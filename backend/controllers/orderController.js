@@ -94,6 +94,14 @@ export const updateOrderStatus = async (req, res) => {
     
     await order.save();
 
+    // Emit socket event for real-time status update
+    if (global.io) {
+      global.io.to(`order_${order._id}`).emit('status-updated', {
+        orderId: order._id,
+        status: order.status
+      });
+    }
+
     res.status(200).json({ success: true, data: order });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });

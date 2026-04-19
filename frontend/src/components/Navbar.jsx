@@ -41,7 +41,14 @@ const Navbar = () => {
                 </div>
                 <div className="profile-dropdown">
                   <Link to="/profile">My Profile</Link>
-                  <Link to="/orders">My Orders</Link>
+                  {user.role === 'customer' && <Link to="/orders">My Orders</Link>}
+                  {user.role === 'delivery' && (
+                    <>
+                      <Link to="/delivery/dashboard">Dashboard</Link>
+                      <Link to="/delivery/orders">Active Orders</Link>
+                    </>
+                  )}
+                  {user.role === 'admin' && <Link to="/admin">Admin Panel</Link>}
                   <button onClick={handleLogout} className="logout-btn">
                     <LogOut size={16} /> Logout
                   </button>

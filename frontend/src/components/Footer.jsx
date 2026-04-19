@@ -60,9 +60,9 @@ const Footer = () => {
           </ul>
         </div>
       </div>
-      
+
       <div className="footer-bottom">
-        <p>&copy; {new Date().getFullYear()} FoodHub. Developed with ❤️ in Nepal.</p>
+        <p>&copy; {new Date().getFullYear()} FoodHub. Developed by Dinesh Kadel.</p>
       </div>
     </footer>
   );

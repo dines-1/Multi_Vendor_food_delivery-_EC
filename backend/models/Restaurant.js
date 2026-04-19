@@ -42,14 +42,18 @@ const restaurantSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['active', 'closed', 'suspended'],
-      default: 'active',
+      enum: ['pending', 'active', 'closed', 'suspended'],
+      default: 'pending',
     },
     openTime: {
       type: String, // HH:mm format
     },
     closeTime: {
       type: String, // HH:mm format
+    },
+    cuisines: {
+      type: [String],
+      default: [],
     },
   },
   {

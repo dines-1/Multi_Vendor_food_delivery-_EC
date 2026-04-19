@@ -1,0 +1,149 @@
+.orders-page {
+  padding: 3rem 0;
+  min-height: calc(100vh - 80px);
+  background: #f8f9fa;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.orders-page h1 {
+  margin-bottom: 2rem;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.order-card {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+  transition: transform 0.2s;
+}
+
+.order-card:hover {
+  transform: translateY(-2px);
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.restaurant-info {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.restaurant-info img {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.restaurant-info h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.order-num {
+  font-size: 0.85rem;
+  color: #888;
+  margin: 0;
+}
+
+.order-status {
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.order-status.pending { background: #fff3cd; color: #856404; }
+.order-status.confirmed { background: #d1ecf1; color: #0c5460; }
+.order-status.preparing { background: #e2e3e5; color: #383d41; }
+.order-status.out_for_delivery { background: #cce5ff; color: #004085; }
+.order-status.delivered { background: #d4edda; color: #155724; }
+
+.order-body {
+  margin-bottom: 1.5rem;
+}
+
+.order-items {
+  font-size: 0.95rem;
+  color: #444;
+  margin-bottom: 1rem;
+}
+
+.order-meta {
+  display: flex;
+  gap: 1.5rem;
+  font-size: 0.85rem;
+  color: #777;
+}
+
+.order-meta span {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.order-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.track-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #ff4d4d;
+  color: white;
+  padding: 0.8rem 1.5rem;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.track-btn:hover {
+  background: #e63939;
+  box-shadow: 0 4px 15px rgba(255, 77, 77, 0.3);
+}
+
+.no-orders {
+  text-align: center;
+  padding: 5rem 0;
+  color: #888;
+}
+
+.no-orders p {
+  margin: 1.5rem 0;
+}
+
+.btn-primary {
+  display: inline-block;
+  background: #ff4d4d;
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  text-decoration: none;
+  font-weight: 600;
+}

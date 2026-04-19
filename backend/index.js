@@ -1,4 +1,6 @@
 import express from 'express';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import morgan from 'morgan';
@@ -11,6 +13,10 @@ import orderRoutes from './routes/orderRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
 import chatRoutes from './routes/chatRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
+import deliveryRoutes from './routes/deliveryRoutes.js';
+import restaurantRoutes from './routes/restaurantRoutes.js';
+import initSocket from './config/socket.js';
 
 // Load env vars
 dotenv.config();
@@ -19,6 +25,17 @@ dotenv.config();
 connectDB();
 
 const app = express();
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+  cors: {
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    methods: ['GET', 'POST'],
+    credentials: true
+  }
+});
+
+// Initialize Socket logic
+initSocket(io);
 
 // Middleware
 app.use(express.json());
@@ -36,6 +53,9 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/delivery', deliveryRoutes);
+app.use('/api/restaurants', restaurantRoutes);
 
 // Logging in development
 if (process.env.NODE_ENV === 'development') {
@@ -53,7 +73,7 @@ app.get('/', (req, res) => {
 // Port configuration
 const PORT = process.env.PORT || 5000;
 
-const server = app.listen(PORT, () => {
+const server = httpServer.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 

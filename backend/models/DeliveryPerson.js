@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import mongoosePaginate from 'mongoose-paginate-v2';
 
 const deliveryPersonSchema = new mongoose.Schema(
   {
@@ -30,6 +31,11 @@ const deliveryPersonSchema = new mongoose.Schema(
       lat: Number,
       lng: Number,
     },
+    status: {
+      type: String,
+      enum: ['pending', 'active', 'suspended'],
+      default: 'pending',
+    },
   },
   {
     timestamps: true,
@@ -39,6 +45,9 @@ const deliveryPersonSchema = new mongoose.Schema(
 // Indexes
 deliveryPersonSchema.index({ user: 1 }, { unique: true });
 deliveryPersonSchema.index({ isAvailable: 1 });
+
+// Plugins
+deliveryPersonSchema.plugin(mongoosePaginate);
 
 const DeliveryPerson = mongoose.model('DeliveryPerson', deliveryPersonSchema);
 export default DeliveryPerson;

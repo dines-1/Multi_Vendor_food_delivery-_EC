@@ -1,8 +1,37 @@
-import React from 'react';
-import { Search, MapPin, Star, Clock, ChevronRight } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, MapPin, Star, ChevronRight, Clock, Flame, Utensils, Zap } from 'lucide-react';
+import restaurantService from '../services/restaurantService';
+import menuService from '../services/menuService';
 import './Home.css';
 
 const Home = () => {
+  const [categories, setCategories] = useState([]);
+  const [restaurants, setRestaurants] = useState([]);
+  const [trendingFood, setTrendingFood] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [catData, resData, foodData] = await Promise.all([
+          restaurantService.getCuisines(),
+          restaurantService.getRestaurants({ limit: 4 }),
+          menuService.getMenuItems({ limit: 4 })
+        ]);
+
+        if (catData.success) setCategories(catData.data);
+        if (resData.success) setRestaurants(resData.docs);
+        if (foodData.success) setTrendingFood(foodData.docs);
+      } catch (error) {
+        console.error('Error fetching home data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   return (
     <div className="home-page fade-in">
       {/* Hero Section */}
@@ -24,17 +53,6 @@ const Home = () => {
               </button>
             </div>
           </div>
-          
-          <div className="hero-stats">
-            <div className="stat-item">
-              <strong>500+</strong>
-              <span>Restaurants</span>
-            </div>
-            <div className="stat-item">
-              <strong>10k+</strong>
-              <span>Happy Customers</span>
-            </div>
-          </div>
         </div>
         <div className="hero-image">
           <div className="image-blob"></div>
@@ -42,50 +60,94 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Categories Section */}
+      {/* Popular Categories */}
       <section className="categories">
         <div className="section-header">
           <h2>Popular Categories</h2>
           <button className="view-all">View All <ChevronRight size={16} /></button>
         </div>
         <div className="category-grid">
-          {['Burgers', 'Pizza', 'Momo', 'Thakali', 'Bakery', 'Healthy'].map((cat, i) => (
-            <div key={i} className="category-card">
-              <div className="cat-icon-container">
-                <img src={`https://source.unsplash.com/random/100x100?${cat}`} alt={cat} />
+          {loading ? (
+            [1, 2, 3, 4, 5, 6].map(i => <div key={i} className="category-skeleton animate-pulse"></div>)
+          ) : (
+            categories.map((cat, i) => (
+              <div key={i} className="category-card">
+                <div className="cat-icon-container">
+                  <Utensils size={24} color="#FF6B6B" />
+                </div>
+                <span>{cat}</span>
               </div>
-              <span>{cat}</span>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </section>
 
-      {/* Featured Restaurants */}
+      {/* Explore Restaurants */}
       <section className="featured">
         <div className="section-header">
-          <h2>Featured Restaurants</h2>
+          <div className="title-with-icon">
+            <Zap size={24} color="#FFD700" fill="#FFD700" />
+            <h2>Explore Restaurants</h2>
+          </div>
           <button className="view-all">Explore All <ChevronRight size={16} /></button>
         </div>
         <div className="restaurant-grid">
-          {[1, 2, 3].map((item) => (
-            <div key={item} className="restaurant-card">
-              <div className="card-image">
-                <img src={`https://images.unsplash.com/photo-${1500000000000 + item}?auto=format&fit=crop&q=80&w=500`} alt="Restaurant" />
-                <div className="rating-badge">
-                  <Star size={14} fill="#FFD93D" color="#FFD93D" /> 4.5
+          {loading ? (
+            [1, 2, 3, 4].map(i => <div key={i} className="restaurant-skeleton animate-pulse"></div>)
+          ) : (
+            restaurants.map((res) => (
+              <div key={res._id} className="restaurant-card">
+                <div className="card-image">
+                  <img src={res.logo_url || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4'} alt={res.name} />
+                  <div className="rating-badge">
+                    <Star size={14} fill="#FFD93D" color="#FFD93D" /> {res.rating}
+                  </div>
+                </div>
+                <div className="card-info">
+                  <h3>{res.name}</h3>
+                  <p>{res.cuisines?.join(' • ') || 'Various Cuisines'}</p>
+                  <div className="card-meta">
+                    <span><Clock size={14} /> {res.openTime} - {res.closeTime}</span>
+                    <span className="dot"></span>
+                    <span>Free Delivery</span>
+                  </div>
                 </div>
               </div>
-              <div className="card-info">
-                <h3>The Gourmet Kitchen</h3>
-                <p>Italian • Burgers • Shakes</p>
-                <div className="card-meta">
-                  <span><Clock size={14} /> 20-30 min</span>
-                  <span className="dot"></span>
-                  <span>Free Delivery</span>
+            ))
+          )}
+        </div>
+      </section>
+
+      {/* Trending Dishes */}
+      <section className="trending-food">
+        <div className="section-header">
+          <div className="title-with-icon">
+            <Flame size={24} color="#FF4500" fill="#FF4500" />
+            <h2>Trending Dishes</h2>
+          </div>
+          <button className="view-all">View All <ChevronRight size={16} /></button>
+        </div>
+        <div className="food-grid">
+          {loading ? (
+            [1, 2, 3, 4].map(i => <div key={i} className="food-skeleton animate-pulse"></div>)
+          ) : (
+            trendingFood.map((food) => (
+              <div key={food._id} className="food-card">
+                <div className="food-image-wrapper">
+                  <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c" alt={food.name} />
+                  <button className="add-btn">+</button>
+                </div>
+                <div className="food-details">
+                  <h3>{food.name}</h3>
+                  <p className="food-res">{food.restaurant?.name}</p>
+                  <div className="food-price-tag">
+                    <span className="current-price">Rs. {food.price}</span>
+                    {food.isVeg && <div className="veg-icon"></div>}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </section>
     </div>
