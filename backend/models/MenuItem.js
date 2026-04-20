@@ -56,6 +56,19 @@ const menuItemSchema = new mongoose.Schema(
         },
       },
     ],
+    approvalStatus: {
+      type: String,
+      enum: ['pending', 'approved', 'rejected'],
+      default: 'pending',
+    },
+    isFeatured: {
+      type: Boolean,
+      default: false,
+    },
+    removalReason: {
+      type: String,
+      default: '',
+    },
   },
   {
     timestamps: true,

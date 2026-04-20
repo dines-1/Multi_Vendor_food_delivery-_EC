@@ -55,6 +55,48 @@ const restaurantSchema = new mongoose.Schema(
       type: [String],
       default: [],
     },
+    commissionRate: {
+      type: Number,
+      default: null,
+    },
+    documents: [{
+      docType: String,
+      url: String,
+    }],
+    performanceScore: {
+      type: Number,
+      default: 0,
+    },
+    totalSales: {
+      type: Number,
+      default: 0,
+    },
+    suspendReason: {
+      type: String,
+      default: '',
+    },
+    // Payout tracking (replaces Payout model)
+    payoutBalance: {
+      type: Number,
+      default: 0,
+    },
+    lastPayoutAmount: {
+      type: Number,
+      default: 0,
+    },
+    lastPayoutDate: {
+      type: Date,
+      default: null,
+    },
+    lastPayoutRef: {
+      type: String,
+      default: '',
+    },
+    payoutStatus: {
+      type: String,
+      enum: ['none', 'requested', 'approved', 'paid', 'rejected'],
+      default: 'none',
+    },
   },
   {
     timestamps: true,

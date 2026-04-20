@@ -1,82 +1,82 @@
 import React from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Utensils, 
-  Users, 
-  Truck, 
-  Settings, 
-  LogOut,
-  Bell
+import {
+  LayoutDashboard, Store, Users, Package, ShoppingCart,
+  DollarSign, Settings, LogOut, ChevronRight
 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 import './Admin.css';
+
+const navItems = [
+  { section: 'Main' },
+  { to: '/admin', icon: LayoutDashboard, label: 'Dashboard', end: true },
+  { section: 'Management' },
+  { to: '/admin/vendors', icon: Store, label: 'Vendors' },
+  { to: '/admin/users', icon: Users, label: 'Users' },
+  { to: '/admin/products', icon: Package, label: 'Products' },
+  { to: '/admin/orders', icon: ShoppingCart, label: 'Orders' },
+  { section: 'Finance' },
+  { to: '/admin/finance', icon: DollarSign, label: 'Finance' },
+  { section: 'System' },
+  { to: '/admin/settings', icon: Settings, label: 'Settings' },
+];
 
 const AdminLayout = () => {
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    logout();
     navigate('/login');
   };
 
   return (
     <div className="admin-layout">
-      {/* Sidebar */}
       <aside className="admin-sidebar">
         <div className="sidebar-header">
-          FoodDash Admin
+          <span>FoodDash</span> Admin
         </div>
         <nav className="sidebar-nav">
-          <NavLink to="/admin" end className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-            <LayoutDashboard /> Dashboard
-          </NavLink>
-          <NavLink to="/admin/restaurants" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-            <Utensils /> Restaurants
-          </NavLink>
-          <NavLink to="/admin/customers" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-            <Users /> Customers
-          </NavLink>
-          <NavLink to="/admin/delivery" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-            <Truck /> Delivery Partners
-          </NavLink>
-          <NavLink to="/admin/settings" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-            <Settings /> Settings
-          </NavLink>
+          {navItems.map((item, i) =>
+            item.section ? (
+              <div key={i} className="sidebar-section">{item.section}</div>
+            ) : (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.end}
+                className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
+              >
+                <item.icon />
+                {item.label}
+              </NavLink>
+            )
+          )}
         </nav>
-        <div className="sidebar-footer" style={{ padding: '1rem' }}>
-          <button onClick={handleLogout} className="nav-item" style={{ background: 'none', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer' }}>
+        <div style={{ padding: '0.75rem' }}>
+          <button onClick={handleLogout} className="nav-item" style={{ background: 'none', border: 'none', width: '100%', cursor: 'pointer', color: '#94a3b8' }}>
             <LogOut /> Logout
           </button>
         </div>
       </aside>
 
-      {/* Main Content Area */}
       <main className="admin-main">
         <header className="admin-header">
-          <div className="admin-breadcrumb">
-            <span style={{ color: '#64748b' }}>Pages /</span> Dashboard
+          <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+            Admin Panel <ChevronRight size={12} style={{ verticalAlign: 'middle' }} />
           </div>
-          <div className="admin-user-nav" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-            <div className="search-bar" style={{ position: 'relative' }}>
-              <input 
-                type="text" 
-                placeholder="Search..." 
-                style={{ padding: '0.5rem 1rem', borderRadius: '10px', border: '1px solid #e2e8f0', background: 'white' }} 
-              />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div style={{
+              width: 32, height: 32, borderRadius: '50%',
+              background: 'linear-gradient(135deg, #6366f1, #818cf8)',
+              color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: '0.75rem', fontWeight: 700
+            }}>
+              {user?.name?.charAt(0) || 'A'}
             </div>
-            <Bell size={20} style={{ color: '#64748b', cursor: 'pointer' }} />
-            <div className="user-profile" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <div className="avatar" style={{ width: '35px', height: '35px', borderRadius: '50%', background: '#3b82f6', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
-                AD
-              </div>
-              <div className="user-info">
-                <div style={{ fontWeight: 600, fontSize: '0.875rem' }}>Admin User</div>
-              </div>
-            </div>
+            <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>{user?.name || 'Admin'}</span>
           </div>
         </header>
-
         <Outlet />
       </main>
     </div>

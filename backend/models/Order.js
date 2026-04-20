@@ -80,6 +80,37 @@ const orderSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    statusHistory: [{
+      status: String,
+      changedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+      timestamp: { type: Date, default: Date.now },
+      note: String,
+    }],
+    refundRequested: {
+      type: Boolean,
+      default: false,
+    },
+    refundStatus: {
+      type: String,
+      enum: ['none', 'pending', 'approved', 'rejected'],
+      default: 'none',
+    },
+    refundAmount: {
+      type: Number,
+      default: 0,
+    },
+    // Dispute fields (replaces Dispute model)
+    dispute: {
+      isDisputed: { type: Boolean, default: false },
+      raisedBy: { type: String, enum: ['customer', 'vendor', ''], default: '' },
+      reason: { type: String, default: '' },
+      evidence: [{ type: String }],
+      vendorResponse: { type: String, default: '' },
+      vendorEvidence: [{ type: String }],
+      resolution: { type: String, default: '' },
+      resolvedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+      status: { type: String, enum: ['none', 'open', 'under_review', 'resolved'], default: 'none' },
+    },
   },
   {
     timestamps: true,

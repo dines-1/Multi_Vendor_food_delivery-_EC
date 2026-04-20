@@ -20,7 +20,12 @@ export const register = async (req, res) => {
 
     sendTokenResponse(user, 201, res);
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    let message = err.message;
+    if (err.code === 11000) {
+      const field = Object.keys(err.keyValue)[0];
+      message = `${field.charAt(0).toUpperCase() + field.slice(1)} already exists`;
+    }
+    res.status(400).json({ success: false, message });
   }
 };
 

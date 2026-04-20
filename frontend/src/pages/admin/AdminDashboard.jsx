@@ -1,145 +1,223 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Users, 
-  Utensils, 
-  ShoppingBag, 
-  TrendingUp,
-  Clock,
-  AlertCircle
+import {
+  DollarSign, ShoppingCart, Store, Users, Clock, CheckCircle, XCircle, Truck, Package
 } from 'lucide-react';
+import {
+  LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
+} from 'recharts';
 import adminService from '../../services/adminService';
-import { motion } from 'framer-motion';
+import toast from 'react-hot-toast';
+
+const COLORS = ['#f59e0b', '#6366f1', '#10b981', '#ef4444', '#3b82f6', '#8b5cf6'];
+
+const formatNPR = (v) => `NPR ${Number(v || 0).toLocaleString()}`;
+const formatDate = (d) => {
+  if (!d) return '-';
+  const dt = new Date(d);
+  return `${String(dt.getDate()).padStart(2,'0')}/${String(dt.getMonth()+1).padStart(2,'0')}/${dt.getFullYear()}`;
+};
+
+const statusBadge = (s) => {
+  const map = {
+    pending: 'badge-warning', confirmed: 'badge-info', preparing: 'badge-purple',
+    out_for_delivery: 'badge-info', delivered: 'badge-success', cancelled: 'badge-danger',
+    active: 'badge-success', closed: 'badge-default', suspended: 'badge-danger',
+  };
+  return `badge ${map[s] || 'badge-default'}`;
+};
 
 const AdminDashboard = () => {
-  const [stats, setStats] = useState(null);
+  const [kpi, setKpi] = useState(null);
+  const [revenueData, setRevenueData] = useState([]);
+  const [ordersData, setOrdersData] = useState([]);
+  const [statusData, setStatusData] = useState([]);
+  const [recentOrders, setRecentOrders] = useState([]);
+  const [pendingVendors, setPendingVendors] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const data = await adminService.getStats();
-        if (data.success) {
-          setStats(data.data);
-        }
-      } catch (error) {
-        console.error('Error fetching stats:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchStats();
+    loadData();
   }, []);
 
-  if (loading) return <div>Loading statistics...</div>;
+  const loadData = async () => {
+    try {
+      const [k, r, o, s, ro, pv] = await Promise.all([
+        adminService.getKPI(),
+        adminService.getRevenueChart(),
+        adminService.getOrdersChart(),
+        adminService.getOrderStatus(),
+        adminService.getRecentOrders(),
+        adminService.getPendingVendors(),
+      ]);
+      setKpi(k.data);
+      setRevenueData(r.data?.map(d => ({ date: d._id?.slice(5), revenue: d.revenue })) || []);
+      setOrdersData(o.data?.map(d => ({ date: d._id?.slice(5), orders: d.count })) || []);
+      setStatusData(s.data?.map(d => ({ name: d._id, value: d.count })) || []);
+      setRecentOrders(ro.data || []);
+      setPendingVendors(pv.data || []);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVendorAction = async (id, action) => {
+    try {
+      if (action === 'approve') await adminService.approveVendor(id);
+      else await adminService.rejectVendor(id);
+      toast.success(`Vendor ${action}d`);
+      setPendingVendors(prev => prev.filter(v => v._id !== id));
+    } catch { toast.error('Action failed'); }
+  };
+
+  if (loading) return <div className="loading-spinner"><div className="spinner" /></div>;
+
+  const kpiCards = [
+    { label: 'Total Revenue', value: formatNPR(kpi?.totalRevenue), icon: DollarSign, bg: '#ede9fe', color: '#6366f1' },
+    { label: 'Total Orders', value: kpi?.totalOrders || 0, icon: ShoppingCart, bg: '#dbeafe', color: '#3b82f6' },
+    { label: 'Active Vendors', value: kpi?.activeVendors || 0, icon: Store, bg: '#dcfce7', color: '#10b981' },
+    { label: 'Total Users', value: kpi?.totalUsers || 0, icon: Users, bg: '#fef3c7', color: '#f59e0b' },
+  ];
 
   return (
-    <div className="admin-dashboard-content">
-      <div className="admin-title" style={{ marginBottom: '2rem' }}>Dashboard Overview</div>
-      
-      {/* Stats Cards */}
+    <div className="admin-page">
+      <h1 className="admin-page-title">Dashboard</h1>
+
+      {/* KPI Cards */}
       <div className="stats-grid">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className="stat-card"
-        >
-          <div className="stat-icon" style={{ backgroundColor: '#eff6ff', color: '#3b82f6' }}>
-            <Users />
+        {kpiCards.map((c, i) => (
+          <div key={i} className="stat-card">
+            <div className="stat-icon" style={{ background: c.bg, color: c.color }}>
+              <c.icon />
+            </div>
+            <div className="stat-info">
+              <div className="stat-label">{c.label}</div>
+              <div className="stat-value">{c.value}</div>
+            </div>
           </div>
-          <div className="stat-label">Total Customers</div>
-          <div className="stat-value">{stats?.users?.customer || 0}</div>
-          <div className="stat-trend" style={{ fontSize: '0.75rem', color: '#10b981', marginTop: '0.5rem' }}>
-            <TrendingUp size={12} /> +12.5% vs last month
-          </div>
-        </motion.div>
-
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.1 }}
-          className="stat-card"
-        >
-          <div className="stat-icon" style={{ backgroundColor: '#fdf2f8', color: '#db2777' }}>
-            <Utensils />
-          </div>
-          <div className="stat-label">Active Restaurants</div>
-          <div className="stat-value">{stats?.restaurants?.active || 0}</div>
-          <div className="stat-trend" style={{ fontSize: '0.75rem', color: '#f59e0b', marginTop: '0.5rem' }}>
-            <Clock size={12} /> {stats?.restaurants?.pending || 0} Pending Approvals
-          </div>
-        </motion.div>
-
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.2 }}
-          className="stat-card"
-        >
-          <div className="stat-icon" style={{ backgroundColor: '#ecfdf5', color: '#10b981' }}>
-            <ShoppingBag />
-          </div>
-          <div className="stat-label">Total Orders</div>
-          <div className="stat-value">{stats?.orders?.total || 0}</div>
-          <div className="stat-trend" style={{ fontSize: '0.75rem', color: '#10b981', marginTop: '0.5rem' }}>
-            <TrendingUp size={12} /> +5.2% vs last month
-          </div>
-        </motion.div>
-
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.3 }}
-          className="stat-card"
-        >
-          <div className="stat-icon" style={{ backgroundColor: '#fff7ed', color: '#f97316' }}>
-            <AlertCircle />
-          </div>
-          <div className="stat-label">Pending Orders</div>
-          <div className="stat-value">{stats?.orders?.pending || 0}</div>
-          <div className="stat-trend" style={{ fontSize: '0.75rem', color: '#ef4444', marginTop: '0.5rem' }}>
-            Requires Attention
-          </div>
-        </motion.div>
+        ))}
       </div>
 
-      <div className="dashboard-grid" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem' }}>
-        <div className="admin-table-container glass" style={{ padding: '1.5rem' }}>
-          <h3 style={{ marginBottom: '1.5rem' }}>Revenue Analytics</h3>
-          <div style={{ height: '300px', display: 'flex', alignItems: 'flex-end', gap: '1rem', paddingBottom: '2rem' }}>
-            {/* Simple CSS Chart */}
-            {[45, 60, 45, 75, 55, 90].map((height, i) => (
-              <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
-                <motion.div 
-                   initial={{ height: 0 }}
-                   animate={{ height: `${height}%` }}
-                   transition={{ duration: 0.8, delay: i * 0.1 }}
-                   style={{ width: '100%', background: 'linear-gradient(to top, #3b82f6, #60a5fa)', borderRadius: '8px 8px 0 0' }}
-                />
-                <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Month {i + 1}</span>
-              </div>
-            ))}
+      {/* Charts Row */}
+      <div className="chart-row">
+        <div className="admin-card">
+          <div className="admin-card-header"><h3>Revenue (Last 30 Days)</h3></div>
+          <div className="admin-card-body">
+            {revenueData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={250}>
+                <LineChart data={revenueData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                  <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+                  <YAxis tick={{ fontSize: 11 }} />
+                  <Tooltip formatter={(v) => formatNPR(v)} />
+                  <Line type="monotone" dataKey="revenue" stroke="#6366f1" strokeWidth={2} dot={false} />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="empty-state"><Package /><p>No revenue data yet</p></div>
+            )}
           </div>
         </div>
 
-        <div className="admin-table-container glass" style={{ padding: '1.5rem' }}>
-          <h3 style={{ marginBottom: '1.5rem' }}>Recent Notifications</h3>
-          <div className="notification-list" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {[
-              { type: 'restaurant', msg: 'New restaurant registration: "Spice Garden"', time: '2 mins ago' },
-              { type: 'delivery', msg: 'Delivery partner "John Doe" updated documents', time: '15 mins ago' },
-              { type: 'order', msg: 'High value order alert: $245.00', time: '1 hour ago' },
-            ].map((nx, i) => (
-              <div key={i} style={{ display: 'flex', gap: '1rem', padding: '0.75rem', borderRadius: '12px', background: '#f8fafc' }}>
-                <div style={{ width: '4px', borderRadius: '4px', background: nx.type === 'restaurant' ? '#3b82f6' : nx.type === 'delivery' ? '#10b981' : '#f97316' }} />
-                <div>
-                  <div style={{ fontSize: '0.875rem', fontWeight: 500 }}>{nx.msg}</div>
-                  <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{nx.time}</div>
-                </div>
-              </div>
-            ))}
+        <div className="admin-card">
+          <div className="admin-card-header"><h3>Order Status</h3></div>
+          <div className="admin-card-body">
+            {statusData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={250}>
+                <PieChart>
+                  <Pie data={statusData} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value" label={({ name, value }) => `${name}: ${value}`}>
+                    {statusData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="empty-state"><Package /><p>No order data yet</p></div>
+            )}
           </div>
+        </div>
+      </div>
+
+      {/* Orders Bar Chart */}
+      <div className="admin-card" style={{ marginBottom: '1rem' }}>
+        <div className="admin-card-header"><h3>Orders (Last 7 Days)</h3></div>
+        <div className="admin-card-body">
+          {ordersData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={ordersData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+                <YAxis tick={{ fontSize: 11 }} />
+                <Tooltip />
+                <Bar dataKey="orders" fill="#6366f1" radius={[4,4,0,0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="empty-state"><Package /><p>No orders yet</p></div>
+          )}
+        </div>
+      </div>
+
+      {/* Bottom Row */}
+      <div className="chart-row">
+        {/* Recent Orders */}
+        <div className="admin-table-container">
+          <div className="table-toolbar"><h3>Recent Orders</h3></div>
+          {recentOrders.length > 0 ? (
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Order #</th>
+                  <th>Customer</th>
+                  <th>Vendor</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recentOrders.map(o => (
+                  <tr key={o._id}>
+                    <td style={{ fontWeight: 600 }}>{o.orderNumber || '-'}</td>
+                    <td>{o.customer?.name || '-'}</td>
+                    <td>{o.restaurant?.name || '-'}</td>
+                    <td>{formatNPR(o.total_amount)}</td>
+                    <td><span className={statusBadge(o.status)}>{o.status}</span></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <div className="empty-state"><ShoppingCart /><p>No orders yet</p></div>
+          )}
+        </div>
+
+        {/* Pending Vendors */}
+        <div className="admin-card">
+          <div className="admin-card-header"><h3>Pending Approvals</h3></div>
+          {pendingVendors.length > 0 ? (
+            <div className="widget-list">
+              {pendingVendors.map(v => (
+                <div key={v._id} className="widget-item">
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: '0.8rem' }}>{v.name}</div>
+                    <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>{v.owner?.email}</div>
+                  </div>
+                  <div className="btn-group">
+                    <button className="btn btn-success btn-sm" onClick={() => handleVendorAction(v._id, 'approve')}>
+                      <CheckCircle size={12} />
+                    </button>
+                    <button className="btn btn-danger btn-sm" onClick={() => handleVendorAction(v._id, 'reject')}>
+                      <XCircle size={12} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="empty-state"><Store /><p>No pending approvals</p></div>
+          )}
         </div>
       </div>
     </div>

@@ -16,6 +16,13 @@ import notificationRoutes from './routes/notificationRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import deliveryRoutes from './routes/deliveryRoutes.js';
 import restaurantRoutes from './routes/restaurantRoutes.js';
+import adminDashboardRoutes from './routes/adminDashboard.routes.js';
+import adminVendorRoutes from './routes/adminVendor.routes.js';
+import adminUserRoutes from './routes/adminUser.routes.js';
+import adminProductRoutes from './routes/adminProduct.routes.js';
+import adminOrderRoutes from './routes/adminOrder.routes.js';
+import adminFinanceRoutes from './routes/adminFinance.routes.js';
+import adminSettingsRoutes from './routes/adminSettings.routes.js';
 import initSocket from './config/socket.js';
 
 // Load env vars
@@ -56,6 +63,13 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/delivery', deliveryRoutes);
 app.use('/api/restaurants', restaurantRoutes);
+app.use('/api/admin/dashboard', adminDashboardRoutes);
+app.use('/api/admin/vendors', adminVendorRoutes);
+app.use('/api/admin/users', adminUserRoutes);
+app.use('/api/admin/products', adminProductRoutes);
+app.use('/api/admin/orders', adminOrderRoutes);
+app.use('/api/admin/finance', adminFinanceRoutes);
+app.use('/api/admin/settings', adminSettingsRoutes);
 
 // Logging in development
 if (process.env.NODE_ENV === 'development') {

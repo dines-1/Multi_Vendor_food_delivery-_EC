@@ -47,6 +47,18 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    isBanned: {
+      type: Boolean,
+      default: false,
+    },
+    banReason: {
+      type: String,
+      default: '',
+    },
+    permissions: {
+      type: [String],
+      default: [],
+    },
     recentlyViewed: [
       {
         type: mongoose.Schema.Types.ObjectId,

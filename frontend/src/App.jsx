@@ -9,9 +9,12 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import AdminLayout from './pages/admin/AdminLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
-import AdminRestaurants from './pages/admin/AdminRestaurants';
-import AdminUsers from './pages/admin/AdminUsers';
-import AdminDelivery from './pages/admin/AdminDelivery';
+import VendorManagement from './pages/admin/VendorManagement';
+import UserManagement from './pages/admin/UserManagement';
+import ProductModeration from './pages/admin/ProductModeration';
+import OrderManagement from './pages/admin/OrderManagement';
+import FinanceManager from './pages/admin/FinanceManager';
+import PlatformSettings from './pages/admin/PlatformSettings';
 import MyOrders from './pages/MyOrders';
 import TrackOrder from './pages/TrackOrder';
 import DeliveryDashboard from './pages/delivery/DeliveryDashboard';
@@ -43,9 +46,7 @@ function App() {
             <Route path="/orders" element={<><Navbar /><main className="main-content"><MyOrders /></main><Footer /></>} />
             <Route path="/track-order/:id" element={<><Navbar /><main className="main-content"><TrackOrder /></main><Footer /></>} />
 
-
-
-            {/* Admin Routes with dedicated Layout */}
+            {/* Admin Routes */}
             <Route 
               path="/admin" 
               element={
@@ -55,9 +56,12 @@ function App() {
               }
             >
               <Route index element={<AdminDashboard />} />
-              <Route path="restaurants" element={<AdminRestaurants />} />
-              <Route path="customers" element={<AdminUsers />} />
-              <Route path="delivery" element={<AdminDelivery />} />
+              <Route path="vendors" element={<VendorManagement />} />
+              <Route path="users" element={<UserManagement />} />
+              <Route path="products" element={<ProductModeration />} />
+              <Route path="orders" element={<OrderManagement />} />
+              <Route path="finance" element={<FinanceManager />} />
+              <Route path="settings" element={<PlatformSettings />} />
             </Route>
 
             {/* Delivery Routes */}
