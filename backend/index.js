@@ -25,6 +25,7 @@ import adminFinanceRoutes from './routes/adminFinance.routes.js';
 import adminSettingsRoutes from './routes/adminSettings.routes.js';
 import initSocket from './config/socket.js';
 
+
 // Load env vars
 dotenv.config();
 
@@ -41,7 +42,7 @@ const io = new Server(httpServer, {
   }
 });
 
-// Initialize Socket logic
+
 initSocket(io);
 
 // Middleware
