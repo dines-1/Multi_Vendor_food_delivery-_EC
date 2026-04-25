@@ -2,9 +2,13 @@ import express from 'express';
 import {
   getMenuItems,
   getMenuItem,
-  getRecentlyViewed
+  getRecentlyViewed,
+  getVendorMenu,
+  createMenuItem,
+  updateMenuItem,
+  deleteMenuItem
 } from '../controllers/menuController.js';
-import { protect } from '../middleware/auth.js';
+import { protect, authorize } from '../middleware/auth.js';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 
@@ -30,6 +34,13 @@ const optionalProtect = async (req, res, next) => {
 
 router.get('/', getMenuItems);
 router.get('/recently-viewed', protect, getRecentlyViewed);
+
+// Vendor specific routes
+router.get('/vendor/my-menu', protect, authorize('vendor'), getVendorMenu);
+router.post('/vendor', protect, authorize('vendor'), createMenuItem);
+router.put('/vendor/:id', protect, authorize('vendor'), updateMenuItem);
+router.delete('/vendor/:id', protect, authorize('vendor'), deleteMenuItem);
+
 router.get('/:id', optionalProtect, getMenuItem);
 
 export default router;

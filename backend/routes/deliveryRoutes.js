@@ -5,7 +5,9 @@ import {
   getOrderRequests,
   acceptOrder,
   getActiveOrders,
-  updateLocation
+  updateLocation,
+  getDeliveryHistory,
+  getDeliveryStats
 } from '../controllers/deliveryController.js';
 import { protect, authorize } from '../middleware/auth.js';
 
@@ -18,6 +20,8 @@ router.get('/profile', getProfile);
 router.put('/profile', updateProfile);
 router.get('/requests', getOrderRequests);
 router.get('/active-orders', getActiveOrders);
+router.get('/history', getDeliveryHistory);
+router.get('/stats', getDeliveryStats);
 router.put('/orders/:id/accept', acceptOrder);
 router.put('/location', updateLocation);
 
