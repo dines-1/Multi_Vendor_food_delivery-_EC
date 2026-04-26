@@ -1,19 +1,45 @@
-.orders-page {
-  padding: 3rem 0;
-  min-height: calc(100vh - 80px);
-  background: #f8f9fa;
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap');
+
+:root {
+  --primary: #FF5C1A;
+  --primary-hover: #E04D10;
+  --primary-light: #FFF0EA;
+  --secondary: #131110;
+  --bg-main: #F8F9FA;
+  --bg-card: #FFFFFF;
+  --text-main: #1A1208;
+  --text-muted: #6B6560;
+  --success: #1DB954;
+  --border: #E5E7EB;
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
+  --shadow-md: 0 8px 24px rgba(26,18,8,0.06);
+  --shadow-lg: 0 16px 48px rgba(26,18,8,0.1);
+  --radius-sm: 12px;
+  --radius-md: 20px;
+  --radius-lg: 32px;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.container {
-  max-width: 800px;
+.orders-page {
+  padding: 5rem 0;
+  background: var(--bg-main);
+  min-height: 100vh;
+  font-family: 'Outfit', sans-serif;
+}
+
+.orders-page .container {
+  max-width: 900px;
   margin: 0 auto;
-  padding: 0 1rem;
+  padding: 0 2rem;
 }
 
 .orders-page h1 {
-  margin-bottom: 2rem;
-  font-size: 2rem;
-  font-weight: 700;
+  font-family: 'Playfair Display', serif;
+  font-size: 3rem;
+  font-weight: 900;
+  color: var(--secondary);
+  margin-bottom: 3rem;
+  letter-spacing: -0.5px;
 }
 
 .orders-list {
@@ -23,127 +49,161 @@
 }
 
 .order-card {
-  background: white;
-  border-radius: 16px;
-  padding: 1.5rem;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-  transition: transform 0.2s;
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  border: 1px solid var(--border);
+  transition: var(--transition);
 }
 
 .order-card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary);
 }
 
 .order-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
 }
 
 .restaurant-info {
   display: flex;
-  gap: 1rem;
+  gap: 16px;
   align-items: center;
 }
 
 .restaurant-info img {
-  width: 50px;
-  height: 50px;
-  border-radius: 12px;
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
   object-fit: cover;
+  background: #F8F9FA;
+  box-shadow: var(--shadow-sm);
 }
 
 .restaurant-info h3 {
-  margin: 0;
-  font-size: 1.1rem;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--secondary);
+  margin-bottom: 4px;
 }
 
 .order-num {
   font-size: 0.85rem;
-  color: #888;
-  margin: 0;
+  color: var(--text-muted);
+  font-weight: 700;
 }
 
 .order-status {
-  padding: 0.4rem 0.8rem;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 6px 14px;
+  border-radius: 10px;
+  letter-spacing: 0.5px;
   text-transform: uppercase;
+  background: #F1F3F5;
+  color: var(--text-muted);
 }
 
-.order-status.pending { background: #fff3cd; color: #856404; }
-.order-status.confirmed { background: #d1ecf1; color: #0c5460; }
-.order-status.preparing { background: #e2e3e5; color: #383d41; }
-.order-status.out_for_delivery { background: #cce5ff; color: #004085; }
-.order-status.delivered { background: #d4edda; color: #155724; }
+.order-status.delivered { background: #D1FAE5; color: #065F46; }
+.order-status.pending { background: #FEF3C7; color: #B45309; }
+.order-status.preparing { background: #DBEAFE; color: #1E40AF; }
+.order-status.confirmed { background: #E0E7FF; color: #3730A3; }
+.order-status.out_for_delivery { background: #FFF0EA; color: var(--primary); }
 
 .order-body {
-  margin-bottom: 1.5rem;
+  margin-bottom: 24px;
 }
 
 .order-items {
-  font-size: 0.95rem;
-  color: #444;
-  margin-bottom: 1rem;
+  font-size: 1rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  line-height: 1.6;
+  margin-bottom: 16px;
 }
 
 .order-meta {
   display: flex;
-  gap: 1.5rem;
-  font-size: 0.85rem;
-  color: #777;
+  gap: 24px;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text-muted);
 }
 
 .order-meta span {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 8px;
 }
 
 .order-footer {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px dashed var(--border);
+  padding-top: 24px;
+}
+
+.order-total-display {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--secondary);
 }
 
 .track-btn {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  background: #ff4d4d;
-  color: white;
-  padding: 0.8rem 1.5rem;
-  border-radius: 10px;
+  gap: 8px;
+  padding: 14px 28px;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 14px;
   text-decoration: none;
-  font-weight: 600;
-  font-size: 0.9rem;
-  transition: all 0.2s;
+  font-weight: 800;
+  font-size: 0.95rem;
+  transition: var(--transition);
+  box-shadow: 0 4px 12px rgba(255, 92, 26, 0.2);
 }
 
 .track-btn:hover {
-  background: #e63939;
-  box-shadow: 0 4px 15px rgba(255, 77, 77, 0.3);
+  background: var(--primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(255, 92, 26, 0.3);
 }
 
 .no-orders {
   text-align: center;
-  padding: 5rem 0;
-  color: #888;
+  padding: 6rem 2rem;
+  background: white;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
 }
 
 .no-orders p {
-  margin: 1.5rem 0;
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin: 1.5rem 0 2.5rem;
 }
 
 .btn-primary {
   display: inline-block;
-  background: #ff4d4d;
+  background: var(--secondary);
   color: white;
-  padding: 1rem 2rem;
-  border-radius: 12px;
+  padding: 16px 32px;
+  border-radius: 14px;
   text-decoration: none;
-  font-weight: 600;
+  font-weight: 800;
+  transition: var(--transition);
+}
+
+.btn-primary:hover {
+  background: #000;
+  transform: translateY(-2px);
 }

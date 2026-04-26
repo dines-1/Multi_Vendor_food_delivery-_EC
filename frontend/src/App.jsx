@@ -5,8 +5,11 @@ import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
+import HomeRedirect from './components/HomeRedirect';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import RestaurantDetail from './pages/RestaurantDetail';
+import FoodDetail from './pages/FoodDetail';
 import AdminLayout from './pages/admin/AdminLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import VendorManagement from './pages/admin/VendorManagement';
@@ -17,34 +20,51 @@ import FinanceManager from './pages/admin/FinanceManager';
 import PlatformSettings from './pages/admin/PlatformSettings';
 import MyOrders from './pages/MyOrders';
 import TrackOrder from './pages/TrackOrder';
-import DeliveryDashboard from './pages/delivery/DeliveryDashboard';
-import DeliveryOrders from './pages/delivery/DeliveryOrders';
 import AdminRoute from './components/AdminRoute';
 import DeliveryRoute from './components/DeliveryRoute';
+import DeliveryLayout from './pages/delivery/DeliveryLayout';
+import DeliveryDashboard from './pages/delivery/DeliveryDashboard';
+import DeliveryHistory from './pages/delivery/DeliveryHistory';
+import VendorRoute from './components/VendorRoute';
+import VendorLayout from './pages/vendor/VendorLayout';
+import VendorDashboard from './pages/vendor/VendorDashboard';
+import VendorMenu from './pages/vendor/VendorMenu';
+import NotFound from './pages/NotFound';
+
+import { CartProvider } from './context/CartContext';
+import Cart from './pages/Cart';
+import Checkout from './pages/Checkout';
+import PaymentSuccess from './pages/PaymentSuccess';
 
 function App() {
   return (
     <Router>
       <AuthProvider>
-        <div className="app">
-          <Toaster 
-            position="top-right"
-            toastOptions={{
-              duration: 3000,
-              style: {
-                borderRadius: '12px',
-                background: '#333',
-                color: '#fff',
-              },
-            }}
-          />
-          <Routes>
-            {/* Public Routes with Navbar and Footer */}
-            <Route path="/" element={<><Navbar /><main className="main-content"><Home /></main><Footer /></>} />
-            <Route path="/login" element={<><Navbar /><main className="main-content"><Login /></main><Footer /></>} />
-            <Route path="/register" element={<><Navbar /><main className="main-content"><Register /></main><Footer /></>} />
-            <Route path="/orders" element={<><Navbar /><main className="main-content"><MyOrders /></main><Footer /></>} />
-            <Route path="/track-order/:id" element={<><Navbar /><main className="main-content"><TrackOrder /></main><Footer /></>} />
+        <CartProvider>
+          <div className="app">
+            <Toaster 
+              position="top-right"
+              toastOptions={{
+                duration: 3000,
+                style: {
+                  borderRadius: '12px',
+                  background: '#333',
+                  color: '#fff',
+                },
+              }}
+            />
+            <Routes>
+              {/* Public Routes with Navbar and Footer */}
+              <Route path="/" element={<><Navbar /><main className="main-content"><HomeRedirect /></main><Footer /></>} />
+              <Route path="/login" element={<><Navbar /><main className="main-content"><Login /></main><Footer /></>} />
+              <Route path="/register" element={<><Navbar /><main className="main-content"><Register /></main><Footer /></>} />
+              <Route path="/restaurant/:id" element={<><Navbar /><main className="main-content"><RestaurantDetail /></main><Footer /></>} />
+              <Route path="/food/:id" element={<><Navbar /><main className="main-content"><FoodDetail /></main><Footer /></>} />
+              <Route path="/orders" element={<><Navbar /><main className="main-content"><MyOrders /></main><Footer /></>} />
+              <Route path="/track-order/:id" element={<><Navbar /><main className="main-content"><TrackOrder /></main><Footer /></>} />
+              <Route path="/cart" element={<><Navbar /><main className="main-content"><Cart /></main><Footer /></>} />
+              <Route path="/checkout" element={<><Navbar /><main className="main-content"><Checkout /></main><Footer /></>} />
+              <Route path="/payment-success/:method" element={<><Navbar /><main className="main-content"><PaymentSuccess /></main><Footer /></>} />
 
             {/* Admin Routes */}
             <Route 
@@ -69,32 +89,42 @@ function App() {
               path="/delivery" 
               element={
                 <DeliveryRoute>
-                  <><Navbar /><main className="main-content"><DeliveryDashboard /></main></>
+                  <DeliveryLayout />
                 </DeliveryRoute>
               }
-            />
+            >
+              <Route index element={<DeliveryDashboard />} />
+              <Route path="dashboard" element={<DeliveryDashboard />} />
+              <Route path="history" element={<DeliveryHistory />} />
+              <Route path="earnings" element={<div>Earnings Coming Soon</div>} />
+              <Route path="profile" element={<div>Profile Coming Soon</div>} />
+            </Route>
+
+            {/* Vendor/Restaurant Routes */}
             <Route 
-              path="/delivery/dashboard" 
+              path="/vendor" 
               element={
-                <DeliveryRoute>
-                  <><Navbar /><main className="main-content"><DeliveryDashboard /></main></>
-                </DeliveryRoute>
+                <VendorRoute>
+                  <VendorLayout />
+                </VendorRoute>
               }
-            />
-            <Route 
-              path="/delivery/orders" 
-              element={
-                <DeliveryRoute>
-                  <><Navbar /><main className="main-content"><DeliveryOrders /></main></>
-                </DeliveryRoute>
-              }
-            />
+            >
+              <Route index element={<VendorDashboard />} />
+              <Route path="dashboard" element={<VendorDashboard />} />
+              <Route path="menu" element={<VendorMenu />} />
+              <Route path="orders" element={<div>Orders Management Coming Soon</div>} />
+              <Route path="profile" element={<div>Restaurant Profile Management Coming Soon</div>} />
+            </Route>
+
+            {/* 404 Route */}
+            <Route path="*" element={<><Navbar /><NotFound /><Footer /></>} />
 
           </Routes>
         </div>
-      </AuthProvider>
-    </Router>
-  );
+      </CartProvider>
+    </AuthProvider>
+  </Router>
+);
 }
 
 export default App;

@@ -1,6 +1,7 @@
 import Order from '../models/Order.js';
 import Cart from '../models/Cart.js';
 import MenuItem from '../models/MenuItem.js';
+import Restaurant from '../models/Restaurant.js';
 
 // @desc    Checkout and create order
 // @route   POST /api/orders/checkout
@@ -85,7 +86,13 @@ export const updateOrderStatus = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Order not found' });
     }
 
-    // Authorization check could be added here (e.g., only vendor of this restaurant)
+    // Authorization check
+    if (req.user.role === 'vendor') {
+      const restaurant = await Restaurant.findOne({ owner: req.user.id });
+      if (order.restaurant.toString() !== restaurant._id.toString()) {
+        return res.status(403).json({ success: false, message: 'Not authorized to update status for this restaurant' });
+      }
+    }
     
     order.status = status;
     if (status === 'delivered') {
@@ -103,6 +110,26 @@ export const updateOrderStatus = async (req, res) => {
     }
 
     res.status(200).json({ success: true, data: order });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+};
+
+// @desc    Get all orders for vendor's restaurant
+// @route   GET /api/orders/vendor/my-orders
+// @access  Private (Vendor)
+export const getVendorOrders = async (req, res) => {
+  try {
+    const restaurant = await Restaurant.findOne({ owner: req.user.id });
+    if (!restaurant) {
+      return res.status(404).json({ success: false, message: 'Restaurant profile not found' });
+    }
+
+    const orders = await Order.find({ restaurant: restaurant._id })
+      .sort('-createdAt')
+      .populate('customer', 'name phone');
+
+    res.status(200).json({ success: true, data: orders });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
   }

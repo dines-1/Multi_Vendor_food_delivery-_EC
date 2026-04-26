@@ -43,7 +43,7 @@ export const addToCart = async (req, res) => {
       });
     } else {
       // Check if item from same restaurant
-      if (cart.items.length > 0 && cart.restaurant.toString() !== menuItem.restaurant.toString()) {
+      if (cart.items.length > 0 && cart.restaurant && cart.restaurant.toString() !== menuItem.restaurant.toString()) {
         return res.status(400).json({
           success: false,
           message: 'Cannot add items from a different restaurant to the same cart. Clear cart first.'
@@ -54,9 +54,16 @@ export const addToCart = async (req, res) => {
       const itemIndex = cart.items.findIndex(item => item.menuItem.toString() === menuItemId);
 
       if (itemIndex > -1) {
-        cart.items[itemIndex].quantity += (quantity || 1);
+        const newQuantity = cart.items[itemIndex].quantity + (quantity || 1);
+        if (newQuantity > 20) {
+          return res.status(400).json({ success: false, message: 'Quantity cannot exceed 20' });
+        }
+        cart.items[itemIndex].quantity = newQuantity;
         cart.items[itemIndex].special_notes = special_notes || cart.items[itemIndex].special_notes;
       } else {
+        if ((quantity || 1) > 20) {
+          return res.status(400).json({ success: false, message: 'Quantity cannot exceed 20' });
+        }
         cart.items.push({ menuItem: menuItemId, quantity: quantity || 1, special_notes });
       }
       
@@ -87,7 +94,12 @@ export const updateCartItem = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Item not found in cart' });
     }
 
-    if (quantity !== undefined) item.quantity = quantity;
+    if (quantity !== undefined) {
+      if (quantity > 20) {
+        return res.status(400).json({ success: false, message: 'Quantity cannot exceed 20' });
+      }
+      item.quantity = quantity;
+    }
     if (special_notes !== undefined) item.special_notes = special_notes;
 
     if (item.quantity <= 0) {

@@ -60,3 +60,45 @@ export const getRestaurant = async (req, res) => {
     res.status(400).json({ success: false, message: error.message });
   }
 };
+// @desc    Get current vendor's restaurant details
+// @route   GET /api/restaurants/vendor/my-restaurant
+// @access  Private (Vendor)
+export const getMyRestaurant = async (req, res) => {
+  try {
+    const restaurant = await Restaurant.findOne({ owner: req.user.id });
+
+    if (!restaurant) {
+      return res.status(404).json({ success: false, message: 'No restaurant profile found for this vendor' });
+    }
+
+    res.status(200).json({ success: true, data: restaurant });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Create or Update restaurant profile (Vendor)
+// @route   POST /api/restaurants/vendor/profile
+// @access  Private (Vendor)
+export const updateVendorProfile = async (req, res) => {
+  try {
+    let restaurant = await Restaurant.findOne({ owner: req.user.id });
+
+    if (restaurant) {
+      // Update
+      restaurant = await Restaurant.findOneAndUpdate(
+        { owner: req.user.id },
+        req.body,
+        { new: true, runValidators: true }
+      );
+    } else {
+      // Create
+      req.body.owner = req.user.id;
+      restaurant = await Restaurant.create(req.body);
+    }
+
+    res.status(200).json({ success: true, data: restaurant });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};

@@ -125,3 +125,58 @@ export const updateLocation = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+// @desc    Get delivery history
+// @route   GET /api/delivery/history
+// @access  Private/Delivery
+export const getDeliveryHistory = async (req, res) => {
+  try {
+    const delivery = await DeliveryPerson.findOne({ user: req.user.id });
+    const orders = await Order.find({
+      delivery_person_id: delivery._id,
+      status: 'delivered'
+    }).populate('restaurant', 'name address').sort('-delivered_at');
+
+    res.status(200).json({ success: true, data: orders });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Get delivery stats (Today/Total)
+// @route   GET /api/delivery/stats
+// @access  Private/Delivery
+export const getDeliveryStats = async (req, res) => {
+  try {
+    const delivery = await DeliveryPerson.findOne({ user: req.user.id });
+    
+    // Total Delivered
+    const totalDelivered = await Order.countDocuments({
+      delivery_person_id: delivery._id,
+      status: 'delivered'
+    });
+
+    // Today's stats
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    const todayOrders = await Order.find({
+      delivery_person_id: delivery._id,
+      status: 'delivered',
+      delivered_at: { $gte: today }
+    });
+
+    const todayEarnings = todayOrders.reduce((sum, order) => sum + order.delivery_fee, 0);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        totalDelivered,
+        todayDeliveries: todayOrders.length,
+        todayEarnings,
+        rating: 4.8 // Mock rating
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

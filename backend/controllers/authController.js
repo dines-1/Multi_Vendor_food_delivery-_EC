@@ -1,5 +1,7 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
+import Restaurant from '../models/Restaurant.js';
+
 
 // @desc    Register user
 // @route   POST /api/auth/register
@@ -28,6 +30,47 @@ export const register = async (req, res) => {
     res.status(400).json({ success: false, message });
   }
 };
+
+// @desc    Register vendor with restaurant profile
+// @route   POST /api/auth/register-vendor
+// @access  Public
+export const registerVendor = async (req, res) => {
+  try {
+    const { 
+      name, email, phone, password, address,
+      restaurantName, restaurantAddress, cuisines 
+    } = req.body;
+
+    // Create user first
+    const user = await User.create({
+      name,
+      email,
+      phone,
+      password,
+      role: 'vendor',
+      address
+    });
+
+    // Create restaurant linked to user
+    await Restaurant.create({
+      owner: user._id,
+      name: restaurantName,
+      address: restaurantAddress,
+      cuisines: cuisines || [],
+      status: 'pending'
+    });
+
+    sendTokenResponse(user, 201, res);
+  } catch (err) {
+    let message = err.message;
+    if (err.code === 11000) {
+      const field = Object.keys(err.keyValue)[0];
+      message = `${field.charAt(0).toUpperCase() + field.slice(1)} already exists`;
+    }
+    res.status(400).json({ success: false, message });
+  }
+};
+
 
 // @desc    Login user
 // @route   POST /api/auth/login
@@ -104,6 +147,7 @@ const sendTokenResponse = (user, statusCode, res) => {
 
   res.status(statusCode).json({
     success: true,
-    token
+    token,
+    role: user.role
   });
 };

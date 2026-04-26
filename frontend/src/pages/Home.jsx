@@ -1,14 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { Search, MapPin, Star, ChevronRight, Clock, Flame, Utensils, Zap } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import restaurantService from '../services/restaurantService';
 import menuService from '../services/menuService';
+import { useCart } from '../context/CartContext';
 import './Home.css';
 
 const Home = () => {
+  const { addToCart } = useCart();
   const [categories, setCategories] = useState([]);
   const [restaurants, setRestaurants] = useState([]);
   const [trendingFood, setTrendingFood] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  const handleAddToCart = (e, foodId) => {
+    e.stopPropagation();
+    addToCart(foodId, 1);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -42,7 +51,7 @@ const Home = () => {
           
           <div className="search-bar-container">
             <div className="location-picker">
-              <MapPin size={18} color="#FF6B6B" />
+              <MapPin size={18} color="#121211" />
               <span>Kathmandu, Nepal</span>
             </div>
             <div className="search-divider"></div>
@@ -73,7 +82,7 @@ const Home = () => {
             categories.map((cat, i) => (
               <div key={i} className="category-card">
                 <div className="cat-icon-container">
-                  <Utensils size={24} color="#FF6B6B" />
+                  <Utensils size={24} color="#121211" />
                 </div>
                 <span>{cat}</span>
               </div>
@@ -86,7 +95,7 @@ const Home = () => {
       <section className="featured">
         <div className="section-header">
           <div className="title-with-icon">
-            <Zap size={24} color="#FFD700" fill="#FFD700" />
+            <Zap size={24} color="#121211" fill="#121211" />
             <h2>Explore Restaurants</h2>
           </div>
           <button className="view-all">Explore All <ChevronRight size={16} /></button>
@@ -96,20 +105,19 @@ const Home = () => {
             [1, 2, 3, 4].map(i => <div key={i} className="restaurant-skeleton animate-pulse"></div>)
           ) : (
             restaurants.map((res) => (
-              <div key={res._id} className="restaurant-card">
+              <div key={res._id} className="restaurant-card" onClick={() => navigate(`/restaurant/${res._id}`)}>
                 <div className="card-image">
                   <img src={res.logo_url || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4'} alt={res.name} />
                   <div className="rating-badge">
-                    <Star size={14} fill="#FFD93D" color="#FFD93D" /> {res.rating}
+                    <Star size={14} fill="currentColor" /> {res.rating}
                   </div>
                 </div>
                 <div className="card-info">
                   <h3>{res.name}</h3>
-                  <p>{res.cuisines?.join(' • ') || 'Various Cuisines'}</p>
+                  <p>{res.cuisines?.join(', ') || 'Various Cuisines'}</p>
                   <div className="card-meta">
-                    <span><Clock size={14} /> {res.openTime} - {res.closeTime}</span>
-                    <span className="dot"></span>
-                    <span>Free Delivery</span>
+                    <span><Clock size={16} /> <span className="time-tag">{res.openTime} - {res.closeTime}</span></span>
+                    <span style={{color: 'var(--success)', fontWeight: '800'}}>Free Delivery</span>
                   </div>
                 </div>
               </div>
@@ -122,7 +130,7 @@ const Home = () => {
       <section className="trending-food">
         <div className="section-header">
           <div className="title-with-icon">
-            <Flame size={24} color="#FF4500" fill="#FF4500" />
+            <Flame size={24} color="#121211" fill="#121211" />
             <h2>Trending Dishes</h2>
           </div>
           <button className="view-all">View All <ChevronRight size={16} /></button>
@@ -132,10 +140,10 @@ const Home = () => {
             [1, 2, 3, 4].map(i => <div key={i} className="food-skeleton animate-pulse"></div>)
           ) : (
             trendingFood.map((food) => (
-              <div key={food._id} className="food-card">
+              <div key={food._id} className="food-card" onClick={() => navigate(`/food/${food._id}`)}>
                 <div className="food-image-wrapper">
                   <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c" alt={food.name} />
-                  <button className="add-btn">+</button>
+                  <button className="add-btn" onClick={(e) => handleAddToCart(e, food._id)}>+</button>
                 </div>
                 <div className="food-details">
                   <h3>{food.name}</h3>

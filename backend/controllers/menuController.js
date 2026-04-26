@@ -1,5 +1,6 @@
 import MenuItem from '../models/MenuItem.js';
 import User from '../models/User.js';
+import Restaurant from '../models/Restaurant.js';
 
 // @desc    Get all menu items (Browsing & Search)
 // @route   GET /api/menu
@@ -77,6 +78,94 @@ export const getRecentlyViewed = async (req, res) => {
       success: true,
       data: user.recentlyViewed
     });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+};
+// @desc    Get current vendor's menu items
+// @route   GET /api/menu/vendor/my-menu
+// @access  Private (Vendor)
+export const getVendorMenu = async (req, res) => {
+  try {
+    const restaurant = await Restaurant.findOne({ owner: req.user.id });
+    if (!restaurant) {
+      return res.status(404).json({ success: false, message: 'Restaurant not found' });
+    }
+
+    const menuItems = await MenuItem.find({ restaurant: restaurant._id }).populate('category');
+    res.status(200).json({ success: true, data: menuItems });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+};
+
+// @desc    Create menu item (Vendor)
+// @route   POST /api/menu/vendor
+// @access  Private (Vendor)
+export const createMenuItem = async (req, res) => {
+  try {
+    const restaurant = await Restaurant.findOne({ owner: req.user.id });
+    if (!restaurant) {
+      return res.status(404).json({ success: false, message: 'Create a restaurant profile first' });
+    }
+
+    req.body.restaurant = restaurant._id;
+    const menuItem = await MenuItem.create(req.body);
+
+    res.status(201).json({ success: true, data: menuItem });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+};
+
+// @desc    Update menu item (Vendor)
+// @route   PUT /api/menu/vendor/:id
+// @access  Private (Vendor)
+export const updateMenuItem = async (req, res) => {
+  try {
+    let menuItem = await MenuItem.findById(req.params.id);
+
+    if (!menuItem) {
+      return res.status(404).json({ success: false, message: 'Item not found' });
+    }
+
+    // Check ownership
+    const restaurant = await Restaurant.findOne({ owner: req.user.id });
+    if (menuItem.restaurant.toString() !== restaurant._id.toString()) {
+      return res.status(403).json({ success: false, message: 'Not authorized to update this item' });
+    }
+
+    menuItem = await MenuItem.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true
+    });
+
+    res.status(200).json({ success: true, data: menuItem });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+};
+
+// @desc    Delete menu item (Vendor)
+// @route   DELETE /api/menu/vendor/:id
+// @access  Private (Vendor)
+export const deleteMenuItem = async (req, res) => {
+  try {
+    const menuItem = await MenuItem.findById(req.params.id);
+
+    if (!menuItem) {
+      return res.status(404).json({ success: false, message: 'Item not found' });
+    }
+
+    // Check ownership
+    const restaurant = await Restaurant.findOne({ owner: req.user.id });
+    if (menuItem.restaurant.toString() !== restaurant._id.toString()) {
+      return res.status(403).json({ success: false, message: 'Not authorized to delete this item' });
+    }
+
+    await menuItem.deleteOne();
+
+    res.status(200).json({ success: true, data: {} });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
   }

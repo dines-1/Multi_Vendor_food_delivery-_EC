@@ -21,7 +21,12 @@ const Login = () => {
       const res = await api.post('/auth/login', { email, password });
       login(res.data.token);
       toast.success('Welcome back!');
-      navigate('/');
+      
+      const role = res.data.role;
+      if (role === 'admin') navigate('/admin');
+      else if (role === 'vendor') navigate('/vendor');
+      else if (role === 'delivery') navigate('/delivery');
+      else navigate('/');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Login failed');
     } finally {

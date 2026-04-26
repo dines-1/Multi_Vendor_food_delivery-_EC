@@ -12,8 +12,15 @@ const Register = () => {
     email: '',
     phone: '',
     password: '',
-    role: 'customer'
+    role: 'customer',
+    // Vendor specific fields
+    restaurantName: '',
+    restaurantStreet: '',
+    restaurantArea: '',
+    restaurantCity: '',
+    cuisines: ''
   });
+
   const [loading, setLoading] = useState(false);
   
   const { login } = useAuth();
@@ -27,16 +34,32 @@ const Register = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await api.post('/auth/register', formData);
+      let endpoint = '/auth/register';
+      let payload = { ...formData };
+
+      if (formData.role === 'vendor') {
+        endpoint = '/auth/register-vendor';
+        // Format restaurant address
+        payload.restaurantAddress = {
+          street: formData.restaurantStreet,
+          area: formData.restaurantArea,
+          city: formData.restaurantCity
+        };
+        // Format cuisines as array
+        payload.cuisines = formData.cuisines.split(',').map(c => c.trim()).filter(c => c !== '');
+      }
+
+      const res = await api.post(endpoint, payload);
       login(res.data.token);
-      toast.success('Account created successfully!');
-      navigate('/');
+      toast.success(formData.role === 'vendor' ? 'Registration submitted! Awaiting approval.' : 'Account created successfully!');
+      navigate(formData.role === 'vendor' ? '/vendor' : '/');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Registration failed');
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="auth-container fade-in">
@@ -117,7 +140,6 @@ const Register = () => {
               </div>
             </div>
           </div>
-          
           <div className="form-group">
             <label>Password</label>
             <div className="input-wrapper">
@@ -132,6 +154,75 @@ const Register = () => {
               />
             </div>
           </div>
+
+          {formData.role === 'vendor' && (
+
+            <div className="vendor-fields">
+              <h3 style={{ margin: '20px 0 10px', fontSize: '1rem', color: '#2D3436' }}>Restaurant Details</h3>
+              <div className="form-group">
+                <label>Restaurant Name</label>
+                <div className="input-wrapper">
+                  <Store size={18} color="#636E72" />
+                  <input 
+                    name="restaurantName"
+                    type="text" 
+                    placeholder="e.g. Tasty Bites" 
+                    value={formData.restaurantName}
+                    onChange={handleChange}
+                    required={formData.role === 'vendor'}
+                  />
+                </div>
+              </div>
+              <div className="form-group-row">
+                <div className="form-group">
+                  <label>Street</label>
+                  <input 
+                    name="restaurantStreet"
+                    type="text" 
+                    placeholder="123 Street" 
+                    value={formData.restaurantStreet}
+                    onChange={handleChange}
+                    required={formData.role === 'vendor'}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Area</label>
+                  <input 
+                    name="restaurantArea"
+                    type="text" 
+                    placeholder="Downtown" 
+                    value={formData.restaurantArea}
+                    onChange={handleChange}
+                    required={formData.role === 'vendor'}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>City</label>
+                  <input 
+                    name="restaurantCity"
+                    type="text" 
+                    placeholder="City Name" 
+                    value={formData.restaurantCity}
+                    onChange={handleChange}
+                    required={formData.role === 'vendor'}
+                  />
+                </div>
+              </div>
+              <div className="form-group">
+                <label>Cuisines (comma separated)</label>
+                <div className="input-wrapper">
+                  <input 
+                    name="cuisines"
+                    type="text" 
+                    placeholder="Italian, Pizza, Chinese" 
+                    value={formData.cuisines}
+                    onChange={handleChange}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
 
           <button type="submit" className="auth-submit-btn" disabled={loading}>
             {loading ? 'Creating Account...' : 'Get Started'} <ArrowRight size={18} />

@@ -2,10 +2,12 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, User, LogOut, UtensilsCrossed } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 import './Navbar.css';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
+  const { cartCount } = useCart();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -33,7 +35,7 @@ const Navbar = () => {
             <>
               <Link to="/cart" className="action-btn cart-btn">
                 <ShoppingCart size={20} />
-                <span className="cart-badge">2</span>
+                {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
               </Link>
               <div className="user-profile">
                 <div className="avatar-mini">

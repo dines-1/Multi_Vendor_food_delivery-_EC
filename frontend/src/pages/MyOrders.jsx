@@ -62,11 +62,11 @@ const MyOrders = () => {
                   </div>
                   <div className="order-meta">
                     <span><Clock size={16} /> {new Date(order.createdAt).toLocaleDateString()}</span>
-                    <span>Rs. {order.total_amount}</span>
                   </div>
                 </div>
 
                 <div className="order-footer">
+                  <div className="order-total-display">Rs. {order.total_amount}</div>
                   <Link to={`/track-order/${order._id}`} className="track-btn">
                     Track Live Order <ChevronRight size={16} />
                   </Link>
