@@ -189,3 +189,57 @@ export const reorder = async (req, res) => {
     res.status(400).json({ success: false, message: err.message });
   }
 };
+// @desc    Get vendor revenue stats
+// @route   GET /api/orders/vendor/revenue
+// @access  Private (Vendor)
+export const getVendorRevenue = async (req, res) => {
+  try {
+    const restaurant = await Restaurant.findOne({ owner: req.user.id });
+    if (!restaurant) {
+      return res.status(404).json({ success: false, message: 'Restaurant profile not found' });
+    }
+
+    // Get all completed orders
+    const completedOrders = await Order.find({ 
+      restaurant: restaurant._id,
+      status: 'delivered' 
+    });
+
+    const totalEarnings = completedOrders.reduce((sum, order) => sum + order.subtotal, 0);
+    const totalOrders = completedOrders.length;
+
+    // Last 7 days revenue breakdown
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    const dailyRevenue = await Order.aggregate([
+      {
+        $match: {
+          restaurant: restaurant._id,
+          status: 'delivered',
+          createdAt: { $gte: sevenDaysAgo }
+        }
+      },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          amount: { $sum: "$subtotal" },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { "_id": 1 } }
+    ]);
+
+    res.status(200).json({ 
+      success: true, 
+      data: {
+        totalEarnings,
+        totalOrders,
+        dailyRevenue,
+        restaurantBalance: restaurant.earnings || 0
+      } 
+    });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+};

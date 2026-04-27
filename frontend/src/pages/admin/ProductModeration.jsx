@@ -15,7 +15,8 @@ const ProductModeration = () => {
   const [pagination, setPagination] = useState({});
   const [statusFilter, setStatusFilter] = useState('');
   const [modal, setModal] = useState(null);
-  const [form, setForm] = useState({ name: '', image: '', parentCategory: '' });
+  const [form, setForm] = useState({ name: '', image: null, parentCategory: '' });
+  const [imagePreview, setImagePreview] = useState(null);
 
   useEffect(() => {
     if (tab === 'products') loadProducts();
@@ -55,24 +56,43 @@ const ProductModeration = () => {
     } catch { toast.error('Action failed'); }
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setForm({ ...form, image: file });
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
   const handleSaveCategory = async () => {
+    const data = new FormData();
+    data.append('name', form.name);
+    if (form.parentCategory) data.append('parentCategory', form.parentCategory);
+    if (form.image) data.append('image', form.image);
+
     try {
-      if (modal?.editId) await adminService.updateCategory(modal.editId, form);
+      if (modal?.editId) await adminService.updateCategory(modal.editId, data);
       else {
         if (modal.type === 'subcategory') {
-          await adminService.createSubcategory(form);
+          await adminService.createSubcategory(data);
         } else {
-          await adminService.createCategory(form);
+          await adminService.createCategory(data);
         }
       }
       toast.success(modal?.editId ? 'Updated' : 'Created');
-      setModal(null); setForm({ name: '', image: '', parentCategory: '' }); loadCategories();
+      setModal(null); setForm({ name: '', image: null, parentCategory: '' }); setImagePreview(null); loadCategories();
     } catch { toast.error('Failed to save'); }
   };
 
   const handleDeleteCategory = async (id) => {
     if (!confirm('Delete this category?')) return;
     try { await adminService.deleteCategory(id); toast.success('Deleted'); loadCategories(); } catch { toast.error('Failed'); }
+  };
+
+  const getImageUrl = (url) => {
+    if (!url) return null;
+    if (url.startsWith('http')) return url;
+    return `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}${url}`;
   };
 
   return (
@@ -102,23 +122,25 @@ const ProductModeration = () => {
            products.length === 0 ? <div className="empty-state"><Package /><p>No products found</p></div> : (
             <>
               <table className="admin-table">
-                <thead><tr><th>Name</th><th>Vendor</th><th>Price</th><th>Status</th><th>Featured</th><th>Actions</th></tr></thead>
+                <thead><tr><th>Image</th><th>Name</th><th>Vendor</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead>
                 <tbody>
                   {products.map(p => (
                     <tr key={p._id}>
+                      <td><img src={getImageUrl(p.image)} alt="" style={{ width: 40, height: 40, borderRadius: 8, objectFit: 'cover' }} /></td>
                       <td style={{ fontWeight: 600 }}>{p.name}</td>
                       <td>{p.restaurant?.name || '-'}</td>
                       <td>{formatNPR(p.price)}</td>
                       <td><span className={`badge ${p.approvalStatus === 'approved' ? 'badge-success' : p.approvalStatus === 'rejected' ? 'badge-danger' : 'badge-warning'}`}>{p.approvalStatus}</span></td>
-                      <td>{p.isFeatured ? <Star size={14} style={{ color: '#f59e0b', fill: '#f59e0b' }} /> : '-'}</td>
                       <td>
                         <div className="btn-group">
                           {p.approvalStatus === 'pending' && <>
-                            <button className="btn btn-success btn-sm" onClick={() => handleProductAction(p._id, 'approve')}><CheckCircle size={12} /></button>
-                            <button className="btn btn-danger btn-sm" onClick={() => handleProductAction(p._id, 'reject')}><XCircle size={12} /></button>
+                            <button className="btn btn-success btn-sm" onClick={() => handleProductAction(p._id, 'approve')}>Approve</button>
+                            <button className="btn btn-danger btn-sm" onClick={() => handleProductAction(p._id, 'reject')}>Reject</button>
                           </>}
-                          <button className="btn btn-outline btn-sm" onClick={() => handleProductAction(p._id, 'featured')}><Star size={12} /></button>
-                          <button className="btn btn-danger btn-sm" onClick={() => handleProductAction(p._id, 'remove')}><Trash2 size={12} /></button>
+                          <button className="btn btn-outline btn-sm" onClick={() => handleProductAction(p._id, 'featured')}>
+                            {p.isFeatured ? 'Unfeature' : 'Feature'}
+                          </button>
+                          <button className="btn btn-danger btn-sm" onClick={() => handleProductAction(p._id, 'remove')}>Remove</button>
                         </div>
                       </td>
                     </tr>
@@ -142,20 +164,23 @@ const ProductModeration = () => {
           <div className="admin-card">
             <div className="admin-card-header">
               <h3>Global Categories</h3>
-              <button className="btn btn-primary btn-sm" onClick={() => { setForm({ name: '', image: '', parentCategory: '' }); setModal({ type: 'category' }); }}><Plus size={12} /> Add</button>
+              <button className="btn btn-primary btn-sm" onClick={() => { setForm({ name: '', image: null, parentCategory: '' }); setImagePreview(null); setModal({ type: 'category' }); }}><Plus size={12} /> Add</button>
             </div>
             {loading ? <div className="loading-spinner"><div className="spinner" /></div> :
              categories.length === 0 ? <div className="empty-state"><FolderTree /><p>No categories</p></div> : (
               <div className="widget-list">
                 {categories.map(c => (
                   <div key={c._id} className="widget-item">
-                    <div>
-                      <div style={{ fontWeight: 600, fontSize: '0.8rem' }}>{c.name}</div>
-                      <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>/{c.slug}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <img src={getImageUrl(c.image)} alt="" style={{ width: 32, height: 32, borderRadius: 6, objectFit: 'cover', background: '#f1f5f9' }} />
+                      <div>
+                        <div style={{ fontWeight: 600, fontSize: '0.8rem' }}>{c.name}</div>
+                        <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>/{c.slug}</div>
+                      </div>
                     </div>
                     <div className="btn-group">
-                      <button className="btn btn-outline btn-sm" onClick={() => { setForm({ name: c.name, image: c.image, parentCategory: '' }); setModal({ type: 'category', editId: c._id }); }}>Edit</button>
-                      <button className="btn btn-danger btn-sm" onClick={() => handleDeleteCategory(c._id)}><Trash2 size={12} /></button>
+                      <button className="btn btn-outline btn-sm" onClick={() => { setForm({ name: c.name, image: null, parentCategory: '' }); setImagePreview(getImageUrl(c.image)); setModal({ type: 'category', editId: c._id }); }}>Edit</button>
+                      <button className="btn btn-danger btn-sm" onClick={() => handleDeleteCategory(c._id)}>Delete</button>
                     </div>
                   </div>
                 ))}
@@ -166,19 +191,22 @@ const ProductModeration = () => {
           <div className="admin-card">
             <div className="admin-card-header">
               <h3>Subcategories</h3>
-              <button className="btn btn-primary btn-sm" onClick={() => { setForm({ name: '', image: '', parentCategory: categories[0]?._id || '' }); setModal({ type: 'subcategory' }); }}><Plus size={12} /> Add</button>
+              <button className="btn btn-primary btn-sm" onClick={() => { setForm({ name: '', image: null, parentCategory: categories[0]?._id || '' }); setImagePreview(null); setModal({ type: 'subcategory' }); }}><Plus size={12} /> Add</button>
             </div>
             {subcategories.length === 0 ? <div className="empty-state"><FolderTree /><p>No subcategories</p></div> : (
               <div className="widget-list">
                 {subcategories.map(s => (
                   <div key={s._id} className="widget-item">
-                    <div>
-                      <div style={{ fontWeight: 600, fontSize: '0.8rem' }}>{s.name}</div>
-                      <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Parent: {s.parentCategory?.name || 'Unknown'}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <img src={getImageUrl(s.image)} alt="" style={{ width: 32, height: 32, borderRadius: 6, objectFit: 'cover', background: '#f1f5f9' }} />
+                      <div>
+                        <div style={{ fontWeight: 600, fontSize: '0.8rem' }}>{s.name}</div>
+                        <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Parent: {s.parentCategory?.name || 'Unknown'}</div>
+                      </div>
                     </div>
                     <div className="btn-group">
-                      <button className="btn btn-outline btn-sm" onClick={() => { setForm({ name: s.name, image: s.image, parentCategory: s.parentCategory?._id || s.parentCategory }); setModal({ type: 'subcategory', editId: s._id }); }}>Edit</button>
-                      <button className="btn btn-danger btn-sm" onClick={() => handleDeleteCategory(s._id)}><Trash2 size={12} /></button>
+                      <button className="btn btn-outline btn-sm" onClick={() => { setForm({ name: s.name, image: null, parentCategory: s.parentCategory?._id || s.parentCategory }); setImagePreview(getImageUrl(s.image)); setModal({ type: 'subcategory', editId: s._id }); }}>Edit</button>
+                      <button className="btn btn-danger btn-sm" onClick={() => handleDeleteCategory(s._id)}>Delete</button>
                     </div>
                   </div>
                 ))}
@@ -195,7 +223,13 @@ const ProductModeration = () => {
             <div className="modal-header"><h3>{modal.editId ? 'Edit' : 'Add'} {modal.type}</h3><button className="modal-close" onClick={() => setModal(null)}><X size={18} /></button></div>
             <div className="modal-body">
               <div className="form-group"><label className="form-label">Name</label><input className="form-input" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} /></div>
-              <div className="form-group"><label className="form-label">Image URL</label><input className="form-input" value={form.image} onChange={e => setForm({ ...form, image: e.target.value })} /></div>
+              <div className="form-group">
+                <label className="form-label">Category Image</label>
+                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                  {imagePreview && <img src={imagePreview} alt="Preview" style={{ width: 50, height: 50, borderRadius: 8, objectFit: 'cover' }} />}
+                  <input type="file" onChange={handleFileChange} accept="image/*" />
+                </div>
+              </div>
               {modal.type === 'subcategory' && (
                 <div className="form-group">
                   <label className="form-label">Parent Category</label>

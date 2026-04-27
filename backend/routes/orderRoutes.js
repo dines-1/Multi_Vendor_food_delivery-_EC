@@ -5,7 +5,8 @@ import {
   updateOrderStatus,
   cancelOrder,
   reorder,
-  getVendorOrders
+  getVendorOrders,
+  getVendorRevenue
 } from '../controllers/orderController.js';
 import { protect, authorize } from '../middleware/auth.js';
 
@@ -18,6 +19,7 @@ router.get('/my-orders', getMyOrders);
 
 // Vendor specific routes
 router.get('/vendor/my-orders', authorize('vendor'), getVendorOrders);
+router.get('/vendor/revenue', authorize('vendor'), getVendorRevenue);
 
 router.put('/:id/status', authorize('vendor', 'delivery', 'admin'), updateOrderStatus);
 router.post('/:id/cancel', cancelOrder);

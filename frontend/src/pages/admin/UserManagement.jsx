@@ -119,11 +119,11 @@ const UserManagement = () => {
                     <td>{formatDate(u.createdAt)}</td>
                     <td>
                       <div className="btn-group">
-                        <button className="btn btn-outline btn-sm" onClick={() => viewDetail(u._id)}><Eye size={12} /></button>
+                        <button className="btn btn-outline btn-sm" onClick={() => viewDetail(u._id)}>View</button>
                         {u.isBanned ? (
-                          <button className="btn btn-success btn-sm" onClick={() => handleUnban(u._id)}><Shield size={12} /></button>
+                          <button className="btn btn-success btn-sm" onClick={() => handleUnban(u._id)}>Unban</button>
                         ) : (
-                          <button className="btn btn-danger btn-sm" onClick={() => setModal({ type: 'ban', id: u._id })}><Ban size={12} /></button>
+                          <button className="btn btn-danger btn-sm" onClick={() => setModal({ type: 'ban', id: u._id })}>Ban</button>
                         )}
                         <button className="btn btn-outline btn-sm" onClick={() => { setNewRole(u.role); setModal({ type: 'role', id: u._id }); }}>Role</button>
                       </div>

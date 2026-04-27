@@ -83,18 +83,23 @@ export const getMyRestaurant = async (req, res) => {
 export const updateVendorProfile = async (req, res) => {
   try {
     let restaurant = await Restaurant.findOne({ owner: req.user.id });
+    
+    const data = { ...req.body };
+    if (req.file) {
+      data.logo_url = `/uploads/${req.file.filename}`;
+    }
 
     if (restaurant) {
       // Update
       restaurant = await Restaurant.findOneAndUpdate(
         { owner: req.user.id },
-        req.body,
+        data,
         { new: true, runValidators: true }
       );
     } else {
       // Create
-      req.body.owner = req.user.id;
-      restaurant = await Restaurant.create(req.body);
+      data.owner = req.user.id;
+      restaurant = await Restaurant.create(data);
     }
 
     res.status(200).json({ success: true, data: restaurant });

@@ -64,6 +64,7 @@
 .admin-main {
   flex: 1;
   margin-left: 280px;
+  min-height: 100vh;
 }
 
 .admin-header {
@@ -77,4 +78,38 @@
   position: sticky;
   top: 0;
   z-index: 90;
+}
+
+@media (max-width: 1024px) {
+  .admin-sidebar {
+    width: 80px;
+  }
+  .sidebar-header, .sidebar-section, .nav-item span, .nav-item {
+    font-size: 0;
+    justify-content: center;
+    padding: 15px;
+  }
+  .nav-item {
+      width: 50px;
+      margin: 5px auto;
+  }
+  .admin-main {
+    margin-left: 80px;
+  }
+  .sidebar-header {
+      padding: 1.5rem 0.5rem;
+      text-align: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-sidebar {
+    display: none; /* We could implement a bottom nav here like Delivery */
+  }
+  .admin-main {
+    margin-left: 0;
+  }
+  .admin-header {
+    padding: 0 20px;
+  }
 }

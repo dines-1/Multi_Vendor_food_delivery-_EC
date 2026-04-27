@@ -9,6 +9,7 @@ import {
   deleteMenuItem
 } from '../controllers/menuController.js';
 import { protect, authorize } from '../middleware/auth.js';
+import upload from '../middleware/upload.js';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 
@@ -37,8 +38,8 @@ router.get('/recently-viewed', protect, getRecentlyViewed);
 
 // Vendor specific routes
 router.get('/vendor/my-menu', protect, authorize('vendor'), getVendorMenu);
-router.post('/vendor', protect, authorize('vendor'), createMenuItem);
-router.put('/vendor/:id', protect, authorize('vendor'), updateMenuItem);
+router.post('/vendor', protect, authorize('vendor'), upload.single('image'), createMenuItem);
+router.put('/vendor/:id', protect, authorize('vendor'), upload.single('image'), updateMenuItem);
 router.delete('/vendor/:id', protect, authorize('vendor'), deleteMenuItem);
 
 router.get('/:id', optionalProtect, getMenuItem);

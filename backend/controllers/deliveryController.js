@@ -1,5 +1,6 @@
 import DeliveryPerson from '../models/DeliveryPerson.js';
 import Order from '../models/Order.js';
+import User from '../models/User.js';
 
 // @desc    Get current delivery person profile
 // @route   GET /api/delivery/profile
@@ -23,13 +24,23 @@ export const getProfile = async (req, res) => {
 // @access  Private/Delivery
 export const updateProfile = async (req, res) => {
   try {
-    const { vehicle_type, license_plate, isAvailable } = req.body;
+    const { vehicle_type, license_plate, isAvailable, name, phone } = req.body;
     
+    // Update Delivery Person details
     const delivery = await DeliveryPerson.findOneAndUpdate(
       { user: req.user.id },
       { vehicle_type, license_plate, isAvailable },
       { new: true, runValidators: true }
     );
+
+    // Update User details if name or phone provided
+    if (name || phone) {
+      const userUpdate = {};
+      if (name) userUpdate.name = name;
+      if (phone) userUpdate.phone = phone;
+      
+      await User.findByIdAndUpdate(req.user.id, userUpdate);
+    }
 
     res.status(200).json({ success: true, data: delivery });
   } catch (error) {

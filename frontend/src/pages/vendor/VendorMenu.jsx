@@ -24,10 +24,11 @@ const VendorMenu = () => {
     description: '',
     price: '',
     category: '',
-    image_url: '',
+    image: null,
     isVeg: true,
     isAvailable: true
   });
+  const [imagePreview, setImagePreview] = useState(null);
 
   useEffect(() => {
     fetchMenu();
@@ -52,10 +53,11 @@ const VendorMenu = () => {
       description: '',
       price: '',
       category: '',
-      image_url: '',
+      image: null,
       isVeg: true,
       isAvailable: true
     });
+    setImagePreview(null);
     setEditingItem(null);
   };
 
@@ -66,10 +68,13 @@ const VendorMenu = () => {
       description: item.description,
       price: item.price,
       category: item.category?._id || '',
-      image_url: item.image_url,
+      image: null,
       isVeg: item.isVeg,
       isAvailable: item.isAvailable
     });
+    if (item.image) {
+      setImagePreview(item.image.startsWith('http') ? item.image : `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}${item.image}`);
+    }
     setShowModal(true);
   };
 
@@ -85,14 +90,39 @@ const VendorMenu = () => {
     }
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setFormData({ ...formData, image: file });
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    const data = new FormData();
+    data.append('name', formData.name);
+    data.append('description', formData.description);
+    data.append('price', formData.price);
+    data.append('category', formData.category);
+    data.append('isVeg', formData.isVeg);
+    data.append('isAvailable', formData.isAvailable);
+    
+    if (formData.image) {
+      data.append('image', formData.image);
+    }
+
     try {
       if (editingItem) {
-        await api.put(`/menu/vendor/${editingItem._id}`, formData);
+        await api.put(`/menu/vendor/${editingItem._id}`, data, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
         toast.success('Item updated');
       } else {
-        await api.post('/menu/vendor', formData);
+        await api.post('/menu/vendor', data, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
         toast.success('Item added');
       }
       setShowModal(false);
@@ -101,6 +131,12 @@ const VendorMenu = () => {
     } catch (err) {
       toast.error(err.response?.data?.message || 'Action failed');
     }
+  };
+
+  const getImageUrl = (url) => {
+    if (!url) return 'https://via.placeholder.com/300x200?text=Food+Image';
+    if (url.startsWith('http')) return url;
+    return `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}${url}`;
   };
 
   if (loading) return <div className="vendor-loading">Loading Menu...</div>;
@@ -131,7 +167,7 @@ const VendorMenu = () => {
         {menuItems.map(item => (
           <div key={item._id} className="menu-item-card">
             <div className="item-image">
-              <img src={item.image_url || 'https://via.placeholder.com/300x200?text=Food+Image'} alt={item.name} />
+              <img src={getImageUrl(item.image)} alt={item.name} />
               <div className={`status-badge ${item.isAvailable ? 'available' : 'unavailable'}`}>
                 {item.isAvailable ? 'Available' : 'Sold Out'}
               </div>
@@ -210,12 +246,19 @@ const VendorMenu = () => {
                 ></textarea>
               </div>
               <div className="form-group">
-                <label>Image URL</label>
-                <input 
-                  type="text" 
-                  value={formData.image_url} 
-                  onChange={(e) => setFormData({...formData, image_url: e.target.value})} 
-                />
+                <label>Food Image</label>
+                <div className="file-input-wrapper">
+                  {imagePreview && (
+                    <div className="image-preview-sm">
+                      <img src={imagePreview} alt="Preview" />
+                    </div>
+                  )}
+                  <input 
+                    type="file" 
+                    onChange={handleFileChange} 
+                    accept="image/*"
+                  />
+                </div>
               </div>
               <div className="form-toggle-row">
                 <div className="toggle-group">

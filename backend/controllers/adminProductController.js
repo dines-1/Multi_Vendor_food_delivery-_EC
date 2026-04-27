@@ -97,6 +97,9 @@ export const getCategories = async (req, res) => {
 export const createCategory = async (req, res) => {
   try {
     const data = { ...req.body, restaurant: null, parentCategory: null };
+    if (req.file) {
+      data.image = `/uploads/${req.file.filename}`;
+    }
     const category = await Category.create(data);
     res.status(201).json({ success: true, data: category, message: 'Category created' });
   } catch (error) {
@@ -106,7 +109,11 @@ export const createCategory = async (req, res) => {
 
 export const updateCategory = async (req, res) => {
   try {
-    const category = await Category.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    const data = { ...req.body };
+    if (req.file) {
+      data.image = `/uploads/${req.file.filename}`;
+    }
+    const category = await Category.findByIdAndUpdate(req.params.id, data, { new: true, runValidators: true });
     if (!category) return res.status(404).json({ success: false, message: 'Category not found' });
     res.json({ success: true, data: category, message: 'Category updated' });
   } catch (error) {

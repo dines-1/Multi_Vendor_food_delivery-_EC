@@ -1,0 +1,246 @@
+.vendor-revenue-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.revenue-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2.5rem;
+}
+
+.revenue-header h1 {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: #131110;
+  margin-bottom: 0.5rem;
+}
+
+.revenue-header p {
+  color: #64748B;
+}
+
+.btn-export {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.75rem 1.25rem;
+  background: white;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  color: #1E293B;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-export:hover {
+  background: #F8FAFC;
+  border-color: #CBD5E1;
+}
+
+/* Stats Cards */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.stat-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 24px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  border: 1px solid #F1F5F9;
+}
+
+.stat-card.primary {
+  background: #131110;
+  color: white;
+  border: none;
+}
+
+.stat-card.primary .stat-icon {
+  background: #FF5C1A;
+  color: white;
+}
+
+.stat-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 18px;
+  background: #FFF1EB;
+  color: #FF5C1A;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-icon.purple { background: #F5F3FF; color: #8B5CF6; }
+.stat-icon.green { background: #F0FDF4; color: #10B981; }
+
+.stat-content label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #94A3B8;
+  margin-bottom: 0.25rem;
+}
+
+.stat-content h3 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  margin: 0;
+}
+
+.stat-trend {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-top: 0.5rem;
+}
+
+.stat-trend.positive { color: #10B981; }
+.stat-trend.negative { color: #EF4444; }
+
+.clickable {
+  color: #FF5C1A;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* Charts */
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+@media (max-width: 1024px) {
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.chart-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 24px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+  border: 1px solid #F1F5F9;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.chart-header h3 {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #1E293B;
+}
+
+.chart-legend {
+  display: flex;
+  gap: 1rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #64748B;
+}
+
+.dot { width: 8px; height: 8px; border-radius: 50%; }
+.dot.revenue { background: #FF5C1A; }
+
+/* Table */
+.recent-activity {
+  background: white;
+  border-radius: 24px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+  border: 1px solid #F1F5F9;
+}
+
+.activity-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.activity-header h3 {
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.btn-text {
+  background: none;
+  border: none;
+  color: #FF5C1A;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.activity-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.activity-table th {
+  text-align: left;
+  padding: 1rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #94A3B8;
+  text-transform: uppercase;
+  border-bottom: 1px solid #F1F5F9;
+}
+
+.activity-table td {
+  padding: 1.25rem 1rem;
+  font-size: 0.9rem;
+  color: #1E293B;
+  border-bottom: 1px solid #F8FAFC;
+}
+
+.date-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #64748B;
+}
+
+.amount-cell {
+  font-weight: 700;
+}
+
+.amount-cell.negative {
+  color: #EF4444;
+}
+
+.badge-status {
+  padding: 4px 12px;
+  border-radius: 99px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.badge-status.success { background: #DCFCE7; color: #166534; }
+.badge-status.pending { background: #FEF3C7; color: #92400E; }

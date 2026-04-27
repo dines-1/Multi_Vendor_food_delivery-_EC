@@ -109,8 +109,14 @@ export const createMenuItem = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Create a restaurant profile first' });
     }
 
-    req.body.restaurant = restaurant._id;
-    const menuItem = await MenuItem.create(req.body);
+    const data = { ...req.body };
+    data.restaurant = restaurant._id;
+    
+    if (req.file) {
+      data.image = `/uploads/${req.file.filename}`;
+    }
+
+    const menuItem = await MenuItem.create(data);
 
     res.status(201).json({ success: true, data: menuItem });
   } catch (err) {
@@ -135,7 +141,12 @@ export const updateMenuItem = async (req, res) => {
       return res.status(403).json({ success: false, message: 'Not authorized to update this item' });
     }
 
-    menuItem = await MenuItem.findByIdAndUpdate(req.params.id, req.body, {
+    const data = { ...req.body };
+    if (req.file) {
+      data.image = `/uploads/${req.file.filename}`;
+    }
+
+    menuItem = await MenuItem.findByIdAndUpdate(req.params.id, data, {
       new: true,
       runValidators: true
     });

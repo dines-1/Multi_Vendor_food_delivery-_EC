@@ -1,5 +1,6 @@
 import express from 'express';
 import { protect, authorize } from '../middleware/auth.js';
+import upload from '../middleware/upload.js';
 import {
   getProducts,
   approveProduct,
@@ -30,8 +31,8 @@ router.put('/:id/featured', toggleFeatured);
 
 // Categories
 router.get('/categories', getCategories);
-router.post('/categories', createCategory);
-router.put('/categories/:id', updateCategory);
+router.post('/categories', upload.single('image'), createCategory);
+router.put('/categories/:id', upload.single('image'), updateCategory);
 router.delete('/categories/:id', deleteCategory);
 
 // Subcategories

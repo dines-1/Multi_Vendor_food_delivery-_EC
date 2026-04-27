@@ -30,6 +30,9 @@ import VendorRoute from './components/VendorRoute';
 import VendorLayout from './pages/vendor/VendorLayout';
 import VendorDashboard from './pages/vendor/VendorDashboard';
 import VendorMenu from './pages/vendor/VendorMenu';
+import VendorOrders from './pages/vendor/VendorOrders';
+import VendorRevenue from './pages/vendor/VendorRevenue';
+import VendorProfile from './pages/vendor/VendorProfile';
 import NotFound from './pages/NotFound';
 
 import { CartProvider } from './context/CartContext';
@@ -113,8 +116,9 @@ function App() {
               <Route index element={<VendorDashboard />} />
               <Route path="dashboard" element={<VendorDashboard />} />
               <Route path="menu" element={<VendorMenu />} />
-              <Route path="orders" element={<div>Orders Management Coming Soon</div>} />
-              <Route path="profile" element={<div>Restaurant Profile Management Coming Soon</div>} />
+              <Route path="orders" element={<VendorOrders />} />
+              <Route path="revenue" element={<VendorRevenue />} />
+              <Route path="profile" element={<VendorProfile />} />
             </Route>
 
             {/* 404 Route */}

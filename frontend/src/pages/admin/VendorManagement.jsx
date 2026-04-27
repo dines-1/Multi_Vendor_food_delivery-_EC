@@ -119,18 +119,18 @@ const VendorManagement = () => {
                     <td>{formatDate(v.createdAt)}</td>
                     <td>
                       <div className="btn-group">
-                        <button className="btn btn-outline btn-sm" onClick={() => viewDetail(v._id)}><Eye size={12} /></button>
+                        <button className="btn btn-outline btn-sm" onClick={() => viewDetail(v._id)}>View</button>
                         {v.status === 'pending' && <>
-                          <button className="btn btn-success btn-sm" onClick={() => handleAction(v._id, 'approve')}><CheckCircle size={12} /></button>
-                          <button className="btn btn-danger btn-sm" onClick={() => handleAction(v._id, 'reject')}><XCircle size={12} /></button>
+                          <button className="btn btn-success btn-sm" onClick={() => handleAction(v._id, 'approve')}>Approve</button>
+                          <button className="btn btn-danger btn-sm" onClick={() => handleAction(v._id, 'reject')}>Reject</button>
                         </>}
                         {v.status === 'active' && (
-                          <button className="btn btn-warning btn-sm" onClick={() => setModal({ type: 'suspend', id: v._id })}><Ban size={12} /></button>
+                          <button className="btn btn-warning btn-sm" onClick={() => setModal({ type: 'suspend', id: v._id })}>Suspend</button>
                         )}
                         {v.status === 'suspended' && (
-                          <button className="btn btn-success btn-sm" onClick={() => handleAction(v._id, 'reactivate')}><RefreshCw size={12} /></button>
+                          <button className="btn btn-success btn-sm" onClick={() => handleAction(v._id, 'reactivate')}>Activate</button>
                         )}
-                        <button className="btn btn-outline btn-sm" onClick={() => { setCommission(v.commissionRate || ''); setModal({ type: 'commission', id: v._id }); }}><Percent size={12} /></button>
+                        <button className="btn btn-outline btn-sm" onClick={() => { setCommission(v.commissionRate || ''); setModal({ type: 'commission', id: v._id }); }}>Commission</button>
                       </div>
                     </td>
                   </tr>

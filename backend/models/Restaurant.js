@@ -7,6 +7,7 @@ const restaurantSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true,
+      unique: true, // Strictly one restaurant per user
     },
     name: {
       type: String,
