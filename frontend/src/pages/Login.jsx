@@ -49,7 +49,7 @@ const Login = () => {
               <Mail size={18} color="#636E72" />
               <input 
                 type="email" 
-                placeholder="name@example.com" 
+                placeholder="Email Address" 
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -63,7 +63,7 @@ const Login = () => {
               <Lock size={18} color="#636E72" />
               <input 
                 type="password" 
-                placeholder="••••••••" 
+                placeholder="Password" 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required

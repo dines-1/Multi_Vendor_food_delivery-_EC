@@ -25,6 +25,7 @@ class SocketService {
     }
   }
 
+  // ========== ORDER TRACKING ==========
   joinOrderRoom(orderId) {
     if (this.socket) {
       this.socket.emit('join-order', orderId);
@@ -53,6 +54,71 @@ class SocketService {
   updateLocation(orderId, location) {
     if (this.socket) {
       this.socket.emit('update-location', { orderId, location });
+    }
+  }
+
+  // ========== CHAT ==========
+  joinUserRoom(userId) {
+    if (this.socket) {
+      this.socket.emit('join-user', userId);
+    }
+  }
+
+  joinConversation(conversationId) {
+    if (this.socket) {
+      this.socket.emit('join-conversation', conversationId);
+    }
+  }
+
+  leaveConversation(conversationId) {
+    if (this.socket) {
+      this.socket.emit('leave-conversation', conversationId);
+    }
+  }
+
+  sendChatMessage(conversationId, message, recipientIds) {
+    if (this.socket) {
+      this.socket.emit('send-message', { conversationId, message, recipientIds });
+    }
+  }
+
+  onNewMessage(callback) {
+    if (this.socket) {
+      this.socket.off('new-message'); // prevent duplicates
+      this.socket.on('new-message', callback);
+    }
+  }
+
+  onMessageNotification(callback) {
+    if (this.socket) {
+      this.socket.off('message-notification');
+      this.socket.on('message-notification', callback);
+    }
+  }
+
+  emitTyping(conversationId, userName) {
+    if (this.socket) {
+      this.socket.emit('typing', { conversationId, userName });
+    }
+  }
+
+  emitStopTyping(conversationId) {
+    if (this.socket) {
+      this.socket.emit('stop-typing', { conversationId });
+    }
+  }
+
+  onUserTyping(callback) {
+    if (this.socket) {
+      this.socket.off('user-typing');
+      this.socket.on('user-typing', callback);
+    }
+  }
+
+  onUserStopTyping(callback) {
+    if (this.socket) {
+      this.socket.off('user-stop-typing');
+      this.socket.on('user-stop-typing', callback);
     }
   }
 }

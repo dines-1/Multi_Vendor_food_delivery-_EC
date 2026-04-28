@@ -165,3 +165,25 @@
   gap: 8px;
   background: none;
 }
+
+/* Chat Nav Button */
+.chat-nav-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1.5px solid #E5E7EB;
+  background: #FFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #131110;
+}
+
+.chat-nav-btn:hover {
+  border-color: #FF5C1A;
+  color: #FF5C1A;
+  background: #FFF0EA;
+  transform: translateY(-2px);
+}
