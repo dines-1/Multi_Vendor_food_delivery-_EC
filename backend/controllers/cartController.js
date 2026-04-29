@@ -71,6 +71,12 @@ export const addToCart = async (req, res) => {
       await cart.save();
     }
 
+    // Populate for frontend
+    await cart.populate({
+      path: 'items.menuItem',
+      populate: ['category', 'restaurant']
+    });
+
     res.status(200).json({ success: true, data: cart });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
@@ -107,6 +113,12 @@ export const updateCartItem = async (req, res) => {
     }
 
     await cart.save();
+
+    // Populate for frontend
+    await cart.populate({
+      path: 'items.menuItem',
+      populate: ['category', 'restaurant']
+    });
 
     res.status(200).json({ success: true, data: cart });
   } catch (err) {
