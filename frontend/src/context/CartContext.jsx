@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import api from '../services/api';
 import toast from 'react-hot-toast';
 import { useAuth } from './AuthContext';
@@ -10,16 +10,7 @@ export const CartProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
 
-  useEffect(() => {
-    if (user) {
-      fetchCart();
-    } else {
-      setCart(null);
-      setLoading(false);
-    }
-  }, [user]);
-
-  const fetchCart = async () => {
+  const fetchCart = useCallback(async () => {
     try {
       setLoading(true);
       const res = await api.get('/cart');
@@ -29,25 +20,35 @@ export const CartProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (user && user.role === 'customer') {
+      fetchCart();
+    } else {
+      setCart(null);
+      setLoading(false);
+    }
+  }, [user, fetchCart]);
 
   const addToCart = async (menuItemId, quantity = 1, special_notes = '') => {
     try {
       const res = await api.post('/cart', { menuItemId, quantity, special_notes });
       setCart(res.data.data);
       toast.success('Added to cart!');
-      return true;
+      return { success: true };
     } catch (err) {
+      const code = err.response?.data?.code;
       const msg = err.response?.data?.message || 'Failed to add to cart';
       toast.error(msg);
-      return false;
+      return { success: false, code, message: msg };
     }
   };
 
   const updateQuantity = async (itemId, quantity) => {
     try {
       if (quantity > 20) {
-        toast.error('Limit of 20 items reached');
+        toast.error('Maximum 20 items allowed');
         return;
       }
       const res = await api.put(`/cart/${itemId}`, { quantity });
@@ -59,9 +60,9 @@ export const CartProvider = ({ children }) => {
 
   const removeFromCart = async (itemId) => {
     try {
-      const res = await api.put(`/cart/${itemId}`, { quantity: 0 });
+      const res = await api.delete(`/cart/${itemId}`);
       setCart(res.data.data);
-      toast.success('Removed from cart');
+      toast.success('Item removed');
     } catch (err) {
       toast.error('Failed to remove item');
     }
@@ -69,31 +70,35 @@ export const CartProvider = ({ children }) => {
 
   const clearCart = async () => {
     try {
-      await api.delete('/cart');
-      setCart({ ...cart, items: [], restaurant: null });
+      await api.delete('/cart/clear');
+      setCart(prev => ({ ...prev, items: [], restaurant: null }));
+      toast.success('Cart cleared');
     } catch (err) {
       toast.error('Failed to clear cart');
     }
   };
 
   const cartCount = cart?.items?.reduce((acc, item) => acc + item.quantity, 0) || 0;
+
   const cartTotal = cart?.items?.reduce((acc, item) => {
     const price = item.menuItem?.discountPrice || item.menuItem?.price || 0;
-    return acc + (price * item.quantity);
+    return acc + price * item.quantity;
   }, 0) || 0;
 
   return (
-    <CartContext.Provider value={{ 
-      cart, 
-      loading, 
-      addToCart, 
-      updateQuantity, 
-      removeFromCart, 
-      clearCart, 
-      cartCount, 
-      cartTotal,
-      fetchCart 
-    }}>
+    <CartContext.Provider
+      value={{
+        cart,
+        loading,
+        addToCart,
+        updateQuantity,
+        removeFromCart,
+        clearCart,
+        cartCount,
+        cartTotal,
+        fetchCart
+      }}
+    >
       {children}
     </CartContext.Provider>
   );

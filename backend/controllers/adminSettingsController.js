@@ -1,45 +1,5 @@
-import ShippingZone from '../models/ShippingZone.js';
 import User from '../models/User.js';
 import bcrypt from 'bcryptjs';
-
-// ==================== SHIPPING ZONES ====================
-
-export const getShippingZones = async (req, res) => {
-  try {
-    const zones = await ShippingZone.find().sort({ createdAt: -1 });
-    res.json({ success: true, data: zones });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
-
-export const createShippingZone = async (req, res) => {
-  try {
-    const zone = await ShippingZone.create(req.body);
-    res.status(201).json({ success: true, data: zone, message: 'Shipping zone created' });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
-
-export const updateShippingZone = async (req, res) => {
-  try {
-    const zone = await ShippingZone.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!zone) return res.status(404).json({ success: false, message: 'Zone not found' });
-    res.json({ success: true, data: zone, message: 'Zone updated' });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
-
-export const deleteShippingZone = async (req, res) => {
-  try {
-    await ShippingZone.findByIdAndDelete(req.params.id);
-    res.json({ success: true, message: 'Zone deleted' });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
 
 // ==================== SUB-ADMINS ====================
 

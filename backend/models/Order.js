@@ -122,7 +122,7 @@ orderSchema.index({ customer: 1 });
 orderSchema.index({ restaurant: 1 });
 orderSchema.index({ status: 1 });
 orderSchema.index({ ordered_at: -1 });
-orderSchema.index({ orderNumber: 1 }, { unique: true });
+// orderNumber already has unique:true on the field definition — no need for a duplicate schema.index
 
 // Plugins
 orderSchema.plugin(mongoosePaginate);

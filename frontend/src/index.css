@@ -3,7 +3,7 @@
 :root {
   --primary: #FF6B6B;
   --primary-hover: #ff5252;
-  --secondary: #66a0ab;
+  --secondary: #FFD93D;
   --accent: #6BCB77;
   --text-dark: #2D3436;
   --text-light: #636E72;
@@ -74,13 +74,6 @@ input {
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
