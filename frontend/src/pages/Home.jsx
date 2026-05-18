@@ -1,11 +1,188 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, MapPin, Star, ChevronRight, Clock, Flame, Utensils, Zap, Truck, ShoppingBag, Navigation, Smile, Shield, Heart, Award, Quote } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Search, MapPin, Star, ChevronRight, Clock, Flame, Utensils, Zap, Truck, ShoppingBag, Navigation, Smile, Shield, Heart, Award, Quote, Package, CheckCircle, ChefHat, PartyPopper, Activity } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
 import restaurantService from '../services/restaurantService';
 import menuService from '../services/menuService';
 import { useCart } from '../context/CartContext';
+import api from '../services/api';
 import './Home.css';
 
+/* ─── Status config for active orders ───────────────────────────── */
+const ORDER_STATUS = {
+  pending:          { label: 'Order Placed',    color: '#F59E0B', step: 0 },
+  confirmed:        { label: 'Confirmed',        color: '#3B82F6', step: 1 },
+  preparing:        { label: 'Preparing',        color: '#8B5CF6', step: 2 },
+  out_for_delivery: { label: 'Out for Delivery', color: '#6366F1', step: 3 },
+  delivered:        { label: 'Delivered',        color: '#10B981', step: 4 },
+};
+
+const PIPELINE_STEPS = [
+  { key: 'pending',          label: 'Placed',    icon: Package },
+  { key: 'confirmed',        label: 'Confirmed', icon: CheckCircle },
+  { key: 'preparing',        label: 'Preparing', icon: ChefHat },
+  { key: 'out_for_delivery', label: 'On Way',    icon: Navigation },
+  { key: 'delivered',        label: 'Delivered', icon: PartyPopper },
+];
+
+/* ─── Single active order card with animated pipeline ─────────── */
+const ActiveOrderCard = ({ order }) => {
+  const navigate = useNavigate();
+  const cfg       = ORDER_STATUS[order.status] || ORDER_STATUS.pending;
+  const currentStep = cfg.step;
+
+  return (
+    <div className="ao-card">
+      {/* Card top */}
+      <div className="ao-card-top">
+        <div className="ao-rest-info">
+          <img
+            src={order.restaurant?.logo_url || 'https://via.placeholder.com/40'}
+            alt={order.restaurant?.name}
+            className="ao-rest-logo"
+          />
+          <div>
+            <p className="ao-rest-name">{order.restaurant?.name}</p>
+            <span className="ao-order-num">#{order.orderNumber}</span>
+          </div>
+        </div>
+        <div className="ao-status-pill" style={{ color: cfg.color, borderColor: `${cfg.color}40`, background: `${cfg.color}12` }}>
+          <span className="ao-live-dot" style={{ background: cfg.color }} />
+          {cfg.label}
+        </div>
+      </div>
+
+      {/* ── Animated Pipeline ── */}
+      <div className="ao-pipeline">
+        {PIPELINE_STEPS.map((step, idx) => {
+          const stepCfg   = ORDER_STATUS[step.key];
+          const completed = currentStep > idx;
+          const isCurrent = currentStep === idx;
+          const isLast    = idx === PIPELINE_STEPS.length - 1;
+          const IconComp  = step.icon;
+
+          return (
+            <React.Fragment key={step.key}>
+              {/* Step node */}
+              <div className="ao-step">
+                <div
+                  className={`ao-step-dot ${completed ? 'completed' : ''} ${isCurrent ? 'current' : ''}`}
+                  style={(completed || isCurrent) ? { borderColor: stepCfg.color, background: completed ? stepCfg.color : 'transparent' } : {}}
+                >
+                  {completed ? (
+                    <CheckCircle size={11} color="#fff" strokeWidth={3} />
+                  ) : isCurrent ? (
+                    <>
+                      <span className="ao-glow-ring" style={{ borderColor: stepCfg.color }} />
+                      <IconComp size={10} color={stepCfg.color} />
+                    </>
+                  ) : (
+                    <IconComp size={10} color="#6b7280" />
+                  )}
+                </div>
+                <span className={`ao-step-label ${isCurrent ? 'current-lbl' : ''} ${completed ? 'done-lbl' : ''}`}
+                  style={isCurrent ? { color: stepCfg.color } : {}}
+                >
+                  {step.label}
+                </span>
+              </div>
+
+              {/* Connector line */}
+              {!isLast && (
+                <div className="ao-connector">
+                  <div
+                    className={`ao-connector-fill ${completed ? 'filled' : ''}`}
+                    style={completed ? { background: `linear-gradient(90deg, ${stepCfg.color}, ${ORDER_STATUS[PIPELINE_STEPS[idx + 1].key].color})` } : {}}
+                  />
+                  {/* Travelling dot animation on current connection */}
+                  {currentStep === idx && (
+                    <div className="ao-travel-dot" style={{ background: stepCfg.color }} />
+                  )}
+                </div>
+              )}
+            </React.Fragment>
+          );
+        })}
+      </div>
+
+      {/* Card bottom */}
+      <div className="ao-card-bottom">
+        <div className="ao-items-preview">
+          {order.items.slice(0, 3).map((item, i) => (
+            <span key={i} className="ao-item-chip">{item.quantity}× {item.name}</span>
+          ))}
+          {order.items.length > 3 && (
+            <span className="ao-item-chip more">+{order.items.length - 3} more</span>
+          )}
+        </div>
+        <div className="ao-card-actions">
+          <span className="ao-total">Rs. {order.total_amount}</span>
+          <Link to={`/track-order/${order._id}`} className="ao-track-btn">
+            Track Live <ChevronRight size={13} />
+          </Link>
+          <Link to="/orders" className="ao-details-btn">
+            My Orders
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ─── Active Orders Section ─────────────────────────────────────── */
+const ActiveOrdersSection = () => {
+  const [activeOrders, setActiveOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchActive = async () => {
+      try {
+        const res = await api.get('/orders/my-orders');
+        const all = res.data.data || [];
+        const active = all.filter(o =>
+          ['pending', 'confirmed', 'preparing', 'out_for_delivery'].includes(o.status)
+        );
+        setActiveOrders(active);
+      } catch {
+        // Silently fail — user may not be logged in
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchActive();
+  }, []);
+
+  if (loading || activeOrders.length === 0) return null;
+
+  return (
+    <section className="active-orders-section">
+      <div className="ao-section-header">
+        <div className="ao-header-left">
+          <div className="ao-live-badge">
+            <span className="ao-live-indicator" />
+            LIVE
+          </div>
+          <div>
+            <h2 className="ao-title">Active Orders</h2>
+            <p className="ao-subtitle">
+              {activeOrders.length} order{activeOrders.length > 1 ? 's' : ''} in progress
+            </p>
+          </div>
+        </div>
+        <Link to="/orders" className="ao-view-all-btn">
+          View All <ChevronRight size={15} />
+        </Link>
+      </div>
+
+      <div className="ao-cards-scroll">
+        {activeOrders.map(order => (
+          <ActiveOrderCard key={order._id} order={order} />
+        ))}
+      </div>
+    </section>
+  );
+};
+
+/* ─── Main Home Component ───────────────────────────────────────── */
 const Home = () => {
   const { addToCart } = useCart();
   const [categories, setCategories] = useState([]);
@@ -128,6 +305,9 @@ const Home = () => {
         </div>
       </section>
 
+      {/* ═══════ ACTIVE ORDERS TRACKING SECTION ═══════ */}
+      <ActiveOrdersSection />
+
       {/* Popular Categories */}
       <section className="categories">
         <div className="section-header">
@@ -218,7 +398,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ========== HOW IT WORKS ========== */}
+      {/* HOW IT WORKS */}
       <section className="how-it-works">
         <div className="section-header">
           <div className="title-with-icon">
@@ -245,7 +425,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ========== ABOUT US ========== */}
+      {/* ABOUT US */}
       <section className="about-us">
         <div className="about-content">
           <div className="about-text">
@@ -260,7 +440,7 @@ const Home = () => {
               <div className="value-card">
                 <Shield size={22} />
                 <div>
-                  <h4>Safe & Hygienic</h4>
+                  <h4>Safe &amp; Hygienic</h4>
                   <p>Every restaurant partner follows strict safety standards</p>
                 </div>
               </div>
@@ -301,7 +481,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ========== CUSTOMER REVIEWS ========== */}
+      {/* CUSTOMER REVIEWS */}
       <section className="customer-reviews">
         <div className="section-header">
           <div className="title-with-icon">
