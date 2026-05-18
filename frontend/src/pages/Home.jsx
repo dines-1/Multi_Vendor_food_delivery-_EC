@@ -190,8 +190,18 @@ const Home = () => {
   const [restaurants, setRestaurants] = useState([]);
   const [trendingFood, setTrendingFood] = useState([]);
   const [reviews, setReviews] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading]           = useState(true);
+  const [homeSearch, setHomeSearch]     = useState('');
   const navigate = useNavigate();
+
+  const handleHomeSearchSubmit = (e) => {
+    if (e) e.preventDefault();
+    if (homeSearch.trim()) {
+      navigate(`/explore?search=${encodeURIComponent(homeSearch.trim())}`);
+    } else {
+      navigate('/explore');
+    }
+  };
 
   // Animated counters state
   const [counters, setCounters] = useState({ restaurants: 0, orders: 0, customers: 0, riders: 0 });
@@ -288,19 +298,24 @@ const Home = () => {
           <h1>Delicious Food <br /> Delivered to your <span className="highlight">Doorstep</span></h1>
           <p>Order from your favorite restaurants and enjoy premium meals in minutes.</p>
           
-          <div className="search-bar-container">
+          <form className="search-bar-container" onSubmit={handleHomeSearchSubmit}>
             <div className="location-picker">
               <MapPin size={18} color="#121211" />
               <span>Kathmandu, Nepal</span>
             </div>
             <div className="search-divider"></div>
             <div className="search-input-wrapper">
-              <input type="text" placeholder="Search for food or restaurants..." />
-              <button className="search-btn">
+              <input
+                type="text"
+                placeholder="Search for food, categories or restaurants..."
+                value={homeSearch}
+                onChange={(e) => setHomeSearch(e.target.value)}
+              />
+              <button type="submit" className="search-btn">
                 <Search size={20} />
               </button>
             </div>
-          </div>
+          </form>
         </div>
         <div className="hero-image">
           <div className="image-blob"></div>

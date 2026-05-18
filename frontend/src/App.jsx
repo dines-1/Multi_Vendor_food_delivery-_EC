@@ -20,6 +20,7 @@ import FinanceManager from './pages/admin/FinanceManager';
 import PlatformSettings from './pages/admin/PlatformSettings';
 import MyOrders from './pages/MyOrders';
 import TrackOrder from './pages/TrackOrder';
+import Explore from './pages/Explore';
 import AdminRoute from './components/AdminRoute';
 import DeliveryRoute from './components/DeliveryRoute';
 import DeliveryLayout from './pages/delivery/DeliveryLayout';
@@ -60,6 +61,7 @@ function App() {
             <Routes>
               {/* Public Routes with Navbar and Footer */}
               <Route path="/" element={<><Navbar /><main className="main-content"><HomeRedirect /></main><Footer /></>} />
+              <Route path="/explore" element={<><Navbar /><main className="main-content"><Explore /></main><Footer /></>} />
               <Route path="/login" element={<><Navbar /><main className="main-content"><Login /></main><Footer /></>} />
               <Route path="/register" element={<><Navbar /><main className="main-content"><Register /></main><Footer /></>} />
               <Route path="/restaurant/:id" element={<><Navbar /><main className="main-content"><RestaurantDetail /></main><Footer /></>} />
