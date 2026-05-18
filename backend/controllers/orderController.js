@@ -17,6 +17,42 @@ const DELIVERY_STATUS_FLOW = {
   out_for_delivery: ['delivered'],
 };
 
+// Auto-cancellation helper for stale pending orders
+const autoCancelStaleOrders = async () => {
+  try {
+    const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+    const staleOrders = await Order.find({
+      status: 'pending',
+      createdAt: { $lt: tenMinutesAgo }
+    });
+
+    for (const order of staleOrders) {
+      order.status = 'cancelled';
+      order.statusHistory.push({
+        status: 'cancelled',
+        note: 'Auto-cancelled: Restaurant did not accept order within 10 minutes.',
+        timestamp: new Date()
+      });
+      await order.save();
+
+      if (global.io) {
+        global.io.to(`order_${order._id}`).emit('status-updated', {
+          orderId: order._id,
+          status: 'cancelled',
+          statusHistory: order.statusHistory
+        });
+        global.io.to(`user_${order.customer}`).emit('order-status-changed', {
+          orderId: order._id,
+          orderNumber: order.orderNumber,
+          status: 'cancelled'
+        });
+      }
+    }
+  } catch (err) {
+    console.error('Error auto-cancelling stale orders:', err);
+  }
+};
+
 // @desc    Checkout and create order
 // @route   POST /api/orders/checkout
 // @access  Private
@@ -105,6 +141,7 @@ export const checkout = async (req, res) => {
 // @access  Private
 export const getMyOrders = async (req, res) => {
   try {
+    await autoCancelStaleOrders();
     const orders = await Order.find({ customer: req.user.id })
       .sort('-createdAt')
       .populate('restaurant', 'name logo_url');
@@ -120,6 +157,7 @@ export const getMyOrders = async (req, res) => {
 // @access  Private
 export const getOrderById = async (req, res) => {
   try {
+    await autoCancelStaleOrders();
     const order = await Order.findById(req.params.id)
       .populate('customer', 'name phone email')
       .populate('restaurant', 'name logo_url address phone')
@@ -228,6 +266,7 @@ export const updateOrderStatus = async (req, res) => {
 // @access  Private (vendor)
 export const getVendorOrders = async (req, res) => {
   try {
+    await autoCancelStaleOrders();
     const restaurant = await Restaurant.findOne({ owner: req.user.id });
     if (!restaurant) {
       return res.status(404).json({ success: false, message: 'Restaurant not found' });

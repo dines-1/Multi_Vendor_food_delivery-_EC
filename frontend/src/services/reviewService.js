@@ -10,6 +10,11 @@ const reviewService = {
     const res = await api.get(`/reviews/restaurant/${restaurantId}`);
     return res.data;
   },
+
+  getRecentReviews: async () => {
+    const res = await api.get('/reviews');
+    return res.data;
+  },
 };
 
 export default reviewService;

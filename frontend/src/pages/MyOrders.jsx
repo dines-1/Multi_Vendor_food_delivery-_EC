@@ -19,7 +19,10 @@ import {
   CreditCard,
   ChefHat,
   Navigation,
-  PartyPopper
+  PartyPopper,
+  Timer,
+  AlertCircle,
+  HelpCircle
 } from 'lucide-react';
 import ReviewModal from '../components/ReviewModal';
 import ChatDrawer from '../components/ChatDrawer';
@@ -44,14 +47,77 @@ const TIMELINE_STEPS = [
   { key: 'delivered',        label: 'Delivered',          icon: PartyPopper },
 ];
 
+/* ─── Client Real-Time Countdown Timer Component ─────────────────────── */
+const OrderCountdown = ({ createdAt, onTimeout }) => {
+  const calculateTimeLeft = useCallback(() => {
+    const total = (new Date(createdAt).getTime() + 10 * 60 * 1000) - Date.now();
+    const seconds = Math.max(0, Math.floor((total / 1000) % 60));
+    const minutes = Math.max(0, Math.floor((total / 1000 / 60) % 60));
+    return { total, minutes, seconds };
+  }, [createdAt]);
+
+  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const remaining = calculateTimeLeft();
+      setTimeLeft(remaining);
+      if (remaining.total <= 0) {
+        clearInterval(timer);
+        if (onTimeout) onTimeout();
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [calculateTimeLeft, onTimeout]);
+
+  if (timeLeft.total <= 0) {
+    return (
+      <div className="countdown-banner expired">
+        <AlertCircle size={14} />
+        <span>Cancellation pending...</span>
+      </div>
+    );
+  }
+
+  const formatNumber = (num) => String(num).padStart(2, '0');
+  const isUrgent = timeLeft.total < 2 * 60 * 1000; // less than 2 mins
+
+  return (
+    <div className={`countdown-banner ${isUrgent ? 'urgent' : ''}`}>
+      <Timer size={14} className={isUrgent ? 'animate-pulse' : ''} />
+      <span>
+        Restaurant has <strong>{formatNumber(timeLeft.minutes)}:{formatNumber(timeLeft.seconds)}</strong> left to accept this request
+      </span>
+    </div>
+  );
+};
+
+/* ─── Helper for Payment Status Badge ─────────────────────────────────── */
+const getPaymentStatusInfo = (order) => {
+  if (order.status === 'cancelled') {
+    if (order.paymentMethod === 'cash') {
+      return { label: 'Cancelled (No payment)', color: '#EF4444', bg: 'rgba(239,68,68,0.1)' };
+    }
+    return { label: 'Refunded to wallet/source', color: '#10B981', bg: 'rgba(16,185,129,0.1)' };
+  }
+  
+  if (order.paymentMethod === 'cash') {
+    if (order.status === 'delivered') {
+      return { label: 'COD - Collected', color: '#10B981', bg: 'rgba(16,185,129,0.1)' };
+    }
+    return { label: 'COD - Pending Delivery', color: '#F59E0B', bg: 'rgba(245,158,11,0.1)' };
+  }
+  
+  return { label: `Paid via ${order.paymentMethod?.toUpperCase()}`, color: '#10B981', bg: 'rgba(16,185,129,0.1)' };
+};
+
 /* ─── Order Details Drawer ────────────────────────────────────────── */
 const OrderDetailsDrawer = ({ order, onClose, onCancel, onReorder, onRate, onMessage, reviewedOrders, cancellingId }) => {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // Trigger open animation
     requestAnimationFrame(() => setMounted(true));
-    // Lock body scroll
     document.body.style.overflow = 'hidden';
     return () => { document.body.style.overflow = ''; };
   }, []);
@@ -66,6 +132,7 @@ const OrderDetailsDrawer = ({ order, onClose, onCancel, onReorder, onRate, onMes
   const isCancellable = ['pending', 'confirmed'].includes(order.status);
   const isReviewed   = reviewedOrders.has(order._id);
   const cancelling   = cancellingId === order._id;
+  const payInfo      = getPaymentStatusInfo(order);
 
   // Build timestamp map from statusHistory
   const historyMap = {};
@@ -116,6 +183,15 @@ const OrderDetailsDrawer = ({ order, onClose, onCancel, onReorder, onRate, onMes
               day: 'numeric', month: 'short', year: 'numeric',
               hour: '2-digit', minute: '2-digit'
             })}
+          </span>
+        </div>
+
+        {/* Payment Row */}
+        <div className="drawer-payment-pill-row">
+          <span className="pm-label">Payment Method:</span>
+          <span className="pm-method-pill">{order.paymentMethod?.toUpperCase()}</span>
+          <span className="pm-status-pill" style={{ color: payInfo.color, background: payInfo.bg }}>
+            {payInfo.label}
           </span>
         </div>
 
@@ -179,7 +255,12 @@ const OrderDetailsDrawer = ({ order, onClose, onCancel, onReorder, onRate, onMes
         {isCancelled && (
           <div className="cancelled-notice">
             <XCircle size={20} />
-            <span>This order was cancelled.</span>
+            <div>
+              <strong>Order Cancelled</strong>
+              <p className="cancelled-explanation">
+                {order.statusHistory?.find(h => h.status === 'cancelled')?.note || 'The order has been cancelled.'}
+              </p>
+            </div>
           </div>
         )}
 
@@ -243,12 +324,6 @@ const OrderDetailsDrawer = ({ order, onClose, onCancel, onReorder, onRate, onMes
           </div>
         )}
 
-        {/* ── Payment ── */}
-        <div className="drawer-section payment-row-section">
-          <span className="payment-label">Payment</span>
-          <span className="payment-chip">{order.paymentMethod?.toUpperCase()}</span>
-        </div>
-
         {/* ── Action Buttons ── */}
         <div className="drawer-actions">
           {isActive && (
@@ -304,7 +379,8 @@ const MyOrders = () => {
   const [chatOrderId, setChatOrderId] = useState(null);
   const [reviewedOrders, setReviewedOrders] = useState(new Set());
   const [selectedOrder, setSelectedOrder] = useState(null);
-  const { addToCart } = useCart();
+  const [activeTab, setActiveTab]     = useState('live');
+  const { addToCart }                 = useCart();
 
   const fetchOrders = useCallback(async () => {
     try {
@@ -327,7 +403,6 @@ const MyOrders = () => {
       await api.post(`/orders/${orderId}/cancel`);
       toast.success('Order cancelled');
       fetchOrders();
-      // Update selected order status if drawer is open
       if (selectedOrder?._id === orderId) {
         setSelectedOrder(prev => ({ ...prev, status: 'cancelled' }));
       }
@@ -373,24 +448,63 @@ const MyOrders = () => {
     );
   }
 
+  // Filter orders into Live and History
+  const liveOrders = orders.filter(o =>
+    ['pending', 'confirmed', 'preparing', 'out_for_delivery'].includes(o.status)
+  );
+  
+  const historyOrders = orders.filter(o =>
+    ['delivered', 'cancelled'].includes(o.status)
+  );
+
+  const displayedOrders = activeTab === 'live' ? liveOrders : historyOrders;
+
   return (
     <div className="orders-page">
       <div className="container">
         <div className="orders-header">
           <h1>My Orders</h1>
-          <p className="orders-subtitle">{orders.length} total order{orders.length !== 1 ? 's' : ''}</p>
+          <p className="orders-subtitle">
+            Manage your active orders and review your purchase history
+          </p>
         </div>
 
-        {orders.length === 0 ? (
-          <div className="no-orders">
-            <Package size={64} strokeWidth={1.2} />
-            <h2>No orders yet</h2>
-            <p>You haven't placed any orders yet. Start exploring!</p>
-            <Link to="/" className="btn-primary">Browse Restaurants</Link>
+        {/* Sleek Underline Tabs */}
+        <div className="orders-tabs">
+          <button
+            className={`tab-btn ${activeTab === 'live' ? 'active' : ''}`}
+            onClick={() => setActiveTab('live')}
+          >
+            <Clock size={16} />
+            <span>Live Orders</span>
+            <span className="tab-count-badge">{liveOrders.length}</span>
+          </button>
+          <button
+            className={`tab-btn ${activeTab === 'history' ? 'active' : ''}`}
+            onClick={() => setActiveTab('history')}
+          >
+            <RotateCcw size={16} />
+            <span>Order History</span>
+            <span className="tab-count-badge history">{historyOrders.length}</span>
+          </button>
+        </div>
+
+        {displayedOrders.length === 0 ? (
+          <div className="no-orders animate-fadeIn">
+            <Package size={64} strokeWidth={1} />
+            <h2>No orders found</h2>
+            <p>
+              {activeTab === 'live' 
+                ? "You don't have any active orders in progress right now." 
+                : "You don't have any past orders yet."}
+            </p>
+            {activeTab === 'live' && (
+              <Link to="/" className="btn-primary">Order Delicious Food</Link>
+            )}
           </div>
         ) : (
           <div className="orders-list">
-            {orders.map((order) => {
+            {displayedOrders.map((order) => {
               const cfg = STATUS_CONFIG[order.status] || STATUS_CONFIG.pending;
               const Icon = cfg.icon;
               const isActive    = ['pending', 'confirmed', 'preparing', 'out_for_delivery'].includes(order.status);
@@ -398,33 +512,42 @@ const MyOrders = () => {
               const isCancellable = ['pending', 'confirmed'].includes(order.status);
               const isReviewed  = reviewedOrders.has(order._id);
               const cancelling  = cancellingId === order._id;
+              const payInfo     = getPaymentStatusInfo(order);
 
               return (
-                <div key={order._id} className="order-card">
-                  {/* Header */}
-                  <div className="order-header">
-                    <div className="restaurant-info">
+                <div key={order._id} className="order-card-redesigned animate-fadeIn">
+                  {/* Top Alert Countdown for Pending Orders */}
+                  {order.status === 'pending' && (
+                    <OrderCountdown createdAt={order.createdAt} onTimeout={fetchOrders} />
+                  )}
+
+                  {/* Header Row */}
+                  <div className="card-top-section">
+                    <div className="rest-metadata">
                       <img
                         src={order.restaurant?.logo_url || 'https://via.placeholder.com/50'}
                         alt={order.restaurant?.name}
-                        className="restaurant-logo"
+                        className="rest-logo-sq"
                       />
-                      <div>
+                      <div className="rest-text">
                         <h3>{order.restaurant?.name}</h3>
-                        <p className="order-num">#{order.orderNumber}</p>
+                        <span className="order-num-tag">#{order.orderNumber}</span>
                       </div>
                     </div>
-                    <div
-                      className="order-status-badge"
-                      style={{ color: cfg.color, background: cfg.bg }}
-                    >
-                      <Icon size={14} />
-                      {cfg.label}
+                    
+                    <div className="badge-group">
+                      <span className="payment-status-pill" style={{ color: payInfo.color, background: payInfo.bg }}>
+                        {payInfo.label}
+                      </span>
+                      <span className="status-flow-badge" style={{ color: cfg.color, background: cfg.bg }}>
+                        <Icon size={13} />
+                        {cfg.label}
+                      </span>
                     </div>
                   </div>
 
-                  {/* Mini Status Pipeline */}
-                  {order.status !== 'cancelled' && (
+                  {/* Mini Status Pipeline for Active Orders */}
+                  {isActive && (
                     <div className="order-mini-pipeline">
                       {TIMELINE_STEPS.map((step, idx) => {
                         const stepCfg   = STATUS_CONFIG[step.key];
@@ -453,49 +576,58 @@ const MyOrders = () => {
                     </div>
                   )}
 
-                  {/* Items */}
-                  <div className="order-body">
-                    <div className="order-items-list">
-                      {order.items.map((item, i) => (
-                        <span key={i} className="order-item-chip">
-                          {item.quantity}× {item.name}
-                        </span>
-                      ))}
+                  {/* Order Details Body */}
+                  <div className="card-middle-section">
+                    <div className="items-list-wrap">
+                      <span className="wrap-title">Items Ordered:</span>
+                      <div className="chips-container">
+                        {order.items.map((item, i) => (
+                          <span key={i} className="food-item-chip">
+                            <strong>{item.quantity}×</strong> {item.name}
+                          </span>
+                        ))}
+                      </div>
                     </div>
-                    <div className="order-meta">
-                      <span>
+
+                    <div className="card-meta-line">
+                      <div className="meta-item">
                         <Clock size={14} />
-                        {new Date(order.createdAt).toLocaleDateString('en-US', {
-                          day: 'numeric', month: 'short', year: 'numeric',
-                          hour: '2-digit', minute: '2-digit'
-                        })}
-                      </span>
-                      <span className="payment-chip">{order.paymentMethod?.toUpperCase()}</span>
+                        <span>
+                          Ordered on: {new Date(order.createdAt).toLocaleDateString('en-US', {
+                            day: 'numeric', month: 'short', year: 'numeric',
+                            hour: '2-digit', minute: '2-digit'
+                          })}
+                        </span>
+                      </div>
+                      <div className="meta-item-right">
+                        <span>Payment Method: <strong>{order.paymentMethod?.toUpperCase()}</strong></span>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Footer */}
-                  <div className="order-footer">
-                    <div className="order-total-display">
-                      Rs. {order.total_amount}
+                  {/* Order Card Footer */}
+                  <div className="card-bottom-section">
+                    <div className="amount-label-value">
+                      <span className="total-title">Total Paid</span>
+                      <span className="total-val">Rs. {order.total_amount}</span>
                     </div>
-                    <div className="order-actions">
-                      {/* View Details */}
+
+                    <div className="card-buttons-group">
                       <button
-                        className="view-details-btn"
+                        className="btn-details"
                         onClick={() => setSelectedOrder(order)}
                       >
                         <Eye size={14} /> Details
                       </button>
 
                       {isActive && (
-                        <Link to={`/track-order/${order._id}`} className="track-btn">
+                        <Link to={`/track-order/${order._id}`} className="btn-track-live">
                           Track Live <ChevronRight size={14} />
                         </Link>
                       )}
                       {isCancellable && (
                         <button
-                          className="cancel-order-btn"
+                          className="btn-cancel"
                           onClick={() => handleCancel(order._id)}
                           disabled={cancelling}
                         >
@@ -504,21 +636,21 @@ const MyOrders = () => {
                         </button>
                       )}
                       {isDelivered && !isReviewed && (
-                        <button className="rate-btn" onClick={() => handleRateOrder(order)}>
+                        <button className="btn-rate" onClick={() => handleRateOrder(order)}>
                           <Star size={14} /> Rate
                         </button>
                       )}
                       {isDelivered && isReviewed && (
-                        <span className="reviewed-badge">
+                        <span className="reviewed-success-badge">
                           <Star size={13} fill="currentColor" /> Reviewed
                         </span>
                       )}
                       {isDelivered && (
                         <>
-                          <button className="msg-btn" onClick={() => handleMessage(order)}>
-                            <MessageCircle size={14} />
+                          <button className="btn-message" onClick={() => handleMessage(order)} title="Message Restaurant">
+                            <MessageCircle size={14} /> Message
                           </button>
-                          <button className="reorder-btn" onClick={() => handleReorder(order)}>
+                          <button className="btn-reorder" onClick={() => handleReorder(order)}>
                             <RotateCcw size={14} /> Reorder
                           </button>
                         </>

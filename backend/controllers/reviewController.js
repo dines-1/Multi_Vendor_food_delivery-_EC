@@ -53,3 +53,21 @@ export const getRestaurantReviews = async (req, res) => {
     res.status(400).json({ success: false, message: err.message });
   }
 };
+
+// @desc    Get all reviews
+// @route   GET /api/reviews
+// @access  Public
+export const getAllReviews = async (req, res) => {
+  try {
+    const reviews = await Review.find()
+      .populate('customer', 'name avatar address')
+      .populate('restaurant', 'name logo_url')
+      .sort('-createdAt')
+      .limit(12);
+
+    res.status(200).json({ success: true, data: reviews });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+};
+

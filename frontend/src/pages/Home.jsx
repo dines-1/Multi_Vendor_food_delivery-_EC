@@ -3,6 +3,7 @@ import { Search, MapPin, Star, ChevronRight, Clock, Flame, Utensils, Zap, Truck,
 import { useNavigate, Link } from 'react-router-dom';
 import restaurantService from '../services/restaurantService';
 import menuService from '../services/menuService';
+import reviewService from '../services/reviewService';
 import { useCart } from '../context/CartContext';
 import api from '../services/api';
 import './Home.css';
@@ -188,6 +189,7 @@ const Home = () => {
   const [categories, setCategories] = useState([]);
   const [restaurants, setRestaurants] = useState([]);
   const [trendingFood, setTrendingFood] = useState([]);
+  const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -204,15 +206,26 @@ const Home = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [catData, resData, foodData] = await Promise.all([
+        const [catData, resData, foodData, reviewRes] = await Promise.all([
           restaurantService.getCuisines(),
           restaurantService.getRestaurants({ limit: 4 }),
-          menuService.getMenuItems({ limit: 4 })
+          menuService.getMenuItems({ limit: 4 }),
+          reviewService.getRecentReviews().catch(() => ({ success: false, data: [] }))
         ]);
 
         if (catData.success) setCategories(catData.data);
         if (resData.success) setRestaurants(resData.docs);
         if (foodData.success) setTrendingFood(foodData.docs);
+        if (reviewRes && reviewRes.success) {
+          const mappedReviews = reviewRes.data.map(r => ({
+            name: r.customer?.name || 'Anonymous User',
+            avatar: r.customer?.name ? r.customer.name.charAt(0).toUpperCase() : 'U',
+            rating: r.rating || 5,
+            text: r.comment || 'No comment provided.',
+            location: r.customer?.address?.area || r.customer?.address?.city || 'Kathmandu'
+          }));
+          setReviews(mappedReviews);
+        }
       } catch (error) {
         console.error('Error fetching home data:', error);
       } finally {
@@ -259,16 +272,6 @@ const Home = () => {
       if (step >= steps) clearInterval(timer);
     }, interval);
   };
-
-  // Mock testimonials
-  const testimonials = [
-    { name: 'Aarav Sharma', avatar: 'A', rating: 5, text: 'Absolutely love the service! Food arrives hot and fresh every time. The momo from Thamel was incredible!', location: 'Baluwatar' },
-    { name: 'Priya Thapa', avatar: 'P', rating: 5, text: 'Best food delivery app in Kathmandu. The tracking feature is amazing — I can see my rider in real-time!', location: 'Lazimpat' },
-    { name: 'Rohan KC', avatar: 'R', rating: 4, text: 'Great variety of restaurants. The checkout process is super smooth and delivery is always on time.', location: 'Patan' },
-    { name: 'Sujata Devi', avatar: 'S', rating: 5, text: 'I order thali every day for lunch. Quality is consistent and the riders are very polite!', location: 'Baneshwor' },
-    { name: 'Bikram Rai', avatar: 'B', rating: 5, text: 'Finally a delivery app that works well in Kathmandu! Payment via eSewa is super convenient.', location: 'Thamel' },
-    { name: 'Nisha Gurung', avatar: 'N', rating: 4, text: 'The pizza from Pizza Palace was perfect. Will definitely order again. Great customer support too!', location: 'Jhamsikhel' },
-  ];
 
   const howItWorksSteps = [
     { icon: <Search size={28} />, title: 'Browse', desc: 'Explore restaurants and menus near you' },
@@ -490,28 +493,34 @@ const Home = () => {
           </div>
         </div>
         <div className="reviews-scroll-wrapper">
-          <div className="reviews-scroll">
-            {[...testimonials, ...testimonials].map((t, i) => (
-              <div key={i} className="review-card">
-                <div className="review-quote-icon">
-                  <Quote size={20} />
-                </div>
-                <div className="review-stars">
-                  {[...Array(5)].map((_, si) => (
-                    <Star key={si} size={16} fill={si < t.rating ? '#F59E0B' : 'none'} color={si < t.rating ? '#F59E0B' : '#D1D5DB'} />
-                  ))}
-                </div>
-                <p className="review-text">{t.text}</p>
-                <div className="review-author">
-                  <div className="review-avatar">{t.avatar}</div>
-                  <div>
-                    <span className="review-name">{t.name}</span>
-                    <span className="review-location">📍 {t.location}</span>
+          {reviews.length > 0 ? (
+            <div className="reviews-scroll">
+              {[...reviews, ...reviews].map((t, i) => (
+                <div key={i} className="review-card">
+                  <div className="review-quote-icon">
+                    <Quote size={20} />
+                  </div>
+                  <div className="review-stars">
+                    {[...Array(5)].map((_, si) => (
+                      <Star key={si} size={16} fill={si < t.rating ? '#F59E0B' : 'none'} color={si < t.rating ? '#F59E0B' : '#D1D5DB'} />
+                    ))}
+                  </div>
+                  <p className="review-text">{t.text}</p>
+                  <div className="review-author">
+                    <div className="review-avatar">{t.avatar}</div>
+                    <div>
+                      <span className="review-name">{t.name}</span>
+                      <span className="review-location">📍 {t.location}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <p style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem 0', width: '100%', fontWeight: '500' }}>
+              No reviews available yet. Be the first to order and review!
+            </p>
+          )}
         </div>
       </section>
     </div>
