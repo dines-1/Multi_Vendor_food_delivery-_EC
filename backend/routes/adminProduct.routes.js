@@ -11,10 +11,6 @@ import {
   createCategory,
   updateCategory,
   deleteCategory,
-  getSubcategories,
-  createSubcategory,
-  updateSubcategory,
-  deleteSubcategory,
   removeReview,
 } from '../controllers/adminProductController.js';
 
@@ -35,11 +31,6 @@ router.post('/categories', upload.single('image'), createCategory);
 router.put('/categories/:id', upload.single('image'), updateCategory);
 router.delete('/categories/:id', deleteCategory);
 
-// Subcategories
-router.get('/subcategories', getSubcategories);
-router.post('/subcategories', createSubcategory);
-router.put('/subcategories/:id', updateSubcategory);
-router.delete('/subcategories/:id', deleteSubcategory);
 
 // Reviews
 router.delete('/reviews/:id', removeReview);

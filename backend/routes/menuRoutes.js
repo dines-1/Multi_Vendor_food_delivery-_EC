@@ -6,7 +6,9 @@ import {
   getVendorMenu,
   createMenuItem,
   updateMenuItem,
-  deleteMenuItem
+  deleteMenuItem,
+  getVendorCategories,
+  createVendorCategory
 } from '../controllers/menuController.js';
 import { protect, authorize } from '../middleware/auth.js';
 import upload from '../middleware/upload.js';
@@ -41,6 +43,10 @@ router.get('/vendor/my-menu', protect, authorize('vendor'), getVendorMenu);
 router.post('/vendor', protect, authorize('vendor'), upload.single('image'), createMenuItem);
 router.put('/vendor/:id', protect, authorize('vendor'), upload.single('image'), updateMenuItem);
 router.delete('/vendor/:id', protect, authorize('vendor'), deleteMenuItem);
+
+// Vendor category management
+router.get('/vendor/categories', protect, authorize('vendor'), getVendorCategories);
+router.post('/vendor/categories', protect, authorize('vendor'), upload.single('image'), createVendorCategory);
 
 router.get('/:id', optionalProtect, getMenuItem);
 

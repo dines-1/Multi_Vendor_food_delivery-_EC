@@ -30,8 +30,16 @@ const VendorMenu = () => {
   });
   const [imagePreview, setImagePreview] = useState(null);
 
+  // Category specific states
+  const [categories, setCategories] = useState([]);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [newCategoryImage, setNewCategoryImage] = useState(null);
+  const [newCategoryImagePreview, setNewCategoryImagePreview] = useState(null);
+
   useEffect(() => {
     fetchMenu();
+    fetchCategories();
   }, []);
 
   const fetchMenu = async () => {
@@ -44,6 +52,54 @@ const VendorMenu = () => {
       toast.error('Failed to fetch menu');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const res = await api.get('/menu/vendor/categories');
+      if (res.data.success) {
+        setCategories(res.data.data);
+      }
+    } catch (err) {
+      toast.error('Failed to fetch categories');
+    }
+  };
+
+  const handleCreateCategory = async (e) => {
+    e.preventDefault();
+    if (!newCategoryName.trim()) {
+      toast.error('Please enter a category name');
+      return;
+    }
+
+    const data = new FormData();
+    data.append('name', newCategoryName.trim());
+    if (newCategoryImage) {
+      data.append('image', newCategoryImage);
+    }
+
+    try {
+      const res = await api.post('/menu/vendor/categories', data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      if (res.data.success) {
+        toast.success('Category created successfully');
+        // Reload categories
+        const updatedCats = await api.get('/menu/vendor/categories');
+        if (updatedCats.data.success) {
+          setCategories(updatedCats.data.data);
+        }
+        // Auto-select the newly created category in the food form
+        setFormData(prev => ({ ...prev, category: res.data.data._id }));
+        // Close category modal and reset fields
+        setShowCategoryModal(false);
+        setNewCategoryName('');
+        setNewCategoryImage(null);
+        setNewCategoryImagePreview(null);
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to create category');
     }
   };
 
@@ -228,12 +284,47 @@ const VendorMenu = () => {
                   />
                 </div>
                 <div className="form-group">
-                  <label>Category ID (Temporary)</label>
-                  <input 
-                    type="text" 
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                    <label style={{ marginBottom: 0 }}>Category</label>
+                    <button 
+                      type="button" 
+                      onClick={() => setShowCategoryModal(true)} 
+                      style={{ 
+                        background: 'none', 
+                        border: 'none', 
+                        color: '#ef4444', 
+                        cursor: 'pointer',
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '2px'
+                      }}
+                    >
+                      <Plus size={12} /> Add Custom
+                    </button>
+                  </div>
+                  <select 
                     value={formData.category} 
                     onChange={(e) => setFormData({...formData, category: e.target.value})} 
-                  />
+                    required
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      borderRadius: '8px',
+                      border: '1px solid #cbd5e1',
+                      background: '#fff',
+                      fontSize: '0.9rem',
+                      height: '42px'
+                    }}
+                  >
+                    <option value="">-- Select Category --</option>
+                    {categories.map(cat => (
+                      <option key={cat._id} value={cat._id}>
+                        {cat.name} {cat.restaurant ? '(Custom)' : ''}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
               <div className="form-group">
@@ -280,6 +371,64 @@ const VendorMenu = () => {
               </div>
               <button type="submit" className="btn-submit">
                 {editingItem ? 'Update Information' : 'Add to Menu'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {showCategoryModal && (
+        <div className="modal-overlay" style={{ zIndex: 1100 }}>
+          <div className="modal-card" style={{ maxWidth: '400px' }}>
+            <div className="modal-header">
+              <h2>Add Custom Category</h2>
+              <button 
+                type="button" 
+                className="btn-close" 
+                onClick={() => {
+                  setShowCategoryModal(false);
+                  setNewCategoryName('');
+                  setNewCategoryImage(null);
+                  setNewCategoryImagePreview(null);
+                }}
+              >
+                <X size={24} />
+              </button>
+            </div>
+            <form onSubmit={handleCreateCategory} className="modal-form">
+              <div className="form-group">
+                <label>Category Name</label>
+                <input 
+                  type="text" 
+                  value={newCategoryName} 
+                  onChange={(e) => setNewCategoryName(e.target.value)} 
+                  placeholder="e.g. Desserts, Chef Specials"
+                  required 
+                />
+              </div>
+              <div className="form-group">
+                <label>Category Image (Optional)</label>
+                <div className="file-input-wrapper">
+                  {newCategoryImagePreview && (
+                    <div className="image-preview-sm">
+                      <img src={newCategoryImagePreview} alt="Preview" />
+                    </div>
+                  )}
+                  <input 
+                    type="file" 
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      if (file) {
+                        setNewCategoryImage(file);
+                        setNewCategoryImagePreview(URL.createObjectURL(file));
+                      }
+                    }} 
+                    accept="image/*"
+                  />
+                </div>
+              </div>
+              <button type="submit" className="btn-submit">
+                Create Category
               </button>
             </form>
           </div>

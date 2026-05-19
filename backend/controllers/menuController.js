@@ -1,6 +1,7 @@
 import MenuItem from '../models/MenuItem.js';
 import User from '../models/User.js';
 import Restaurant from '../models/Restaurant.js';
+import Category from '../models/Category.js';
 
 // @desc    Get all menu items (Browsing & Search)
 // @route   GET /api/menu
@@ -181,3 +182,57 @@ export const deleteMenuItem = async (req, res) => {
     res.status(400).json({ success: false, message: err.message });
   }
 };
+
+// @desc    Get categories for current vendor (global + vendor-specific)
+// @route   GET /api/menu/vendor/categories
+// @access  Private (Vendor)
+export const getVendorCategories = async (req, res) => {
+  try {
+    const restaurant = await Restaurant.findOne({ owner: req.user.id });
+    if (!restaurant) {
+      return res.status(404).json({ success: false, message: 'Restaurant not found' });
+    }
+    const categories = await Category.find({
+      $or: [
+        { restaurant: null },
+        { restaurant: restaurant._id }
+      ]
+    }).sort({ name: 1 });
+    res.status(200).json({ success: true, data: categories });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+};
+
+// @desc    Create category by vendor
+// @route   POST /api/menu/vendor/categories
+// @access  Private (Vendor)
+export const createVendorCategory = async (req, res) => {
+  try {
+    const restaurant = await Restaurant.findOne({ owner: req.user.id });
+    if (!restaurant) {
+      return res.status(404).json({ success: false, message: 'Restaurant not found' });
+    }
+
+    const { name } = req.body;
+    if (!name) {
+      return res.status(400).json({ success: false, message: 'Please provide a category name' });
+    }
+
+    const data = {
+      name,
+      restaurant: restaurant._id,
+      parentCategory: null
+    };
+
+    if (req.file) {
+      data.image = `/uploads/${req.file.filename}`;
+    }
+
+    const category = await Category.create(data);
+    res.status(201).json({ success: true, data: category, message: 'Category created successfully' });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+};
+

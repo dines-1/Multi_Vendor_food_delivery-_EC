@@ -9,7 +9,6 @@ const ProductModeration = () => {
   const [tab, setTab] = useState('products');
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [subcategories, setSubcategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState({});
@@ -37,10 +36,9 @@ const ProductModeration = () => {
     setLoading(true);
     try {
       const cats = await adminService.getCategories();
-      // Filter categories into global (no parent) and subcategories (has parent)
       const all = cats.data || [];
-      setCategories(all.filter(c => !c.parentCategory));
-      setSubcategories(all.filter(c => c.parentCategory));
+      // Only display global platform categories
+      setCategories(all.filter(c => !c.parentCategory && !c.restaurant));
     } catch { toast.error('Failed to load categories'); }
     setLoading(false);
   };
@@ -73,11 +71,7 @@ const ProductModeration = () => {
     try {
       if (modal?.editId) await adminService.updateCategory(modal.editId, data);
       else {
-        if (modal.type === 'subcategory') {
-          await adminService.createSubcategory(data);
-        } else {
-          await adminService.createCategory(data);
-        }
+        await adminService.createCategory(data);
       }
       toast.success(modal?.editId ? 'Updated' : 'Created');
       setModal(null); setForm({ name: '', image: null, parentCategory: '' }); setImagePreview(null); loadCategories();
@@ -101,7 +95,7 @@ const ProductModeration = () => {
 
       <div className="tabs">
         <button className={`tab ${tab === 'products' ? 'active' : ''}`} onClick={() => setTab('products')}>Products</button>
-        <button className={`tab ${tab === 'categories' ? 'active' : ''}`} onClick={() => setTab('categories')}>Categories & Subcategories</button>
+        <button className={`tab ${tab === 'categories' ? 'active' : ''}`} onClick={() => setTab('categories')}>Categories</button>
       </div>
 
       {tab === 'products' && (
@@ -160,7 +154,7 @@ const ProductModeration = () => {
       )}
 
       {tab === 'categories' && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
           <div className="admin-card">
             <div className="admin-card-header">
               <h3>Global Categories</h3>
@@ -187,40 +181,14 @@ const ProductModeration = () => {
               </div>
             )}
           </div>
-
-          <div className="admin-card">
-            <div className="admin-card-header">
-              <h3>Subcategories</h3>
-              <button className="btn btn-primary btn-sm" onClick={() => { setForm({ name: '', image: null, parentCategory: categories[0]?._id || '' }); setImagePreview(null); setModal({ type: 'subcategory' }); }}><Plus size={12} /> Add</button>
-            </div>
-            {subcategories.length === 0 ? <div className="empty-state"><FolderTree /><p>No subcategories</p></div> : (
-              <div className="widget-list">
-                {subcategories.map(s => (
-                  <div key={s._id} className="widget-item">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <img src={getImageUrl(s.image)} alt="" style={{ width: 32, height: 32, borderRadius: 6, objectFit: 'cover', background: '#f1f5f9' }} />
-                      <div>
-                        <div style={{ fontWeight: 600, fontSize: '0.8rem' }}>{s.name}</div>
-                        <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Parent: {s.parentCategory?.name || 'Unknown'}</div>
-                      </div>
-                    </div>
-                    <div className="btn-group">
-                      <button className="btn btn-outline btn-sm" onClick={() => { setForm({ name: s.name, image: null, parentCategory: s.parentCategory?._id || s.parentCategory }); setImagePreview(getImageUrl(s.image)); setModal({ type: 'subcategory', editId: s._id }); }}>Edit</button>
-                      <button className="btn btn-danger btn-sm" onClick={() => handleDeleteCategory(s._id)}>Delete</button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
         </div>
       )}
 
       {/* Category Modal */}
-      {(modal?.type === 'category' || modal?.type === 'subcategory') && (
+      {modal?.type === 'category' && (
         <div className="modal-overlay" onClick={() => setModal(null)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <div className="modal-header"><h3>{modal.editId ? 'Edit' : 'Add'} {modal.type}</h3><button className="modal-close" onClick={() => setModal(null)}><X size={18} /></button></div>
+            <div className="modal-header"><h3>{modal.editId ? 'Edit' : 'Add'} Category</h3><button className="modal-close" onClick={() => setModal(null)}><X size={18} /></button></div>
             <div className="modal-body">
               <div className="form-group"><label className="form-label">Name</label><input className="form-input" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} /></div>
               <div className="form-group">
@@ -230,14 +198,6 @@ const ProductModeration = () => {
                   <input type="file" onChange={handleFileChange} accept="image/*" />
                 </div>
               </div>
-              {modal.type === 'subcategory' && (
-                <div className="form-group">
-                  <label className="form-label">Parent Category</label>
-                  <select className="form-select" value={form.parentCategory} onChange={e => setForm({ ...form, parentCategory: e.target.value })}>
-                    {categories.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
-                  </select>
-                </div>
-              )}
             </div>
             <div className="modal-footer">
               <button className="btn btn-outline" onClick={() => setModal(null)}>Cancel</button>
