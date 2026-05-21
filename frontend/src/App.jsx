@@ -39,7 +39,7 @@ import NotFound from './pages/NotFound';
 import { CartProvider } from './context/CartContext';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
-import PaymentSuccess from './pages/PaymentSuccess';
+import PaymentResult from './pages/PaymentResult';
 
 function App() {
   return (
@@ -70,7 +70,9 @@ function App() {
               <Route path="/track-order/:id" element={<><Navbar /><main className="main-content"><TrackOrder /></main><Footer /></>} />
               <Route path="/cart" element={<><Navbar /><main className="main-content"><Cart /></main><Footer /></>} />
               <Route path="/checkout" element={<><Navbar /><main className="main-content"><Checkout /></main><Footer /></>} />
-              <Route path="/payment-success/:method" element={<><Navbar /><main className="main-content"><PaymentSuccess /></main><Footer /></>} />
+              <Route path="/payment-result" element={<><Navbar /><main className="main-content"><PaymentResult /></main><Footer /></>} />
+              {/* Legacy redirect so old links still work */}
+              <Route path="/payment-success/:method" element={<><Navbar /><main className="main-content"><PaymentResult /></main><Footer /></>} />
 
             {/* Admin Routes */}
             <Route 

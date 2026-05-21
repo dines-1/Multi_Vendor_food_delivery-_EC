@@ -362,38 +362,52 @@
 
 .btn-primary {
   background: var(--admin-primary);
-  color: #000000;
+  color: #ffffff;
 }
 
 .btn-primary:hover {
   background: #4f46e5;
+  color: #ffffff;
 }
 
 .btn-success {
   background: var(--admin-success);
-  color: #000000;
+  color: #ffffff;
 }
 
 .btn-success:hover {
   background: #059669;
+  color: #ffffff;
 }
 
 .btn-danger {
   background: var(--admin-danger);
-  color: #000000;
+  color: #ffffff;
 }
 
 .btn-danger:hover {
   background: #dc2626;
+  color: #ffffff;
 }
 
 .btn-warning {
   background: var(--admin-warning);
-  color: #000000;
+  color: #ffffff;
 }
 
 .btn-warning:hover {
   background: #d97706;
+  color: #ffffff;
+}
+
+.btn-info {
+  background: var(--admin-info);
+  color: #ffffff;
+}
+
+.btn-info:hover {
+  background: #2563eb;
+  color: #ffffff;
 }
 
 .btn-outline {
@@ -405,12 +419,44 @@
 .btn-outline:hover {
   background: #f8fafc;
   border-color: var(--admin-secondary);
+  color: var(--admin-text);
 }
 
 .btn-sm {
   padding: 0.25rem 0.5rem;
   font-size: 0.7rem;
 }
+
+/* Icon-only action buttons (used in table rows) */
+.btn-icon {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.btn-icon.view   { background: #dbeafe; color: #1d4ed8; }
+.btn-icon.edit   { background: #fef9c3; color: #a16207; }
+.btn-icon.delete { background: #fee2e2; color: #b91c1c; }
+.btn-icon.approve { background: #dcfce7; color: #166534; }
+.btn-icon.suspend { background: #fee2e2; color: #991b1b; }
+
+.btn-icon.view:hover    { background: #bfdbfe; }
+.btn-icon.edit:hover    { background: #fef08a; }
+.btn-icon.delete:hover  { background: #fecaca; }
+.btn-icon.approve:hover { background: #bbf7d0; }
+.btn-icon.suspend:hover { background: #fecaca; }
 
 .btn-group {
   display: flex;

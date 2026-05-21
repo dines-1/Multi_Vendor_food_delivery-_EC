@@ -63,6 +63,11 @@ const orderSchema = new mongoose.Schema(
       enum: ['pending', 'confirmed', 'preparing', 'out_for_delivery', 'delivered', 'cancelled'],
       default: 'pending',
     },
+    payment_status: {
+      type: String,
+      enum: ['unpaid', 'paid', 'refunded'],
+      default: 'unpaid',
+    },
     delivery_address: {
       street: String,
       area: String,
