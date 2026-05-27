@@ -1,16 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import api from '../services/api';
 import {
   Package,
   Clock,
-  ChevronRight,
   Star,
   MessageCircle,
   RotateCcw,
   XCircle,
   CheckCircle,
-  Truck,
   ShoppingBag,
   Loader2,
   Eye,
@@ -126,7 +124,6 @@ const OrderDetailsDrawer = ({ order, onClose, onCancel, onReorder, onRate, onMes
 
   const cfg = STATUS_CONFIG[order.status] || STATUS_CONFIG.pending;
   const currentStep = cfg.step;
-  const isActive     = ['pending', 'confirmed', 'preparing', 'out_for_delivery'].includes(order.status);
   const isDelivered  = order.status === 'delivered';
   const isCancelled  = order.status === 'cancelled';
   const isCancellable = ['pending', 'confirmed'].includes(order.status);
@@ -326,11 +323,6 @@ const OrderDetailsDrawer = ({ order, onClose, onCancel, onReorder, onRate, onMes
 
         {/* ── Action Buttons ── */}
         <div className="drawer-actions">
-          {isActive && (
-            <Link to={`/track-order/${order._id}`} className="drawer-action-btn primary">
-              <Truck size={15} /> Track Live <ChevronRight size={14} />
-            </Link>
-          )}
           {isCancellable && (
             <button
               className="drawer-action-btn danger"
@@ -381,6 +373,19 @@ const MyOrders = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [activeTab, setActiveTab]     = useState('live');
   const { addToCart }                 = useCart();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab === 'live' || tab === 'history') {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    setSearchParams({ tab });
+  };
 
   const fetchOrders = useCallback(async () => {
     try {
@@ -473,7 +478,7 @@ const MyOrders = () => {
         <div className="orders-tabs">
           <button
             className={`tab-btn ${activeTab === 'live' ? 'active' : ''}`}
-            onClick={() => setActiveTab('live')}
+            onClick={() => handleTabChange('live')}
           >
             <Clock size={16} />
             <span>Live Orders</span>
@@ -481,7 +486,7 @@ const MyOrders = () => {
           </button>
           <button
             className={`tab-btn ${activeTab === 'history' ? 'active' : ''}`}
-            onClick={() => setActiveTab('history')}
+            onClick={() => handleTabChange('history')}
           >
             <RotateCcw size={16} />
             <span>Order History</span>
@@ -620,11 +625,6 @@ const MyOrders = () => {
                         <Eye size={14} /> Details
                       </button>
 
-                      {isActive && (
-                        <Link to={`/track-order/${order._id}`} className="btn-track-live">
-                          Track Live <ChevronRight size={14} />
-                        </Link>
-                      )}
                       {isCancellable && (
                         <button
                           className="btn-cancel"

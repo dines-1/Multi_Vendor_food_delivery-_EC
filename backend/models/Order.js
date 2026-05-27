@@ -55,7 +55,7 @@ const orderSchema = new mongoose.Schema(
     },
     paymentMethod: {
       type: String,
-      enum: ['esewa', 'khalti', 'cash', 'card'],
+      enum: ['esewa', 'stripe', 'khalti', 'cash', 'card'],
       required: true,
     },
     status: {

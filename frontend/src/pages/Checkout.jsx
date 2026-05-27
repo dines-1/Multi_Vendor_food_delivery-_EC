@@ -50,10 +50,13 @@ const Checkout = () => {
       // 2. Handle Payment Redirection
       if (paymentMethod === 'cash') {
         toast.success('Order placed successfully!');
-        navigate(`/track-order/${order._id}`);
+        navigate('/orders?tab=live');
       } else if (paymentMethod === 'esewa') {
         const esewaRes = await api.post('/payments/esewa/initiate', { orderId: order._id });
         initiateEsewaPayment(esewaRes.data.data);
+      } else if (paymentMethod === 'stripe') {
+        const stripeRes = await api.post('/payments/stripe/initiate', { orderId: order._id });
+        window.location.href = stripeRes.data.data.url;
       }
     } catch (err) {
       toast.error(err.response?.data?.message || 'Checkout failed');
@@ -62,12 +65,12 @@ const Checkout = () => {
     }
   };
 
-  const initiateEsewaPayment = (data) => {
+  const initiateEsewaPayment = ({ action_url, formData }) => {
     const form = document.createElement('form');
     form.method = 'POST';
-    form.action = 'https://rc-epay.esewa.com.np/api/epay/main/v2/form';
+    form.action = action_url;
 
-    Object.entries(data).forEach(([key, value]) => {
+    Object.entries(formData).forEach(([key, value]) => {
       const input = document.createElement('input');
       input.type = 'hidden';
       input.name = key;
@@ -159,6 +162,18 @@ const Checkout = () => {
                   <div className="pay-info">
                     <h4>eSewa Digital Wallet</h4>
                     <p>Secure online payment</p>
+                  </div>
+                  <div className="radio-circle"></div>
+                </div>
+
+                <div
+                  className={`payment-card ${paymentMethod === 'stripe' ? 'active' : ''}`}
+                  onClick={() => setPaymentMethod('stripe')}
+                >
+                  <div className="pay-icon stripe"><CreditCard size={24} /></div>
+                  <div className="pay-info">
+                    <h4>Stripe Card Payment</h4>
+                    <p>Pay securely with card</p>
                   </div>
                   <div className="radio-circle"></div>
                 </div>

@@ -1,541 +1,232 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Search, MapPin, Star, ChevronRight, Clock, Flame, Utensils, Zap, Truck, ShoppingBag, Navigation, Smile, Shield, Heart, Award, Quote, Package, CheckCircle, ChefHat, PartyPopper, Activity } from 'lucide-react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import {
+  ArrowRight,
+  ChefHat,
+  Clock,
+  MapPin,
+  Navigation,
+  Package,
+  Search,
+  ShoppingBag,
+  Sparkles,
+  Star,
+  Utensils,
+} from 'lucide-react';
 import restaurantService from '../services/restaurantService';
 import menuService from '../services/menuService';
-import reviewService from '../services/reviewService';
-import { useCart } from '../context/CartContext';
 import api from '../services/api';
+import { useCart } from '../context/CartContext';
+import { getDocs, normalizeMenuItem, normalizeRestaurant } from '../utils/customerData';
 import './Home.css';
 
-/* ─── Status config for active orders ───────────────────────────── */
-const ORDER_STATUS = {
-  pending:          { label: 'Order Placed',    color: '#F59E0B', step: 0 },
-  confirmed:        { label: 'Confirmed',        color: '#3B82F6', step: 1 },
-  preparing:        { label: 'Preparing',        color: '#8B5CF6', step: 2 },
-  out_for_delivery: { label: 'Out for Delivery', color: '#6366F1', step: 3 },
-  delivered:        { label: 'Delivered',        color: '#10B981', step: 4 },
-};
+const activeStatuses = ['pending', 'confirmed', 'preparing', 'out_for_delivery'];
 
-const PIPELINE_STEPS = [
-  { key: 'pending',          label: 'Placed',    icon: Package },
-  { key: 'confirmed',        label: 'Confirmed', icon: CheckCircle },
-  { key: 'preparing',        label: 'Preparing', icon: ChefHat },
-  { key: 'out_for_delivery', label: 'On Way',    icon: Navigation },
-  { key: 'delivered',        label: 'Delivered', icon: PartyPopper },
-];
-
-/* ─── Single active order card with animated pipeline ─────────── */
-const ActiveOrderCard = ({ order }) => {
+const Home = () => {
   const navigate = useNavigate();
-  const cfg       = ORDER_STATUS[order.status] || ORDER_STATUS.pending;
-  const currentStep = cfg.step;
-
-  return (
-    <div className="ao-card">
-      {/* Card top */}
-      <div className="ao-card-top">
-        <div className="ao-rest-info">
-          <img
-            src={order.restaurant?.logo_url || 'https://via.placeholder.com/40'}
-            alt={order.restaurant?.name}
-            className="ao-rest-logo"
-          />
-          <div>
-            <p className="ao-rest-name">{order.restaurant?.name}</p>
-            <span className="ao-order-num">#{order.orderNumber}</span>
-          </div>
-        </div>
-        <div className="ao-status-pill" style={{ color: cfg.color, borderColor: `${cfg.color}40`, background: `${cfg.color}12` }}>
-          <span className="ao-live-dot" style={{ background: cfg.color }} />
-          {cfg.label}
-        </div>
-      </div>
-
-      {/* ── Animated Pipeline ── */}
-      <div className="ao-pipeline">
-        {PIPELINE_STEPS.map((step, idx) => {
-          const stepCfg   = ORDER_STATUS[step.key];
-          const completed = currentStep > idx;
-          const isCurrent = currentStep === idx;
-          const isLast    = idx === PIPELINE_STEPS.length - 1;
-          const IconComp  = step.icon;
-
-          return (
-            <React.Fragment key={step.key}>
-              {/* Step node */}
-              <div className="ao-step">
-                <div
-                  className={`ao-step-dot ${completed ? 'completed' : ''} ${isCurrent ? 'current' : ''}`}
-                  style={(completed || isCurrent) ? { borderColor: stepCfg.color, background: completed ? stepCfg.color : 'transparent' } : {}}
-                >
-                  {completed ? (
-                    <CheckCircle size={11} color="#fff" strokeWidth={3} />
-                  ) : isCurrent ? (
-                    <>
-                      <span className="ao-glow-ring" style={{ borderColor: stepCfg.color }} />
-                      <IconComp size={10} color={stepCfg.color} />
-                    </>
-                  ) : (
-                    <IconComp size={10} color="#6b7280" />
-                  )}
-                </div>
-                <span className={`ao-step-label ${isCurrent ? 'current-lbl' : ''} ${completed ? 'done-lbl' : ''}`}
-                  style={isCurrent ? { color: stepCfg.color } : {}}
-                >
-                  {step.label}
-                </span>
-              </div>
-
-              {/* Connector line */}
-              {!isLast && (
-                <div className="ao-connector">
-                  <div
-                    className={`ao-connector-fill ${completed ? 'filled' : ''}`}
-                    style={completed ? { background: `linear-gradient(90deg, ${stepCfg.color}, ${ORDER_STATUS[PIPELINE_STEPS[idx + 1].key].color})` } : {}}
-                  />
-                  {/* Travelling dot animation on current connection */}
-                  {currentStep === idx && (
-                    <div className="ao-travel-dot" style={{ background: stepCfg.color }} />
-                  )}
-                </div>
-              )}
-            </React.Fragment>
-          );
-        })}
-      </div>
-
-      {/* Card bottom */}
-      <div className="ao-card-bottom">
-        <div className="ao-items-preview">
-          {order.items.slice(0, 3).map((item, i) => (
-            <span key={i} className="ao-item-chip">{item.quantity}× {item.name}</span>
-          ))}
-          {order.items.length > 3 && (
-            <span className="ao-item-chip more">+{order.items.length - 3} more</span>
-          )}
-        </div>
-        <div className="ao-card-actions">
-          <span className="ao-total">Rs. {order.total_amount}</span>
-          <Link to={`/track-order/${order._id}`} className="ao-track-btn">
-            Track Live <ChevronRight size={13} />
-          </Link>
-          <Link to="/orders" className="ao-details-btn">
-            My Orders
-          </Link>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-/* ─── Active Orders Section ─────────────────────────────────────── */
-const ActiveOrdersSection = () => {
+  const { addToCart } = useCart();
+  const [search, setSearch] = useState('');
+  const [restaurants, setRestaurants] = useState([]);
+  const [menuItems, setMenuItems] = useState([]);
+  const [cuisines, setCuisines] = useState([]);
   const [activeOrders, setActiveOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchActive = async () => {
+    let mounted = true;
+
+    const loadHome = async () => {
       try {
-        const res = await api.get('/orders/my-orders');
-        const all = res.data.data || [];
-        const active = all.filter(o =>
-          ['pending', 'confirmed', 'preparing', 'out_for_delivery'].includes(o.status)
-        );
-        setActiveOrders(active);
-      } catch {
-        // Silently fail — user may not be logged in
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchActive();
-  }, []);
-
-  if (loading || activeOrders.length === 0) return null;
-
-  return (
-    <section className="active-orders-section">
-      <div className="ao-section-header">
-        <div className="ao-header-left">
-          <div className="ao-live-badge">
-            <span className="ao-live-indicator" />
-            LIVE
-          </div>
-          <div>
-            <h2 className="ao-title">Active Orders</h2>
-            <p className="ao-subtitle">
-              {activeOrders.length} order{activeOrders.length > 1 ? 's' : ''} in progress
-            </p>
-          </div>
-        </div>
-        <Link to="/orders" className="ao-view-all-btn">
-          View All <ChevronRight size={15} />
-        </Link>
-      </div>
-
-      <div className="ao-cards-scroll">
-        {activeOrders.map(order => (
-          <ActiveOrderCard key={order._id} order={order} />
-        ))}
-      </div>
-    </section>
-  );
-};
-
-/* ─── Main Home Component ───────────────────────────────────────── */
-const Home = () => {
-  const { addToCart } = useCart();
-  const [categories, setCategories] = useState([]);
-  const [restaurants, setRestaurants] = useState([]);
-  const [trendingFood, setTrendingFood] = useState([]);
-  const [reviews, setReviews] = useState([]);
-  const [loading, setLoading]           = useState(true);
-  const [homeSearch, setHomeSearch]     = useState('');
-  const navigate = useNavigate();
-
-  const handleHomeSearchSubmit = (e) => {
-    if (e) e.preventDefault();
-    if (homeSearch.trim()) {
-      navigate(`/explore?search=${encodeURIComponent(homeSearch.trim())}`);
-    } else {
-      navigate('/explore');
-    }
-  };
-
-  // Animated counters state
-  const [counters, setCounters] = useState({ restaurants: 0, orders: 0, customers: 0, riders: 0 });
-  const statsRef = useRef(null);
-  const hasAnimated = useRef(false);
-
-  const handleAddToCart = (e, foodId) => {
-    e.stopPropagation();
-    addToCart(foodId, 1);
-  };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [catData, resData, foodData, reviewRes] = await Promise.all([
-          restaurantService.getCuisines(),
-          restaurantService.getRestaurants({ limit: 4 }),
-          menuService.getMenuItems({ limit: 4 }),
-          reviewService.getRecentReviews().catch(() => ({ success: false, data: [] }))
+        const [restaurantRes, menuRes, cuisineRes, ordersRes] = await Promise.all([
+          restaurantService.getRestaurants({ limit: 6 }),
+          menuService.getMenuItems({ limit: 8, sort: '-createdAt' }),
+          restaurantService.getCuisines().catch(() => ({ data: [] })),
+          api.get('/orders/my-orders').catch(() => ({ data: { data: [] } })),
         ]);
 
-        if (catData.success) setCategories(catData.data);
-        if (resData.success) setRestaurants(resData.docs);
-        if (foodData.success) setTrendingFood(foodData.docs);
-        if (reviewRes && reviewRes.success) {
-          const mappedReviews = reviewRes.data.map(r => ({
-            name: r.customer?.name || 'Anonymous User',
-            avatar: r.customer?.name ? r.customer.name.charAt(0).toUpperCase() : 'U',
-            rating: r.rating || 5,
-            text: r.comment || 'No comment provided.',
-            location: r.customer?.address?.area || r.customer?.address?.city || 'Kathmandu'
-          }));
-          setReviews(mappedReviews);
-        }
+        if (!mounted) return;
+        setRestaurants(getDocs(restaurantRes).map(normalizeRestaurant));
+        setMenuItems(getDocs(menuRes).map(normalizeMenuItem));
+        setCuisines(getDocs(cuisineRes).slice(0, 8));
+        setActiveOrders(getDocs(ordersRes.data).filter((order) => activeStatuses.includes(order.status)));
       } catch (error) {
-        console.error('Error fetching home data:', error);
+        console.error('Error loading home data:', error);
       } finally {
-        setLoading(false);
+        if (mounted) setLoading(false);
       }
     };
 
-    fetchData();
+    loadHome();
+    return () => {
+      mounted = false;
+    };
   }, []);
 
-  // Intersection Observer for animated counters
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !hasAnimated.current) {
-          hasAnimated.current = true;
-          animateCounters();
-        }
-      },
-      { threshold: 0.3 }
-    );
+  const featuredCategories = useMemo(() => {
+    const names = new Set(cuisines);
+    menuItems.forEach((item) => names.add(item.categoryName));
+    return Array.from(names).filter(Boolean).slice(0, 8);
+  }, [cuisines, menuItems]);
 
-    if (statsRef.current) observer.observe(statsRef.current);
-    return () => observer.disconnect();
-  }, []);
-
-  const animateCounters = () => {
-    const targets = { restaurants: 50, orders: 10000, customers: 5000, riders: 200 };
-    const duration = 2000;
-    const steps = 60;
-    const interval = duration / steps;
-    let step = 0;
-
-    const timer = setInterval(() => {
-      step++;
-      const progress = step / steps;
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setCounters({
-        restaurants: Math.round(targets.restaurants * eased),
-        orders: Math.round(targets.orders * eased),
-        customers: Math.round(targets.customers * eased),
-        riders: Math.round(targets.riders * eased),
-      });
-      if (step >= steps) clearInterval(timer);
-    }, interval);
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    const query = search.trim();
+    navigate(query ? `/explore?search=${encodeURIComponent(query)}` : '/explore');
   };
 
-  const howItWorksSteps = [
-    { icon: <Search size={28} />, title: 'Browse', desc: 'Explore restaurants and menus near you' },
-    { icon: <ShoppingBag size={28} />, title: 'Order', desc: 'Add items to cart and checkout securely' },
-    { icon: <Navigation size={28} />, title: 'Track', desc: 'Watch your rider in real-time on the map' },
-    { icon: <Smile size={28} />, title: 'Enjoy', desc: 'Receive hot food at your doorstep' },
-  ];
+  const handleAddToCart = (event, id) => {
+    event.stopPropagation();
+    addToCart(id, 1);
+  };
 
   return (
-    <div className="home-page fade-in">
-      {/* Hero Section */}
-      <section className="hero">
-        <div className="hero-content">
-          <h1>Delicious Food <br /> Delivered to your <span className="highlight">Doorstep</span></h1>
-          <p>Order from your favorite restaurants and enjoy premium meals in minutes.</p>
-          
-          <form className="search-bar-container" onSubmit={handleHomeSearchSubmit}>
-            <div className="location-picker">
-              <MapPin size={18} color="#121211" />
-              <span>Kathmandu, Nepal</span>
-            </div>
-            <div className="search-divider"></div>
-            <div className="search-input-wrapper">
-              <input
-                type="text"
-                placeholder="Search for food, categories or restaurants..."
-                value={homeSearch}
-                onChange={(e) => setHomeSearch(e.target.value)}
-              />
-              <button type="submit" className="search-btn">
-                <Search size={20} />
-              </button>
-            </div>
+    <div className="home-page">
+      <section className="home-hero">
+        <div className="home-hero-copy">
+          <span className="eyebrow"><Sparkles size={16} /> Fresh from local kitchens</span>
+          <h1>Order meals that are actually available right now.</h1>
+          <p>Browse active restaurants, real menu items, and fresh uploads from the backend without stale placeholder data getting in the way.</p>
+
+          <form className="home-search" onSubmit={handleSubmit}>
+            <MapPin size={20} />
+            <span>Kathmandu</span>
+            <input
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search dishes, cuisines, or restaurants"
+            />
+            <button type="submit" aria-label="Search">
+              <Search size={20} />
+            </button>
           </form>
-        </div>
-        <div className="hero-image">
-          <div className="image-blob"></div>
-          <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=1000" alt="Delicious Food" />
-        </div>
-      </section>
 
-      {/* ═══════ ACTIVE ORDERS TRACKING SECTION ═══════ */}
-      <ActiveOrdersSection />
-
-      {/* Popular Categories */}
-      <section className="categories">
-        <div className="section-header">
-          <h2>Popular Categories</h2>
-          <button className="view-all">View All <ChevronRight size={16} /></button>
-        </div>
-        <div className="category-grid">
-          {loading ? (
-            [1, 2, 3, 4, 5, 6].map(i => <div key={i} className="category-skeleton animate-pulse"></div>)
-          ) : (
-            categories.map((cat, i) => (
-              <div key={i} className="category-card">
-                <div className="cat-icon-container">
-                  <Utensils size={24} color="#121211" />
-                </div>
-                <span>{cat}</span>
-              </div>
-            ))
-          )}
-        </div>
-      </section>
-
-      {/* Explore Restaurants */}
-      <section className="featured">
-        <div className="section-header">
-          <div className="title-with-icon">
-            <Zap size={24} color="#121211" fill="#121211" />
-            <h2>Explore Restaurants</h2>
+          <div className="home-quick-stats">
+            <div><strong>{restaurants.length || 0}+</strong><span>restaurants</span></div>
+            <div><strong>{menuItems.length || 0}+</strong><span>dishes loaded</span></div>
+            <div><strong>{featuredCategories.length || 0}</strong><span>categories</span></div>
           </div>
-          <button className="view-all">Explore All <ChevronRight size={16} /></button>
+        </div>
+
+        <div className="home-hero-media">
+          <img
+            src={menuItems[0]?.image || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=1000'}
+            alt="Fresh restaurant food"
+          />
+          <div className="hero-floating-card">
+            <ChefHat size={20} />
+            <div>
+              <strong>{menuItems[0]?.name || 'Chef specials'}</strong>
+              <span>{menuItems[0]?.restaurantName || 'Ready to explore'}</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {activeOrders.length > 0 && (
+        <section className="home-section active-orders">
+          <div className="section-title-row">
+            <div>
+              <span className="section-kicker">Live orders</span>
+              <h2>Track what is on the way</h2>
+            </div>
+            <Link to="/orders" className="text-link">My orders <ArrowRight size={16} /></Link>
+          </div>
+          <div className="active-order-grid">
+            {activeOrders.slice(0, 3).map((order) => (
+              <Link className="active-order-card" to="/orders?tab=live" key={order._id}>
+                <Package size={22} />
+                <div>
+                  <strong>{order.restaurant?.name || 'Your order'}</strong>
+                  <span>{order.status?.replaceAll('_', ' ') || 'pending'} · Rs. {order.total_amount || order.total || 0}</span>
+                </div>
+                <Navigation size={18} />
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <section className="home-section">
+        <div className="section-title-row">
+          <div>
+            <span className="section-kicker">Categories</span>
+            <h2>Start with a craving</h2>
+          </div>
+          <Link to="/explore" className="text-link">Explore all <ArrowRight size={16} /></Link>
+        </div>
+        <div className="category-strip">
+          {loading
+            ? Array.from({ length: 6 }).map((_, index) => <div className="skeleton category-tile" key={index} />)
+            : featuredCategories.map((category) => (
+                <button
+                  className="category-tile"
+                  key={category}
+                  onClick={() => navigate(`/explore?search=${encodeURIComponent(category)}`)}
+                >
+                  <Utensils size={22} />
+                  <span>{category}</span>
+                </button>
+              ))}
+        </div>
+      </section>
+
+      <section className="home-section surface">
+        <div className="section-title-row">
+          <div>
+            <span className="section-kicker">Restaurants</span>
+            <h2>Open kitchens to browse</h2>
+          </div>
+          <Link to="/explore" className="text-link">View all <ArrowRight size={16} /></Link>
         </div>
         <div className="restaurant-grid">
-          {loading ? (
-            [1, 2, 3, 4].map(i => <div key={i} className="restaurant-skeleton animate-pulse"></div>)
-          ) : (
-            restaurants.map((res) => (
-              <div key={res._id} className="restaurant-card" onClick={() => navigate(`/restaurant/${res._id}`)}>
-                <div className="card-image">
-                  <img src={res.logo_url || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4'} alt={res.name} />
-                  <div className="rating-badge">
-                    <Star size={14} fill="currentColor" /> {res.rating}
-                  </div>
-                </div>
-                <div className="card-info">
-                  <h3>{res.name}</h3>
-                  <p>{res.cuisines?.join(', ') || 'Various Cuisines'}</p>
-                  <div className="card-meta">
-                    <span><Clock size={16} /> <span className="time-tag">{res.openTime} - {res.closeTime}</span></span>
-                    <span style={{color: 'var(--success)', fontWeight: '800'}}>Free Delivery</span>
-                  </div>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-      </section>
-
-      {/* Trending Dishes */}
-      <section className="trending-food">
-        <div className="section-header">
-          <div className="title-with-icon">
-            <Flame size={24} color="#121211" fill="#121211" />
-            <h2>Trending Dishes</h2>
-          </div>
-          <button className="view-all">View All <ChevronRight size={16} /></button>
-        </div>
-        <div className="food-grid">
-          {loading ? (
-            [1, 2, 3, 4].map(i => <div key={i} className="food-skeleton animate-pulse"></div>)
-          ) : (
-            trendingFood.map((food) => (
-              <div key={food._id} className="food-card" onClick={() => navigate(`/food/${food._id}`)}>
-                <div className="food-image-wrapper">
-                  <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c" alt={food.name} />
-                  <button className="add-btn" onClick={(e) => handleAddToCart(e, food._id)}>+</button>
-                </div>
-                <div className="food-details">
-                  <h3>{food.name}</h3>
-                  <p className="food-res">{food.restaurant?.name}</p>
-                  <div className="food-price-tag">
-                    <span className="current-price">Rs. {food.price}</span>
-                    {food.isVeg && <div className="veg-icon"></div>}
-                  </div>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-      </section>
-
-      {/* HOW IT WORKS */}
-      <section className="how-it-works">
-        <div className="section-header">
-          <div className="title-with-icon">
-            <Truck size={24} color="#121211" />
-            <h2>How It Works</h2>
-          </div>
-        </div>
-        <div className="steps-grid">
-          {howItWorksSteps.map((step, i) => (
-            <React.Fragment key={i}>
-              <div className="step-card" style={{ animationDelay: `${i * 0.15}s` }}>
-                <div className="step-number">{i + 1}</div>
-                <div className="step-icon-wrap">{step.icon}</div>
-                <h3>{step.title}</h3>
-                <p>{step.desc}</p>
-              </div>
-              {i < howItWorksSteps.length - 1 && (
-                <div className="step-connector">
-                  <ChevronRight size={20} />
-                </div>
-              )}
-            </React.Fragment>
-          ))}
-        </div>
-      </section>
-
-      {/* ABOUT US */}
-      <section className="about-us">
-        <div className="about-content">
-          <div className="about-text">
-            <span className="about-tag">🍽️ About FoodHub</span>
-            <h2>We Deliver <span>Happiness</span> to Your Door</h2>
-            <p>
-              FoodHub connects you with the best local restaurants in Kathmandu. 
-              We're passionate about great food and exceptional delivery experiences. 
-              Our mission is to make every meal memorable — from the first tap to the last bite.
-            </p>
-            <div className="about-values">
-              <div className="value-card">
-                <Shield size={22} />
-                <div>
-                  <h4>Safe &amp; Hygienic</h4>
-                  <p>Every restaurant partner follows strict safety standards</p>
-                </div>
-              </div>
-              <div className="value-card">
-                <Heart size={22} />
-                <div>
-                  <h4>Made with Love</h4>
-                  <p>Curated selection of the best flavors in Kathmandu</p>
-                </div>
-              </div>
-              <div className="value-card">
-                <Award size={22} />
-                <div>
-                  <h4>Top Rated</h4>
-                  <p>Trusted by thousands of satisfied customers daily</p>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="about-stats" ref={statsRef}>
-            <div className="stat-card primary">
-              <span className="stat-number">{counters.restaurants}+</span>
-              <span className="stat-label">Partner Restaurants</span>
-            </div>
-            <div className="stat-card">
-              <span className="stat-number">{counters.orders.toLocaleString()}+</span>
-              <span className="stat-label">Orders Delivered</span>
-            </div>
-            <div className="stat-card">
-              <span className="stat-number">{counters.customers.toLocaleString()}+</span>
-              <span className="stat-label">Happy Customers</span>
-            </div>
-            <div className="stat-card">
-              <span className="stat-number">{counters.riders}+</span>
-              <span className="stat-label">Delivery Riders</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CUSTOMER REVIEWS */}
-      <section className="customer-reviews">
-        <div className="section-header">
-          <div className="title-with-icon">
-            <Star size={24} color="#121211" fill="#121211" />
-            <h2>What Our Customers Say</h2>
-          </div>
-        </div>
-        <div className="reviews-scroll-wrapper">
-          {reviews.length > 0 ? (
-            <div className="reviews-scroll">
-              {[...reviews, ...reviews].map((t, i) => (
-                <div key={i} className="review-card">
-                  <div className="review-quote-icon">
-                    <Quote size={20} />
-                  </div>
-                  <div className="review-stars">
-                    {[...Array(5)].map((_, si) => (
-                      <Star key={si} size={16} fill={si < t.rating ? '#F59E0B' : 'none'} color={si < t.rating ? '#F59E0B' : '#D1D5DB'} />
-                    ))}
-                  </div>
-                  <p className="review-text">{t.text}</p>
-                  <div className="review-author">
-                    <div className="review-avatar">{t.avatar}</div>
-                    <div>
-                      <span className="review-name">{t.name}</span>
-                      <span className="review-location">📍 {t.location}</span>
+          {loading
+            ? Array.from({ length: 3 }).map((_, index) => <div className="skeleton restaurant-card" key={index} />)
+            : restaurants.map((restaurant) => (
+                <article className="restaurant-card" key={restaurant.id} onClick={() => navigate(`/restaurant/${restaurant.id}`)}>
+                  <img src={restaurant.image} alt={restaurant.name} />
+                  <div className="restaurant-card-body">
+                    <div className="card-title-row">
+                      <h3>{restaurant.name}</h3>
+                      <span><Star size={14} fill="currentColor" /> {restaurant.rating.toFixed(1)}</span>
+                    </div>
+                    <p>{restaurant.cuisines.join(', ') || restaurant.description || 'Local favorites'}</p>
+                    <div className="card-meta-row">
+                      <span><MapPin size={15} /> {restaurant.area}</span>
+                      <span><Clock size={15} /> {restaurant.hours}</span>
                     </div>
                   </div>
-                </div>
+                </article>
               ))}
-            </div>
-          ) : (
-            <p style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem 0', width: '100%', fontWeight: '500' }}>
-              No reviews available yet. Be the first to order and review!
-            </p>
-          )}
+        </div>
+      </section>
+
+      <section className="home-section">
+        <div className="section-title-row">
+          <div>
+            <span className="section-kicker">Menu</span>
+            <h2>Fresh dishes from the API</h2>
+          </div>
+          <Link to="/explore" className="text-link">See menu <ArrowRight size={16} /></Link>
+        </div>
+        <div className="dish-grid">
+          {loading
+            ? Array.from({ length: 4 }).map((_, index) => <div className="skeleton dish-card" key={index} />)
+            : menuItems.map((item) => (
+                <article className="dish-card" key={item.id} onClick={() => navigate(`/food/${item.id}`)}>
+                  <img src={item.image} alt={item.name} />
+                  <div className="dish-card-body">
+                    <span className="dish-category">{item.categoryName}</span>
+                    <h3>{item.name}</h3>
+                    <p>{item.restaurantName}</p>
+                    <div className="dish-footer">
+                      <strong>Rs. {item.discountPrice || item.price}</strong>
+                      <button onClick={(event) => handleAddToCart(event, item.id)} aria-label={`Add ${item.name} to cart`}>
+                        <ShoppingBag size={17} />
+                      </button>
+                    </div>
+                  </div>
+                </article>
+              ))}
         </div>
       </section>
     </div>

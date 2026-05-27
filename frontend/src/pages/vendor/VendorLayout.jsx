@@ -1,11 +1,11 @@
 import React from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
-  LayoutDashboard, 
-  Utensils, 
-  ShoppingCart, 
-  User, 
-  LogOut, 
+  LayoutDashboard,
+  Utensils,
+  ShoppingCart,
+  User,
+  LogOut,
   ChevronRight,
   TrendingUp
 } from 'lucide-react';
@@ -52,8 +52,8 @@ const VendorLayout = () => {
                 end={item.end}
                 className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
                 style={({ isActive }) => ({
-                    color: isActive ? '#fff' : 'rgba(255,255,255,0.6)',
-                    background: isActive ? '#FF5C1A' : 'transparent'
+                  color: isActive ? '#fff' : 'rgba(255,255,255,0.6)',
+                  background: isActive ? '#FF5C1A' : 'transparent'
                 })}
               >
                 <item.icon size={20} />
@@ -84,13 +84,12 @@ const VendorLayout = () => {
               {user?.name?.charAt(0) || 'R'}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#131110' }}>{user?.name}</span>
-                <span style={{ fontSize: '0.7rem', color: '#9CA3AF' }}>Restaurant Manager</span>
+              <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#131110' }}>{user?.name}</span>
             </div>
           </div>
         </header>
         <div style={{ padding: '40px' }}>
-            <Outlet />
+          <Outlet />
         </div>
       </main>
     </div>

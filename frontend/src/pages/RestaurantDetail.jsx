@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import restaurantService from '../services/restaurantService';
 import menuService from '../services/menuService';
+import { getDocs, getEntity, normalizeMenuItem, normalizeRestaurant } from '../utils/customerData';
 import { useCart } from '../context/CartContext';
 import './RestaurantDetail.css';
 
@@ -37,8 +38,8 @@ const RestaurantDetail = () => {
                 const resData = await restaurantService.getRestaurant(id);
                 const menuData = await menuService.getMenuItems({ restaurant: id });
                 
-                if (resData.success) setRestaurant(resData.data);
-                if (menuData.success) setMenuItems(menuData.docs);
+                if (resData.success) setRestaurant(normalizeRestaurant(getEntity(resData)));
+                if (menuData.success) setMenuItems(getDocs(menuData).map(normalizeMenuItem));
             } catch (error) {
                 console.error('Error fetching restaurant details:', error);
             } finally {
@@ -51,17 +52,17 @@ const RestaurantDetail = () => {
     if (loading) return <div className="loading-screen">Loading flavors...</div>;
     if (!restaurant) return <div className="error-screen">Restaurant not found</div>;
 
-    const categories = ['All', ...new Set(menuItems.map(item => item.category))];
+    const categories = ['All', ...new Set(menuItems.map(item => item.categoryName))];
     const filteredItems = activeCategory === 'All' 
         ? menuItems 
-        : menuItems.filter(item => item.category === activeCategory);
+        : menuItems.filter(item => item.categoryName === activeCategory);
 
     return (
         <div className="restaurant-detail fade-in">
             {/* Header / Hero */}
             <div className="res-hero">
                 <div className="res-hero-image">
-                    <img src={restaurant.logo_url || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4'} alt={restaurant.name} />
+                    <img src={restaurant.image} alt={restaurant.name} />
                     <div className="res-hero-overlay"></div>
                 </div>
                 
@@ -81,7 +82,7 @@ const RestaurantDetail = () => {
                 <div className="res-info-section">
                     <div className="res-status-badge">Available Now</div>
                     <h1 className="res-title">{restaurant.name}</h1>
-                    <p className="res-cuisines">{restaurant.cuisines?.join(' • ')}</p>
+                    <p className="res-cuisines">{restaurant.cuisines?.join(' • ') || restaurant.description}</p>
                     
                     <div className="res-meta-grid">
                         <div className="meta-item">
@@ -143,7 +144,7 @@ const RestaurantDetail = () => {
                         {filteredItems.map(item => (
                             <div key={item._id} className="menu-item-card" onClick={() => navigate(`/food/${item._id}`)}>
                                 <div className="item-image">
-                                    <img src={item.image_url || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c'} alt={item.name} />
+                                    <img src={item.image} alt={item.name} />
                                     <button className="add-item-btn" onClick={(e) => handleAddToCart(e, item._id)}>+</button>
                                 </div>
                                 <div className="item-details">

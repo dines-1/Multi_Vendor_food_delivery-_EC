@@ -8,6 +8,10 @@ const FAILURE_REASONS = {
   invalid_signature:   'Payment verification failed (signature mismatch).',
   order_not_found:     'Order could not be found.',
   payment_incomplete:  'Payment was not completed.',
+  payment_cancelled:   'Payment was cancelled or declined by eSewa.',
+  amount_mismatch:     'Paid amount did not match the order total.',
+  stripe_not_configured: 'Stripe payment is not configured on the server.',
+  no_session:          'No Stripe checkout session was provided.',
   server_error:        'A server error occurred during verification.',
 };
 
@@ -35,11 +39,11 @@ const PaymentResult = () => {
               <CheckCircle2 size={80} />
             </div>
             <h1>Payment Successful!</h1>
-            <p>Your order has been confirmed and is being prepared by the restaurant.</p>
+            <p>Your payment was received. You can manage the order from the live orders tab.</p>
             <div className="status-actions">
               {orderId ? (
-                <Link to={`/track-order/${orderId}`} className="primary-btn">
-                  Track Order <Package size={20} />
+                <Link to="/orders?tab=live" className="primary-btn">
+                  My Orders <Package size={20} />
                 </Link>
               ) : (
                 <Link to="/orders" className="primary-btn">

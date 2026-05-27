@@ -83,6 +83,24 @@
   border: 2px solid white;
 }
 
+.orders-nav-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1.5px solid #E5E7EB;
+  background: #FFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.orders-nav-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: #FFF0EA;
+  transform: translateY(-2px);
+}
+
 .user-profile {
   position: relative;
   cursor: pointer;
@@ -152,6 +170,27 @@
   font-size: 0.9rem;
   width: 100%;
   text-align: left;
+}
+
+.profile-dropdown a.dropdown-with-badge {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.dropdown-badge {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--primary);
+  color: white;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 700;
 }
 
 .profile-dropdown a:hover, .logout-btn:hover {

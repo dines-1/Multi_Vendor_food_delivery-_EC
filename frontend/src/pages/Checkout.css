@@ -135,6 +135,11 @@
     color: white;
 }
 
+.pay-icon.stripe {
+    background: #635BFF;
+    color: white;
+}
+
 .pay-info h4 {
     font-weight: 800;
     font-size: 1rem;

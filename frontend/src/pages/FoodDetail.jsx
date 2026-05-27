@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import menuService from '../services/menuService';
 import restaurantService from '../services/restaurantService';
+import { getEntity, normalizeMenuItem, normalizeRestaurant } from '../utils/customerData';
 import toast from 'react-hot-toast';
 import { useCart } from '../context/CartContext';
 import './FoodDetail.css';
@@ -34,11 +35,13 @@ const FoodDetail = () => {
             try {
                 const res = await menuService.getMenuItem(id);
                 if (res.success) {
-                    setFood(res.data);
-                    // Fetch restaurant info
-                    if (res.data.restaurant) {
-                        const resInfo = await restaurantService.getRestaurant(res.data.restaurant);
-                        if (resInfo.success) setRestaurant(resInfo.data);
+                    const normalizedFood = normalizeMenuItem(getEntity(res));
+                    setFood(normalizedFood);
+                    if (normalizedFood.restaurant && typeof normalizedFood.restaurant === 'object') {
+                        setRestaurant(normalizedFood.restaurant);
+                    } else if (normalizedFood.restaurantId) {
+                        const resInfo = await restaurantService.getRestaurant(normalizedFood.restaurantId);
+                        if (resInfo.success) setRestaurant(normalizeRestaurant(getEntity(resInfo)));
                     }
                 }
             } catch (err) {
@@ -71,7 +74,7 @@ const FoodDetail = () => {
                     </button>
                     
                     <div className="main-image">
-                        <img src={food.image_url || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c'} alt={food.name} />
+                        <img src={food.image} alt={food.name} />
                         <div className="discount-tag">15% OFF</div>
                     </div>
 
@@ -82,7 +85,7 @@ const FoodDetail = () => {
                                 className={`thumbnail ${activeImage === i ? 'active' : ''}`}
                                 onClick={() => setActiveImage(i)}
                             >
-                                <img src={food.image_url || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c'} alt="thumb" />
+                                <img src={food.image} alt="thumb" />
                             </div>
                         ))}
                     </div>
