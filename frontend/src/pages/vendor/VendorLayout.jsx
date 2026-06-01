@@ -10,6 +10,7 @@ import {
   TrendingUp
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import NotificationBell from '../../components/NotificationBell';
 import './VendorLayout.css';
 
 const navItems = [
@@ -75,6 +76,7 @@ const VendorLayout = () => {
             Vendor Center <ChevronRight size={12} style={{ verticalAlign: 'middle' }} />
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+            <NotificationBell variant="vendor" />
             <div style={{
               width: 36, height: 36, borderRadius: '12px',
               background: '#FF5C1A',

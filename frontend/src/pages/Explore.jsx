@@ -183,10 +183,7 @@ const Explore = () => {
             </div>
           ) : (
             <div className="explore-items-grid">
-              {filteredItems.map((item) => {
-                const hasDiscount = item.discountPrice && item.discountPrice < item.price;
-
-                return (
+              {filteredItems.map((item) => (
                   <article
                     className="explore-food-card"
                     key={item.id}
@@ -209,8 +206,7 @@ const Explore = () => {
                       </div>
                       <div className="explore-card-footer">
                         <div>
-                          <strong>Rs. {hasDiscount ? item.discountPrice : item.price}</strong>
-                          {hasDiscount && <span>Rs. {item.price}</span>}
+                          <strong>Rs. {item.price}</strong>
                         </div>
                         <button onClick={(event) => handleAddToCart(event, item)}>
                           <ShoppingBag size={16} /> Add
@@ -218,8 +214,7 @@ const Explore = () => {
                       </div>
                     </div>
                   </article>
-                );
-              })}
+                ))}
             </div>
           )}
         </main>

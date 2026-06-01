@@ -181,6 +181,13 @@ const Home = () => {
         <div className="restaurant-grid">
           {loading
             ? Array.from({ length: 3 }).map((_, index) => <div className="skeleton restaurant-card" key={index} />)
+            : restaurants.length === 0 ? (
+                <div className="home-empty-state">
+                  <ChefHat size={28} />
+                  <h3>No active restaurants yet</h3>
+                  <p>Restaurants appear here after an admin marks them active. Opening and closing time only display as hours.</p>
+                </div>
+              )
             : restaurants.map((restaurant) => (
                 <article className="restaurant-card" key={restaurant.id} onClick={() => navigate(`/restaurant/${restaurant.id}`)}>
                   <img src={restaurant.image} alt={restaurant.name} />
@@ -219,7 +226,7 @@ const Home = () => {
                     <h3>{item.name}</h3>
                     <p>{item.restaurantName}</p>
                     <div className="dish-footer">
-                      <strong>Rs. {item.discountPrice || item.price}</strong>
+                      <strong>Rs. {item.price}</strong>
                       <button onClick={(event) => handleAddToCart(event, item.id)} aria-label={`Add ${item.name} to cart`}>
                         <ShoppingBag size={17} />
                       </button>

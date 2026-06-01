@@ -2,6 +2,7 @@ import Order from '../models/Order.js';
 import Cart from '../models/Cart.js';
 import MenuItem from '../models/MenuItem.js';
 import Restaurant from '../models/Restaurant.js';
+import { createNotification } from '../utils/notifications.js';
 
 // Valid status transitions
 const VENDOR_STATUS_FLOW = {
@@ -34,6 +35,14 @@ const autoCancelStaleOrders = async () => {
         timestamp: new Date()
       });
       await order.save();
+
+      await createNotification({
+        recipient: order.customer,
+        type: 'order_status',
+        title: 'Order cancelled',
+        message: `Order ${order.orderNumber} was auto-cancelled because it was not accepted in time.`,
+        relatedId: order._id
+      });
 
       if (global.io) {
         global.io.to(`order_${order._id}`).emit('status-updated', {
@@ -73,7 +82,7 @@ export const checkout = async (req, res) => {
     // Calculate totals
     let subtotal = 0;
     const orderItems = cart.items.map(item => {
-      const price = item.menuItem.discountPrice || item.menuItem.price;
+      const price = item.menuItem.price;
       const itemSubtotal = price * item.quantity;
       subtotal += itemSubtotal;
       return {
@@ -114,11 +123,29 @@ export const checkout = async (req, res) => {
     cart.restaurant = null;
     await cart.save();
 
-    // Notify vendor via socket
-    if (global.io) {
-      const restaurant = await Restaurant.findById(order.restaurant);
-      if (restaurant) {
-        global.io.to(`vendor_${restaurant.owner}`).emit('new-order', {
+    const restaurant = await Restaurant.findById(order.restaurant);
+
+    if (restaurant) {
+      await createNotification({
+        recipient: restaurant.owner,
+        sender: req.user.id,
+        type: 'order_status',
+        title: 'New order received',
+        message: `Order ${order.orderNumber} is waiting for confirmation.`,
+        relatedId: order._id
+      });
+
+      await createNotification({
+        recipient: req.user.id,
+        type: 'order_status',
+        title: 'Order placed',
+        message: `Your order ${order.orderNumber} was placed successfully.`,
+        relatedId: order._id
+      });
+
+      // Notify vendor via socket
+      if (global.io) {
+        global.io.to(`user_${restaurant.owner}`).emit('new-order', {
           orderId: order._id,
           orderNumber: order.orderNumber,
           total_amount: order.total_amount
@@ -236,6 +263,15 @@ export const updateOrderStatus = async (req, res) => {
 
     await order.save();
 
+    await createNotification({
+      recipient: order.customer,
+      sender: req.user.id,
+      type: 'order_status',
+      title: 'Order status updated',
+      message: `Order ${order.orderNumber} is now ${status.replaceAll('_', ' ')}.`,
+      relatedId: order._id
+    });
+
     const populated = await Order.findById(order._id)
       .populate('customer', 'name phone email')
       .populate('restaurant', 'name logo_url');
@@ -319,6 +355,15 @@ export const acceptOrder = async (req, res) => {
     });
     await order.save();
 
+    await createNotification({
+      recipient: order.customer,
+      sender: req.user.id,
+      type: 'order_status',
+      title: 'Order accepted',
+      message: `Order ${order.orderNumber} has been accepted by the restaurant.`,
+      relatedId: order._id
+    });
+
     if (global.io) {
       global.io.to(`order_${order._id}`).emit('status-updated', { orderId: order._id, status: 'confirmed' });
       global.io.to(`user_${order.customer}`).emit('order-status-changed', {
@@ -361,6 +406,15 @@ export const rejectOrder = async (req, res) => {
     });
     await order.save();
 
+    await createNotification({
+      recipient: order.customer,
+      sender: req.user.id,
+      type: 'order_status',
+      title: 'Order rejected',
+      message: `Order ${order.orderNumber} was rejected by the restaurant.`,
+      relatedId: order._id
+    });
+
     if (global.io) {
       global.io.to(`order_${order._id}`).emit('status-updated', { orderId: order._id, status: 'cancelled' });
       global.io.to(`user_${order.customer}`).emit('order-status-changed', {
@@ -401,6 +455,18 @@ export const cancelOrder = async (req, res) => {
       note: 'Cancelled by customer'
     });
     await order.save();
+
+    const restaurant = await Restaurant.findById(order.restaurant);
+    if (restaurant) {
+      await createNotification({
+        recipient: restaurant.owner,
+        sender: req.user.id,
+        type: 'order_status',
+        title: 'Order cancelled',
+        message: `Customer cancelled order ${order.orderNumber}.`,
+        relatedId: order._id
+      });
+    }
 
     if (global.io) {
       global.io.to(`order_${order._id}`).emit('status-updated', { orderId: order._id, status: 'cancelled' });

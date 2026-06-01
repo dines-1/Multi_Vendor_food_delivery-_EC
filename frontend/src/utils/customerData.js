@@ -56,7 +56,6 @@ export const normalizeMenuItem = (item = {}) => {
     restaurantId: typeof item.restaurant === 'object' ? item.restaurant?._id : item.restaurant,
     restaurantName: typeof item.restaurant === 'object' ? item.restaurant?.name : 'Local Kitchen',
     price: Number(item.price || 0),
-    discountPrice: item.discountPrice ? Number(item.discountPrice) : null,
     preparationTime: item.preparationTime || 25,
     description: item.description || 'Freshly prepared with quality ingredients.',
   };

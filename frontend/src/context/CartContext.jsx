@@ -81,7 +81,7 @@ export const CartProvider = ({ children }) => {
   const cartCount = cart?.items?.reduce((acc, item) => acc + item.quantity, 0) || 0;
 
   const cartTotal = cart?.items?.reduce((acc, item) => {
-    const price = item.menuItem?.discountPrice || item.menuItem?.price || 0;
+    const price = item.menuItem?.price || 0;
     return acc + price * item.quantity;
   }, 0) || 0;
 

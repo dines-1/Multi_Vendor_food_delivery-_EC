@@ -4,7 +4,7 @@ import MenuItem from '../models/MenuItem.js';
 const populateCart = (query) =>
   query.populate({
     path: 'items.menuItem',
-    select: 'name price discountPrice image_url restaurant category',
+    select: 'name price image_url restaurant category',
     populate: [
       { path: 'restaurant', select: 'name logo_url' },
       { path: 'category', select: 'name' }

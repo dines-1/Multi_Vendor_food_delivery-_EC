@@ -25,10 +25,6 @@ const menuItemSchema = new mongoose.Schema(
       required: [true, 'Please add a price'],
       min: 0,
     },
-    discountPrice: {
-      type: Number,
-      default: null,
-    },
     image_url: {
       type: String,
     },
@@ -83,13 +79,9 @@ menuItemSchema.index({ isAvailable: 1 });
 // Plugins
 menuItemSchema.plugin(mongoosePaginate);
 
-// Pre-save hook on MenuItem to auto-calculate subtotal if discountPrice exists
+// Pre-save hook on MenuItem to keep subtotal aligned with price
 menuItemSchema.pre('save', function(next) {
-  if (this.discountPrice) {
-    this.subtotal = this.discountPrice;
-  } else {
-    this.subtotal = this.price;
-  }
+  this.subtotal = this.price;
   next();
 });
 

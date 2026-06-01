@@ -94,7 +94,7 @@ const Cart = () => {
           {/* Items */}
           <div className="cart-items-section">
             {cart.items.map((item) => {
-              const price = item.menuItem?.discountPrice || item.menuItem?.price || 0;
+              const price = item.menuItem?.price || 0;
               const itemTotal = price * item.quantity;
               const isRemoving = removingId === item._id;
 
@@ -167,7 +167,7 @@ const Cart = () => {
 
               <div className="summary-rows">
                 {cart.items.map((item) => {
-                  const price = item.menuItem?.discountPrice || item.menuItem?.price || 0;
+                  const price = item.menuItem?.price || 0;
                   return (
                     <div key={item._id} className="summary-mini-row">
                       <span>{item.menuItem?.name} × {item.quantity}</span>

@@ -121,6 +121,19 @@
   z-index: 50;
 }
 
+.admin-title {
+  color: var(--admin-text);
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.admin-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
 .admin-page {
   padding: 1.5rem 2rem;
 }
@@ -291,6 +304,7 @@
   border-top: 1px solid #f1f5f9;
   color: var(--admin-text);
   font-size: 0.8rem;
+  vertical-align: middle;
 }
 
 .admin-table tr:hover td {
@@ -337,6 +351,38 @@
 .badge-purple {
   background: #ede9fe;
   color: #6d28d9;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0.22rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+.status-active,
+.status-approved {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-suspended,
+.status-rejected,
+.status-closed {
+  background: #fee2e2;
+  color: #991b1b;
 }
 
 /* ===== BUTTONS ===== */
@@ -423,8 +469,70 @@
 }
 
 .btn-sm {
-  padding: 0.25rem 0.5rem;
+  min-height: 30px;
+  padding: 0.3rem 0.62rem;
+  border-radius: 7px;
   font-size: 0.7rem;
+}
+
+.action-btn {
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.32rem 0.7rem;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1;
+  color: #111827;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: none;
+}
+
+.action-btn:focus-visible,
+.btn:focus-visible,
+.btn-icon:focus-visible {
+  outline: 3px solid rgba(99, 102, 241, 0.22);
+  outline-offset: 2px;
+}
+
+.btn-approve {
+  background: #ecfdf5;
+  border-color: #bbf7d0;
+  color: #111827;
+}
+
+.btn-suspend {
+  background: #fff7ed;
+  border-color: #fed7aa;
+  color: #111827;
+}
+
+.btn-view {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  color: #111827;
+}
+
+.admin-table .btn-group .btn,
+.widget-item .btn-group .btn {
+  color: #111827;
+  transition: none;
+}
+
+.admin-table .btn-group .btn:hover,
+.widget-item .btn-group .btn:hover,
+.admin-table .action-btn:hover,
+.widget-item .action-btn:hover {
+  background: inherit;
+  border-color: inherit;
+  color: #111827;
+  transform: none;
 }
 
 /* Icon-only action buttons (used in table rows) */
@@ -460,7 +568,10 @@
 
 .btn-group {
   display: flex;
-  gap: 0.35rem;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  max-width: 280px;
 }
 
 /* ===== MODALS ===== */
@@ -818,5 +929,22 @@
   .table-toolbar {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .admin-header {
+    padding: 1rem;
+  }
+
+  .admin-page {
+    padding: 1rem;
+  }
+
+  .admin-actions {
+    width: 100%;
+  }
+
+  .admin-actions .filter-select,
+  .admin-actions input {
+    width: 100%;
   }
 }

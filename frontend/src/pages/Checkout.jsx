@@ -194,7 +194,7 @@ const Checkout = () => {
                   <div key={item._id} className="mini-item">
                     <span className="qty">{item.quantity}x</span>
                     <span className="name">{item.menuItem?.name}</span>
-                    <span className="price">Rs. {(item.menuItem?.discountPrice || item.menuItem?.price) * item.quantity}</span>
+                    <span className="price">Rs. {(item.menuItem?.price || 0) * item.quantity}</span>
                   </div>
                 ))}
               </div>

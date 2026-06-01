@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import api from '../services/api';
 import ChatDrawer from './ChatDrawer';
+import NotificationBell from './NotificationBell';
 import './Navbar.css';
 
 const ACTIVE_ORDER_STATUSES = ['pending', 'confirmed', 'preparing', 'out_for_delivery'];
@@ -70,6 +71,7 @@ const Navbar = () => {
                 <button className="action-btn chat-nav-btn" onClick={() => setShowChat(true)} title="Messages">
                   <MessageCircle size={20} />
                 </button>
+                <NotificationBell />
                 {user.role === 'customer' && (
                   <Link to="/orders?tab=live" className="action-btn orders-nav-btn" title="My Orders">
                     <Package size={20} />

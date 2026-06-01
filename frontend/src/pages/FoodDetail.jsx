@@ -75,7 +75,6 @@ const FoodDetail = () => {
                     
                     <div className="main-image">
                         <img src={food.image} alt={food.name} />
-                        <div className="discount-tag">15% OFF</div>
                     </div>
 
                     <div className="thumbnail-track">
@@ -109,7 +108,6 @@ const FoodDetail = () => {
                     <div className="price-rating-row">
                         <div className="price-stack">
                             <span className="price-main">Rs. {food.price}</span>
-                            <span className="price-old">Rs. {food.price + 50}</span>
                         </div>
                         <div className="rating-stack">
                             <div className="stars">
