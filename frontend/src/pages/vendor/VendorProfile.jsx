@@ -58,7 +58,7 @@ const VendorProfile = () => {
           logo: null
         });
         if (data.logo_url) {
-          setLogoPreview(data.logo_url.startsWith('http') ? data.logo_url : `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}${data.logo_url}`);
+          setLogoPreview(data.logo_url.startsWith('http') ? data.logo_url : `${import.meta.env.VITE_BACKEND_ORIGIN || 'http://localhost:5000'}${data.logo_url}`);
         }
       }
     } catch (err) {

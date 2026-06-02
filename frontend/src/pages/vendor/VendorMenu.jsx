@@ -26,7 +26,8 @@ const VendorMenu = () => {
     category: '',
     image: null,
     isVeg: true,
-    isAvailable: true
+    isAvailable: true,
+    ingredients: ''
   });
   const [imagePreview, setImagePreview] = useState(null);
 
@@ -111,7 +112,8 @@ const VendorMenu = () => {
       category: '',
       image: null,
       isVeg: true,
-      isAvailable: true
+      isAvailable: true,
+      ingredients: ''
     });
     setImagePreview(null);
     setEditingItem(null);
@@ -126,10 +128,12 @@ const VendorMenu = () => {
       category: item.category?._id || '',
       image: null,
       isVeg: item.isVeg,
-      isAvailable: item.isAvailable
+      isAvailable: item.isAvailable,
+      ingredients: item.ingredients ? item.ingredients.join(', ') : ''
     });
-    if (item.image) {
-      setImagePreview(item.image.startsWith('http') ? item.image : `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}${item.image}`);
+    const imgField = item.image_url || item.image;
+    if (imgField) {
+      setImagePreview(imgField.startsWith('http') ? imgField : `${import.meta.env.VITE_BACKEND_ORIGIN || 'http://localhost:5000'}${imgField}`);
     }
     setShowModal(true);
   };
@@ -164,6 +168,7 @@ const VendorMenu = () => {
     data.append('category', formData.category);
     data.append('isVeg', formData.isVeg);
     data.append('isAvailable', formData.isAvailable);
+    data.append('ingredients', formData.ingredients);
     
     if (formData.image) {
       data.append('image', formData.image);
@@ -192,7 +197,7 @@ const VendorMenu = () => {
   const getImageUrl = (url) => {
     if (!url) return 'https://via.placeholder.com/300x200?text=Food+Image';
     if (url.startsWith('http')) return url;
-    return `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}${url}`;
+    return `${import.meta.env.VITE_BACKEND_ORIGIN || 'http://localhost:5000'}${url}`;
   };
 
   if (loading) return <div className="vendor-loading">Loading Menu...</div>;
@@ -223,7 +228,7 @@ const VendorMenu = () => {
         {menuItems.map(item => (
           <div key={item._id} className="menu-item-card">
             <div className="item-image">
-              <img src={getImageUrl(item.image)} alt={item.name} />
+              <img src={getImageUrl(item.image_url || item.image)} alt={item.name} />
               <div className={`status-badge ${item.isAvailable ? 'available' : 'unavailable'}`}>
                 {item.isAvailable ? 'Available' : 'Sold Out'}
               </div>
@@ -335,6 +340,15 @@ const VendorMenu = () => {
                   onChange={(e) => setFormData({...formData, description: e.target.value})} 
                   required
                 ></textarea>
+              </div>
+              <div className="form-group">
+                <label>Ingredients (comma separated)</label>
+                <input 
+                  type="text" 
+                  placeholder="e.g. Tomato, Mozzarella, Basil, Olive Oil"
+                  value={formData.ingredients} 
+                  onChange={(e) => setFormData({...formData, ingredients: e.target.value})} 
+                />
               </div>
               <div className="form-group">
                 <label>Food Image</label>

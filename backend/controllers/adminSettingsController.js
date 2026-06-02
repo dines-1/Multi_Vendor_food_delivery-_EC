@@ -1,5 +1,6 @@
 import User from '../models/User.js';
 import bcrypt from 'bcryptjs';
+import ShippingZone from '../models/ShippingZone.js';
 
 // ==================== SUB-ADMINS ====================
 
@@ -48,6 +49,56 @@ export const deleteSubAdmin = async (req, res) => {
   try {
     await User.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Sub-admin deleted' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// ==================== SHIPPING ZONES ====================
+
+export const getShippingZones = async (req, res) => {
+  try {
+    const zones = await ShippingZone.find({});
+    res.json({ success: true, data: zones });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const createShippingZone = async (req, res) => {
+  try {
+    const { zoneName, coverageArea, baseDeliveryFee } = req.body;
+    const zone = await ShippingZone.create({
+      zoneName,
+      coverageArea,
+      baseDeliveryFee,
+    });
+    res.status(201).json({ success: true, data: zone, message: 'Shipping zone created' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const updateShippingZone = async (req, res) => {
+  try {
+    const { zoneName, coverageArea, baseDeliveryFee } = req.body;
+    const zone = await ShippingZone.findByIdAndUpdate(
+      req.params.id,
+      { zoneName, coverageArea, baseDeliveryFee },
+      { new: true, runValidators: true }
+    );
+    if (!zone) return res.status(404).json({ success: false, message: 'Shipping zone not found' });
+    res.json({ success: true, data: zone, message: 'Shipping zone updated' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const deleteShippingZone = async (req, res) => {
+  try {
+    const zone = await ShippingZone.findByIdAndDelete(req.params.id);
+    if (!zone) return res.status(404).json({ success: false, message: 'Shipping zone not found' });
+    res.json({ success: true, message: 'Shipping zone deleted' });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

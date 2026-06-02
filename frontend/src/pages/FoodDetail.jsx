@@ -149,11 +149,17 @@ const FoodDetail = () => {
 
                     <div className="additional-info">
                         <h3>Ingredients</h3>
-                        <div className="ingredients-list">
-                            {['Fresh Herbs', 'Organic Spices', 'Premium Oil', 'Chef Secret Sauce'].map(ing => (
-                                <span key={ing} className="ing-tag">{ing}</span>
-                            ))}
-                        </div>
+                        {food.ingredients && food.ingredients.length > 0 ? (
+                            <div className="ingredients-list">
+                                {food.ingredients.map(ing => (
+                                    <span key={ing} className="ing-tag">{ing}</span>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="secret-ingredients-msg">
+                                Prepared using the restaurant's secret recipe and special ingredients.
+                            </p>
+                        )}
                     </div>
                 </div>
             </div>

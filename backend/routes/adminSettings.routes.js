@@ -5,6 +5,10 @@ import {
   createSubAdmin,
   updateSubAdmin,
   deleteSubAdmin,
+  getShippingZones,
+  createShippingZone,
+  updateShippingZone,
+  deleteShippingZone,
 } from '../controllers/adminSettingsController.js';
 
 const router = express.Router();
@@ -17,5 +21,11 @@ router.get('/sub-admins', getSubAdmins);
 router.post('/sub-admins', createSubAdmin);
 router.put('/sub-admins/:id', updateSubAdmin);
 router.delete('/sub-admins/:id', deleteSubAdmin);
+
+// Shipping zones
+router.get('/shipping-zones', getShippingZones);
+router.post('/shipping-zones', createShippingZone);
+router.put('/shipping-zones/:id', updateShippingZone);
+router.delete('/shipping-zones/:id', deleteShippingZone);
 
 export default router;

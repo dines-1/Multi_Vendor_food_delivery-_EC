@@ -113,8 +113,12 @@ export const createMenuItem = async (req, res) => {
     const data = { ...req.body };
     data.restaurant = restaurant._id;
     
+    if (typeof data.ingredients === 'string') {
+      data.ingredients = data.ingredients.split(',').map(i => i.trim()).filter(Boolean);
+    }
+    
     if (req.file) {
-      data.image = `/uploads/${req.file.filename}`;
+      data.image_url = `/uploads/${req.file.filename}`;
     }
 
     const menuItem = await MenuItem.create(data);
@@ -143,8 +147,12 @@ export const updateMenuItem = async (req, res) => {
     }
 
     const data = { ...req.body };
+    if (typeof data.ingredients === 'string') {
+      data.ingredients = data.ingredients.split(',').map(i => i.trim()).filter(Boolean);
+    }
+
     if (req.file) {
-      data.image = `/uploads/${req.file.filename}`;
+      data.image_url = `/uploads/${req.file.filename}`;
     }
 
     menuItem = await MenuItem.findByIdAndUpdate(req.params.id, data, {

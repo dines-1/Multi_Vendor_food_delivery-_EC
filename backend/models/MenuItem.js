@@ -65,6 +65,10 @@ const menuItemSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    ingredients: {
+      type: [String],
+      default: [],
+    },
   },
   {
     timestamps: true,

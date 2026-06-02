@@ -198,6 +198,7 @@
 .additional-info h3 { font-size: 1.2rem; font-weight: 800; margin-bottom: 16px; }
 .ingredients-list { display: flex; flex-wrap: wrap; gap: 12px; }
 .ing-tag { padding: 8px 16px; background: #F1F3F5; border-radius: 99px; font-weight: 600; font-size: 0.85rem; color: #6B6560; }
+.secret-ingredients-msg { font-size: 0.95rem; color: #FF5C1A; font-style: italic; font-weight: 500; }
 
 @media (max-width: 1024px) {
     .detail-grid { grid-template-columns: 1fr; gap: 40px; }
