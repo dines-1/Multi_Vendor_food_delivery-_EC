@@ -22,11 +22,6 @@ import MyOrders from './pages/MyOrders';
 import TrackOrder from './pages/TrackOrder';
 import Explore from './pages/Explore';
 import AdminRoute from './components/AdminRoute';
-import DeliveryRoute from './components/DeliveryRoute';
-import DeliveryLayout from './pages/delivery/DeliveryLayout';
-import DeliveryDashboard from './pages/delivery/DeliveryDashboard';
-import DeliveryHistory from './pages/delivery/DeliveryHistory';
-import DeliveryProfile from './pages/delivery/DeliveryProfile';
 import VendorRoute from './components/VendorRoute';
 import VendorLayout from './pages/vendor/VendorLayout';
 import VendorDashboard from './pages/vendor/VendorDashboard';
@@ -92,21 +87,7 @@ function App() {
               <Route path="settings" element={<PlatformSettings />} />
             </Route>
 
-            {/* Delivery Routes */}
-            <Route 
-              path="/delivery" 
-              element={
-                <DeliveryRoute>
-                  <DeliveryLayout />
-                </DeliveryRoute>
-              }
-            >
-              <Route index element={<DeliveryDashboard />} />
-              <Route path="dashboard" element={<DeliveryDashboard />} />
-              <Route path="history" element={<DeliveryHistory />} />
-              <Route path="earnings" element={<div>Earnings Coming Soon</div>} />
-              <Route path="profile" element={<DeliveryProfile />} />
-            </Route>
+
 
             {/* Vendor/Restaurant Routes */}
             <Route 

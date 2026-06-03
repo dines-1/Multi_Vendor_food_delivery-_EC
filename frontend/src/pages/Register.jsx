@@ -85,13 +85,6 @@ const Register = () => {
             <Store size={20} />
             <span>Restaurant</span>
           </div>
-          <div 
-            className={`role-item ${formData.role === 'delivery' ? 'active' : ''}`}
-            onClick={() => setFormData({ ...formData, role: 'delivery' })}
-          >
-            <Truck size={20} />
-            <span>Delivery</span>
-          </div>
         </div>
         
         <form onSubmit={handleSubmit} className="auth-form">

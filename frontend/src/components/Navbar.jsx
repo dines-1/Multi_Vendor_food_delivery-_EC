@@ -94,12 +94,7 @@ const Navbar = () => {
                         {activeOrderCount > 0 && <span className="dropdown-badge">{activeOrderCount}</span>}
                       </Link>
                     )}
-                    {user.role === 'delivery' && (
-                      <>
-                        <Link to="/delivery/dashboard">Dashboard</Link>
-                        <Link to="/delivery/orders">Active Orders</Link>
-                      </>
-                    )}
+
                     {user.role === 'admin' && <Link to="/admin">Admin Panel</Link>}
                     <button onClick={handleLogout} className="logout-btn">
                       <LogOut size={16} /> Logout

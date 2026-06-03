@@ -11,7 +11,6 @@ const HomeRedirect = () => {
     if (!loading && user) {
       if (user.role === 'admin') navigate('/admin');
       else if (user.role === 'vendor') navigate('/vendor');
-      else if (user.role === 'delivery') navigate('/delivery/dashboard');
     }
   }, [user, loading, navigate]);
 
