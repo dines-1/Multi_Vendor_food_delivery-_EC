@@ -244,7 +244,7 @@ export const failEsewa = async (req, res) => {
 const buildStripeSessionPayload = (order) => {
   const amountInSmallestUnit = Math.round(Number(order.total_amount) * 100);
   const itemCount = order.items.reduce((sum, item) => sum + item.quantity, 0);
-  const description = `${itemCount} item${itemCount === 1 ? '' : 's'} from FoodHub`;
+  const description = `${itemCount} item${itemCount === 1 ? '' : 's'} from Chulo`;
 
   return new URLSearchParams({
     mode: 'payment',
@@ -252,7 +252,7 @@ const buildStripeSessionPayload = (order) => {
     cancel_url: `${BACKEND_URL}/api/payments/stripe/failure?orderId=${order._id}`,
     'line_items[0][price_data][currency]': STRIPE_CURRENCY,
     'line_items[0][price_data][unit_amount]': String(amountInSmallestUnit),
-    'line_items[0][price_data][product_data][name]': `FoodHub Order ${order.orderNumber}`,
+    'line_items[0][price_data][product_data][name]': `Chulo Order ${order.orderNumber}`,
     'line_items[0][price_data][product_data][description]': description,
     'line_items[0][quantity]': '1',
     customer_creation: 'always',

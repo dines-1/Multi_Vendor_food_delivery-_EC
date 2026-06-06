@@ -13,6 +13,12 @@ import {
   Utensils,
   Zap,
   Gift,
+  TrendingUp,
+  Users,
+  Bike,
+  Store,
+  Heart,
+  CheckCircle,
 } from 'lucide-react';
 import restaurantService from '../services/restaurantService';
 import menuService from '../services/menuService';
@@ -22,15 +28,6 @@ import { getDocs, normalizeMenuItem, normalizeRestaurant } from '../utils/custom
 import './Home.css';
 
 const activeStatuses = ['pending', 'confirmed', 'preparing', 'out_for_delivery'];
-
-const FLOATING_ITEMS = [
-  { emoji: '🍜', label: 'Thukpa', x: '8%', y: '18%', delay: '0s', duration: '6s' },
-  { emoji: '🥟', label: 'Momos', x: '82%', y: '12%', delay: '1s', duration: '7s' },
-  { emoji: '🍕', label: 'Pizza', x: '75%', y: '68%', delay: '2s', duration: '5.5s' },
-  { emoji: '🍛', label: 'Dal Bhat', x: '5%', y: '72%', delay: '0.5s', duration: '6.5s' },
-  { emoji: '🧁', label: 'Dessert', x: '50%', y: '5%', delay: '1.5s', duration: '7.5s' },
-  { emoji: '🥗', label: 'Salad', x: '88%', y: '42%', delay: '3s', duration: '5s' },
-];
 
 const CATEGORIES = [
   { name: 'Momos', icon: '🥟' },
@@ -88,9 +85,9 @@ const Home = () => {
 
   const displayCategories = featuredCategories.length > 0
     ? featuredCategories.map((name) => {
-      const match = CATEGORIES.find((c) => c.name.toLowerCase() === name.toLowerCase());
-      return { name, icon: match?.icon || '🍽️' };
-    })
+        const match = CATEGORIES.find((c) => c.name.toLowerCase() === name.toLowerCase());
+        return { name, icon: match?.icon || '🍽️' };
+      })
     : CATEGORIES;
 
   const handleSubmit = (e) => {
@@ -107,70 +104,65 @@ const Home = () => {
   return (
     <div className="home-page">
 
-      {/* ── HERO ── */}
+      {/* ── HERO – full-screen ── */}
       <section className="home-hero">
-        <div className="hero-container">
-          <div className="hero-text-side">
-            <span className="hero-eyebrow">
-              <Zap size={14} /> Fresh from local kitchens · Kathmandu
-            </span>
-            <h1 className="hero-title">
-              Meals that are <em>actually</em> available right now
-            </h1>
-            <p className="hero-sub">
-              Real menu items, live restaurants, fresh from the kitchen. No stale placeholders, no guesswork.
-            </p>
+        {/* Background image with overlay */}
+        <div className="hero-bg">
+          <img
+            src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1920&q=80"
+            alt="Delicious food spread"
+            className="hero-bg-img"
+          />
+          <div className="hero-bg-overlay" />
+        </div>
 
-            <form className="hero-search" onSubmit={handleSubmit}>
-              <MapPin size={17} className="search-pin" />
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search dishes, cuisines, or restaurants…"
-              />
-              <button type="submit" className="search-btn" aria-label="Search">
-                <Search size={17} />
-                <span>Search</span>
-              </button>
-            </form>
+        <div className="hero-content">
+          <span className="hero-eyebrow">
+            <Zap size={14} /> Fresh from local kitchens · Kathmandu
+          </span>
+          <h1 className="hero-title">
+            Food you love,<br />
+            <em>at your door</em>
+          </h1>
+          <p className="hero-sub">
+            Real menu items, live restaurants, fresh from the kitchen.
+            No stale placeholders, no guesswork.
+          </p>
 
-            <div className="hero-stats">
-              <div className="hero-stat">
-                <strong>{loading ? '—' : `${restaurants.length}+`}</strong>
-                <span>restaurants</span>
-              </div>
-              <div className="hero-stat-divider" />
-              <div className="hero-stat">
-                <strong>{loading ? '—' : `${menuItems.length}+`}</strong>
-                <span>dishes</span>
-              </div>
-              <div className="hero-stat-divider" />
-              <div className="hero-stat">
-                <strong>{loading ? '—' : displayCategories.length}</strong>
-                <span>categories</span>
-              </div>
+          <form className="hero-search" onSubmit={handleSubmit}>
+            <MapPin size={17} className="search-pin" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search dishes, cuisines, or restaurants…"
+            />
+            <button type="submit" className="search-btn" aria-label="Search">
+              <Search size={17} />
+              <span>Search</span>
+            </button>
+          </form>
+
+          <div className="hero-stats">
+            <div className="hero-stat">
+              <strong>{loading ? '—' : `${restaurants.length}+`}</strong>
+              <span>restaurants</span>
+            </div>
+            <div className="hero-stat-divider" />
+            <div className="hero-stat">
+              <strong>{loading ? '—' : `${menuItems.length}+`}</strong>
+              <span>dishes</span>
+            </div>
+            <div className="hero-stat-divider" />
+            <div className="hero-stat">
+              <strong>{loading ? '—' : displayCategories.length}</strong>
+              <span>categories</span>
             </div>
           </div>
+        </div>
 
-          <div className="hero-visual-side" aria-hidden="true">
-            <div className="hero-food-orbit">
-              {FLOATING_ITEMS.map((item) => (
-                <div
-                  key={item.label}
-                  className="food-float"
-                  style={{ left: item.x, top: item.y, animationDelay: item.delay, animationDuration: item.duration }}
-                >
-                  <span className="food-float-emoji">{item.emoji}</span>
-                  <span className="food-float-label">{item.label}</span>
-                </div>
-              ))}
-              <div className="orbit-ring ring-1" />
-              <div className="orbit-ring ring-2" />
-              <div className="orbit-center">
-                <span>🍽️</span>
-              </div>
-            </div>
-          </div>
+        {/* Scroll cue */}
+        <div className="hero-scroll-cue" aria-hidden="true">
+          <span />
         </div>
       </section>
 
@@ -243,15 +235,15 @@ const Home = () => {
           {loading
             ? Array.from({ length: 8 }).map((_, i) => <div className="skeleton cat-tile" key={i} />)
             : displayCategories.map((cat) => (
-              <button
-                className="cat-tile"
-                key={cat.name}
-                onClick={() => navigate(`/explore?search=${encodeURIComponent(cat.name)}`)}
-              >
-                <span className="cat-emoji">{cat.icon}</span>
-                <span className="cat-name">{cat.name}</span>
-              </button>
-            ))}
+                <button
+                  className="cat-tile"
+                  key={cat.name}
+                  onClick={() => navigate(`/explore?search=${encodeURIComponent(cat.name)}`)}
+                >
+                  <span className="cat-emoji">{cat.icon}</span>
+                  <span className="cat-name">{cat.name}</span>
+                </button>
+              ))}
         </div>
       </section>
 
@@ -307,27 +299,110 @@ const Home = () => {
           {loading
             ? Array.from({ length: 4 }).map((_, i) => <div className="skeleton dish-card" key={i} />)
             : menuItems.map((item) => (
-              <article className="dish-card" key={item.id} onClick={() => navigate(`/food/${item.id}`)}>
-                <div className="dish-img-wrap">
-                  <img src={item.image} alt={item.name} />
-                </div>
-                <div className="dish-card-body">
-                  <span className="dish-category">{item.categoryName}</span>
-                  <h3>{item.name}</h3>
-                  <p className="dish-restaurant">{item.restaurantName}</p>
-                  <div className="dish-footer">
-                    <strong className="dish-price">Rs. {item.price}</strong>
-                    <button
-                      className="add-cart-btn"
-                      onClick={(e) => handleAddToCart(e, item.id)}
-                      aria-label={`Add ${item.name} to cart`}
-                    >
-                      <ShoppingBag size={15} />
-                    </button>
+                <article className="dish-card" key={item.id} onClick={() => navigate(`/food/${item.id}`)}>
+                  <div className="dish-img-wrap">
+                    <img src={item.image} alt={item.name} />
                   </div>
+                  <div className="dish-card-body">
+                    <span className="dish-category">{item.categoryName}</span>
+                    <h3>{item.name}</h3>
+                    <p className="dish-restaurant">{item.restaurantName}</p>
+                    <div className="dish-footer">
+                      <strong className="dish-price">Rs. {item.price}</strong>
+                      <button
+                        className="add-cart-btn"
+                        onClick={(e) => handleAddToCart(e, item.id)}
+                        aria-label={`Add ${item.name} to cart`}
+                      >
+                        <ShoppingBag size={15} />
+                      </button>
+                    </div>
+                  </div>
+                </article>
+              ))}
+        </div>
+      </section>
+
+      {/* ── ABOUT US TEASER ── */}
+      <section className="about-teaser">
+        <div className="about-teaser-inner">
+          <div className="about-teaser-visual">
+            <img
+              src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80"
+              alt="Our team delivering food"
+            />
+            <div className="about-teaser-badge">
+              <Heart size={18} fill="currentColor" />
+              <span>Serving Kathmandu since 2020</span>
+            </div>
+          </div>
+          <div className="about-teaser-text">
+            <span className="section-kicker">Who we are</span>
+            <h2>Built for Kathmandu, by people who live here</h2>
+            <p>
+              We started because we were tired of cold food, wrong orders, and
+              restaurants that were "available" but never actually open. Today we
+              connect thousands of hungry people with the kitchens they love —
+              fast, reliably, and honestly.
+            </p>
+            <ul className="about-perks">
+              <li><CheckCircle size={16} /> Live inventory — no ghost menu items</li>
+              <li><CheckCircle size={16} /> 30-minute delivery or your next order is free</li>
+              <li><CheckCircle size={16} /> Rider earnings go directly to our team</li>
+            </ul>
+            <Link to="/about" className="about-learn-btn">
+              Learn more about us <ArrowRight size={16} />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ── LIST YOUR RESTAURANT ── */}
+      <section className="partner-section">
+        <div className="partner-bg">
+          <img
+            src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1920&q=80"
+            alt="Restaurant kitchen"
+          />
+          <div className="partner-overlay" />
+        </div>
+        <div className="partner-inner">
+          <div className="partner-text">
+            <span className="section-kicker section-kicker--light">Partner with us</span>
+            <h2>List your restaurant.<br />Reach 500,000+ customers.</h2>
+            <p>
+              Join Kathmandu's fastest-growing food platform. We handle delivery,
+              payments, and customer support — you focus on the food.
+            </p>
+            <div className="partner-perks">
+              <div className="partner-perk">
+                <TrendingUp size={20} />
+                <div>
+                  <strong>Grow your reach</strong>
+                  <span>Get discovered by new customers daily</span>
                 </div>
-              </article>
-            ))}
+              </div>
+              <div className="partner-perk">
+                <Bike size={20} />
+                <div>
+                  <strong>We deliver</strong>
+                  <span>Our riders handle every drop-off</span>
+                </div>
+              </div>
+              <div className="partner-perk">
+                <Users size={20} />
+                <div>
+                  <strong>Dedicated support</strong>
+                  <span>A real person to call, always</span>
+                </div>
+              </div>
+            </div>
+            <button className="partner-cta" onClick={() => navigate('/register-restaurant')}>
+              <Store size={18} />
+              Register your restaurant
+              <ArrowRight size={16} />
+            </button>
+          </div>
         </div>
       </section>
 

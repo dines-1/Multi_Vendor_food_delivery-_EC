@@ -5,7 +5,6 @@ import {
   Package,
   Clock,
   Star,
-  MessageCircle,
   RotateCcw,
   XCircle,
   CheckCircle,
@@ -23,7 +22,6 @@ import {
   HelpCircle
 } from 'lucide-react';
 import ReviewModal from '../components/ReviewModal';
-import ChatDrawer from '../components/ChatDrawer';
 import { useCart } from '../context/CartContext';
 import toast from 'react-hot-toast';
 import './MyOrders.css';
@@ -111,7 +109,7 @@ const getPaymentStatusInfo = (order) => {
 };
 
 /* ─── Order Details Drawer ────────────────────────────────────────── */
-const OrderDetailsDrawer = ({ order, onClose, onCancel, onReorder, onRate, onMessage, reviewedOrders, cancellingId }) => {
+const OrderDetailsDrawer = ({ order, onClose, onCancel, onReorder, onRate, reviewedOrders, cancellingId }) => {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -344,14 +342,9 @@ const OrderDetailsDrawer = ({ order, onClose, onCancel, onReorder, onRate, onMes
             </span>
           )}
           {isDelivered && (
-            <>
-              <button className="drawer-action-btn msg" onClick={() => onMessage(order)}>
-                <MessageCircle size={14} /> Message
-              </button>
-              <button className="drawer-action-btn reorder" onClick={() => onReorder(order)}>
-                <RotateCcw size={14} /> Reorder
-              </button>
-            </>
+            <button className="drawer-action-btn reorder" onClick={() => onReorder(order)}>
+              <RotateCcw size={14} /> Reorder
+            </button>
           )}
         </div>
       </div>
@@ -366,9 +359,6 @@ const MyOrders = () => {
   const [cancellingId, setCancellingId] = useState(null);
   const [showReview, setShowReview]   = useState(false);
   const [reviewOrder, setReviewOrder] = useState(null);
-  const [showChat, setShowChat]       = useState(false);
-  const [chatRecipient, setChatRecipient] = useState(null);
-  const [chatOrderId, setChatOrderId] = useState(null);
   const [reviewedOrders, setReviewedOrders] = useState(new Set());
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [activeTab, setActiveTab]     = useState('live');
@@ -436,12 +426,6 @@ const MyOrders = () => {
       setReviewedOrders(prev => new Set([...prev, reviewOrder._id]));
     }
     setReviewOrder(null);
-  };
-
-  const handleMessage = (order) => {
-    setChatRecipient({ _id: order.restaurant?.owner || order.restaurant?._id, name: order.restaurant?.name });
-    setChatOrderId(order._id);
-    setShowChat(true);
   };
 
   if (loading) {
@@ -646,14 +630,9 @@ const MyOrders = () => {
                         </span>
                       )}
                       {isDelivered && (
-                        <>
-                          <button className="btn-message" onClick={() => handleMessage(order)} title="Message Restaurant">
-                            <MessageCircle size={14} /> Message
-                          </button>
-                          <button className="btn-reorder" onClick={() => handleReorder(order)}>
-                            <RotateCcw size={14} /> Reorder
-                          </button>
-                        </>
+                        <button className="btn-reorder" onClick={() => handleReorder(order)}>
+                          <RotateCcw size={14} /> Reorder
+                        </button>
                       )}
                     </div>
                   </div>
@@ -672,7 +651,6 @@ const MyOrders = () => {
           onCancel={handleCancel}
           onReorder={handleReorder}
           onRate={handleRateOrder}
-          onMessage={handleMessage}
           reviewedOrders={reviewedOrders}
           cancellingId={cancellingId}
         />
@@ -683,12 +661,6 @@ const MyOrders = () => {
         onClose={handleReviewClose}
         orderId={reviewOrder?._id}
         restaurantName={reviewOrder?.restaurant?.name}
-      />
-      <ChatDrawer
-        isOpen={showChat}
-        onClose={() => { setShowChat(false); setChatRecipient(null); setChatOrderId(null); }}
-        initialRecipient={chatRecipient}
-        initialOrderId={chatOrderId}
       />
     </div>
   );

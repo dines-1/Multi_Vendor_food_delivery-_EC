@@ -1,6 +1,21 @@
 import Cart from '../models/Cart.js';
 import MenuItem from '../models/MenuItem.js';
 
+const MAX_NOTE_WORDS = 200;
+
+const countWords = (value = '') => value.trim().split(/\s+/).filter(Boolean).length;
+
+const normalizeNotes = (value) => {
+  if (value === undefined) return undefined;
+  const notes = String(value).trim();
+  if (countWords(notes) > MAX_NOTE_WORDS) {
+    const error = new Error(`Special notes cannot exceed ${MAX_NOTE_WORDS} words`);
+    error.statusCode = 400;
+    throw error;
+  }
+  return notes;
+};
+
 const populateCart = (query) =>
   query.populate({
     path: 'items.menuItem',
@@ -33,7 +48,8 @@ export const getCart = async (req, res) => {
 // @access  Private
 export const addToCart = async (req, res) => {
   try {
-    const { menuItemId, quantity = 1, special_notes } = req.body;
+    const { menuItemId, quantity = 1 } = req.body;
+    const special_notes = normalizeNotes(req.body.special_notes);
 
     const menuItem = await MenuItem.findById(menuItemId);
     if (!menuItem) {
@@ -102,7 +118,8 @@ export const addToCart = async (req, res) => {
 // @access  Private
 export const updateCartItem = async (req, res) => {
   try {
-    const { quantity, special_notes } = req.body;
+    const { quantity } = req.body;
+    const special_notes = normalizeNotes(req.body.special_notes);
 
     const cart = await Cart.findOne({ user: req.user.id });
     if (!cart) {
@@ -138,7 +155,7 @@ export const updateCartItem = async (req, res) => {
     const populated = await populateCart(Cart.findById(cart._id));
     res.status(200).json({ success: true, data: populated });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(err.statusCode || 400).json({ success: false, message: err.message });
   }
 };
 

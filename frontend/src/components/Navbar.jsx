@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingCart, LogOut, UtensilsCrossed, MessageCircle, Package } from 'lucide-react';
+import { ShoppingCart, LogOut, UtensilsCrossed, Package } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import api from '../services/api';
-import ChatDrawer from './ChatDrawer';
 import NotificationBell from './NotificationBell';
 import './Navbar.css';
 
@@ -14,7 +13,6 @@ const Navbar = () => {
   const { user, logout } = useAuth();
   const { cartCount } = useCart();
   const navigate = useNavigate();
-  const [showChat, setShowChat] = useState(false);
   const [activeOrderCount, setActiveOrderCount] = useState(0);
 
   useEffect(() => {
@@ -51,26 +49,24 @@ const Navbar = () => {
   };
 
   return (
-    <>
-      <nav className="navbar">
+    <nav className="navbar">
         <div className="navbar-container">
           <Link to="/" className="navbar-logo">
             <div className="logo-icon">
               <UtensilsCrossed size={24} color="#FFF" />
             </div>
-            <span>FoodHub</span>
+            <span>Chulo</span>
           </Link>
 
           <div className="nav-links">
             <Link to="/explore" className="nav-link">Explore</Link>
+            <Link to="/about" className="nav-link">About</Link>
+            <Link to="/contact" className="nav-link">Contact</Link>
           </div>
 
           <div className="nav-actions">
             {user ? (
               <>
-                <button className="action-btn chat-nav-btn" onClick={() => setShowChat(true)} title="Messages">
-                  <MessageCircle size={20} />
-                </button>
                 <NotificationBell />
                 {user.role === 'customer' && (
                   <Link to="/orders?tab=live" className="action-btn orders-nav-btn" title="My Orders">
@@ -110,14 +106,7 @@ const Navbar = () => {
             )}
           </div>
         </div>
-      </nav>
-
-      {/* Chat Drawer */}
-      <ChatDrawer
-        isOpen={showChat}
-        onClose={() => setShowChat(false)}
-      />
-    </>
+    </nav>
   );
 };
 

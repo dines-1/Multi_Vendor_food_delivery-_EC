@@ -8,6 +8,7 @@ import Home from './pages/Home';
 import HomeRedirect from './components/HomeRedirect';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Profile from './pages/Profile';
 import RestaurantDetail from './pages/RestaurantDetail';
 import FoodDetail from './pages/FoodDetail';
 import AdminLayout from './pages/admin/AdminLayout';
@@ -21,6 +22,8 @@ import PlatformSettings from './pages/admin/PlatformSettings';
 import MyOrders from './pages/MyOrders';
 import TrackOrder from './pages/TrackOrder';
 import Explore from './pages/Explore';
+import Contact from './pages/Contact';
+import AboutUs from './pages/AboutUs';
 import AdminRoute from './components/AdminRoute';
 import VendorRoute from './components/VendorRoute';
 import VendorLayout from './pages/vendor/VendorLayout';
@@ -35,6 +38,7 @@ import { CartProvider } from './context/CartContext';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import PaymentResult from './pages/PaymentResult';
+import Registerrestaurants from './pages/Registerrestaurant'
 
 function App() {
   return (
@@ -57,8 +61,12 @@ function App() {
               {/* Public Routes with Navbar and Footer */}
               <Route path="/" element={<><Navbar /><main className="main-content"><HomeRedirect /></main><Footer /></>} />
               <Route path="/explore" element={<><Navbar /><main className="main-content"><Explore /></main><Footer /></>} />
+              <Route path="/about" element={<><Navbar /><main className="main-content"><AboutUs /></main><Footer /></>} />
+              <Route path="/contact" element={<><Navbar /><main className="main-content"><Contact /></main><Footer /></>} />
+              <Route path="/profile" element={<><Navbar /><main className="main-content"><Profile /></main><Footer /></>} />
               <Route path="/login" element={<><Navbar /><main className="main-content"><Login /></main><Footer /></>} />
               <Route path="/register" element={<><Navbar /><main className="main-content"><Register /></main><Footer /></>} />
+              <Route path="//register-restaurant" element={<><Navbar /><main className="main-content"><Registerrestaurants /></main><Footer /></>} />
               <Route path="/restaurant/:id" element={<><Navbar /><main className="main-content"><RestaurantDetail /></main><Footer /></>} />
               <Route path="/food/:id" element={<><Navbar /><main className="main-content"><FoodDetail /></main><Footer /></>} />
               <Route path="/orders" element={<><Navbar /><main className="main-content"><MyOrders /></main><Footer /></>} />

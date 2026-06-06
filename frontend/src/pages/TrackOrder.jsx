@@ -3,12 +3,11 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { ChefHat, MapPin, Navigation, Package, CheckCircle, ArrowLeft, MessageCircle, Star, PartyPopper } from 'lucide-react';
+import { ChefHat, MapPin, Navigation, Package, CheckCircle, ArrowLeft, Star, PartyPopper } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import socketService from '../utils/socket.js';
 import axios from 'axios';
 import ReviewModal from '../components/ReviewModal';
-import ChatDrawer from '../components/ChatDrawer';
 import './TrackOrder.css';
 
 // Fix for default marker icons in Leaflet
@@ -82,8 +81,6 @@ const TrackOrder = () => {
   const [routeTrail, setRouteTrail] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showReview, setShowReview] = useState(false);
-  const [showChat, setShowChat] = useState(false);
-  const [chatRecipient, setChatRecipient] = useState(null);
   const [showCelebration, setShowCelebration] = useState(false);
   const [eta, setEta] = useState(null);
   const [progress, setProgress] = useState(0);
@@ -171,15 +168,6 @@ const TrackOrder = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const openChat = (recipientType) => {
-    if (recipientType === 'restaurant' && order?.restaurant) {
-      setChatRecipient({ _id: order.restaurant.owner || order.restaurant._id, name: order.restaurant.name });
-    } else if (recipientType === 'rider' && order?.delivery_person_id) {
-      setChatRecipient({ _id: order.delivery_person_id.user || order.delivery_person_id._id, name: 'Delivery Rider' });
-    }
-    setShowChat(true);
   };
 
   if (loading) return <div className="loading">Loading Tracker...</div>;
@@ -278,18 +266,8 @@ const TrackOrder = () => {
             </div>
           </div>
 
-          {/* Chat & Review Buttons */}
+          {isDelivered && (
           <div className="action-buttons-grid">
-            <button className="action-card-btn" onClick={() => openChat('restaurant')}>
-              <MessageCircle size={20} />
-              <span>Message Restaurant</span>
-            </button>
-            {order.delivery_person_id && (
-              <button className="action-card-btn rider" onClick={() => openChat('rider')}>
-                <MessageCircle size={20} />
-                <span>Message Rider</span>
-              </button>
-            )}
             {isDelivered && (
               <button className="action-card-btn review" onClick={() => setShowReview(true)}>
                 <Star size={20} />
@@ -297,6 +275,7 @@ const TrackOrder = () => {
               </button>
             )}
           </div>
+          )}
 
           {/* MOCK CONTROLLER FOR DEMO PURPOSES */}
           <div className="demo-controls">
@@ -378,13 +357,6 @@ const TrackOrder = () => {
         restaurantName={order.restaurant?.name}
       />
 
-      {/* Chat Drawer */}
-      <ChatDrawer
-        isOpen={showChat}
-        onClose={() => { setShowChat(false); setChatRecipient(null); }}
-        initialRecipient={chatRecipient}
-        initialOrderId={order._id}
-      />
     </div>
   );
 };

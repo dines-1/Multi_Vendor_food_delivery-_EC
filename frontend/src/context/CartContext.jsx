@@ -58,6 +58,19 @@ export const CartProvider = ({ children }) => {
     }
   };
 
+  const updateItemNotes = async (itemId, special_notes) => {
+    try {
+      const res = await api.put(`/cart/${itemId}`, { special_notes });
+      setCart(res.data.data);
+      toast.success('Note saved');
+      return { success: true };
+    } catch (err) {
+      const message = err.response?.data?.message || 'Failed to save note';
+      toast.error(message);
+      return { success: false, message };
+    }
+  };
+
   const removeFromCart = async (itemId) => {
     try {
       const res = await api.delete(`/cart/${itemId}`);
@@ -92,6 +105,7 @@ export const CartProvider = ({ children }) => {
         loading,
         addToCart,
         updateQuantity,
+        updateItemNotes,
         removeFromCart,
         clearCart,
         cartCount,

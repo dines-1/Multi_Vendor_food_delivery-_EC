@@ -193,7 +193,10 @@ const Checkout = () => {
                 {cart.items.map(item => (
                   <div key={item._id} className="mini-item">
                     <span className="qty">{item.quantity}x</span>
-                    <span className="name">{item.menuItem?.name}</span>
+                    <span className="name">
+                      {item.menuItem?.name}
+                      {item.special_notes && <small>Note: {item.special_notes}</small>}
+                    </span>
                     <span className="price">Rs. {(item.menuItem?.price || 0) * item.quantity}</span>
                   </div>
                 ))}

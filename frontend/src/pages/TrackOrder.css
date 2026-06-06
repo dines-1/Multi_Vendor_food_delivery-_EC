@@ -314,15 +314,6 @@
   box-shadow: var(--shadow-sm);
 }
 
-.action-card-btn.rider {
-  border-color: var(--success);
-}
-
-.action-card-btn.rider:hover {
-  background: rgba(29, 185, 84, 0.08);
-  color: var(--success);
-}
-
 .action-card-btn.review {
   grid-column: 1 / -1;
   background: var(--primary);

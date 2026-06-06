@@ -1,0 +1,322 @@
+/* ═══════════════════════════════════════════════
+   RegisterRestaurant.css
+   Two-column: dark brand panel + white form side
+   ═══════════════════════════════════════════════ */
+
+.rr-page {
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  min-height: 100svh;
+}
+
+/* ── LEFT PANEL ── */
+.rr-panel {
+  background: #0f0d0b;
+  background-image:
+    radial-gradient(ellipse at 20% 80%, rgba(232,57,14,.18) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 10%, rgba(249,168,37,.10) 0%, transparent 55%);
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.rr-panel-content {
+  padding: 48px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  flex: 1;
+}
+
+.rr-back-home {
+  font-size: 13px;
+  color: rgba(255,255,255,.45);
+  text-decoration: none;
+  margin-bottom: 36px;
+  display: inline-block;
+  transition: color .2s;
+}
+.rr-back-home:hover { color: rgba(255,255,255,.8); }
+
+.rr-panel-brand {
+  font-size: 2.8rem;
+  margin-bottom: 20px;
+  line-height: 1;
+}
+
+.rr-panel-content h1 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.2;
+  margin: 0 0 12px;
+  letter-spacing: -.02em;
+}
+
+.rr-panel-content > p {
+  font-size: 14px;
+  color: rgba(255,255,255,.55);
+  line-height: 1.7;
+  margin: 0 0 36px;
+}
+
+/* Benefits list */
+.rr-benefits {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.rr-benefits li {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+.rr-benefit-icon {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+  line-height: 1;
+}
+.rr-benefits li strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 2px;
+}
+.rr-benefits li span {
+  font-size: 13px;
+  color: rgba(255,255,255,.5);
+  line-height: 1.5;
+}
+
+/* Quote */
+.rr-panel-quote {
+  margin-top: auto;
+  padding: 20px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.1);
+}
+.rr-panel-quote p {
+  font-size: 13px;
+  color: rgba(255,255,255,.7);
+  font-style: italic;
+  line-height: 1.6;
+  margin: 0 0 8px;
+}
+.rr-panel-quote span {
+  font-size: 12px;
+  color: rgba(255,255,255,.4);
+  font-weight: 600;
+}
+
+/* ── RIGHT FORM SIDE ── */
+.rr-form-side {
+  background: #faf9f7;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 60px 32px;
+  overflow-y: auto;
+}
+
+.rr-form-wrap {
+  width: 100%;
+  max-width: 560px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+/* ── STEPPER ── */
+.rr-stepper {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 4px;
+}
+
+.rr-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #9ca3af;
+  white-space: nowrap;
+}
+.rr-step.active { color: #111; }
+.rr-step.done   { color: #22c55e; }
+
+.rr-step-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 800;
+  flex-shrink: 0;
+  transition: all .25s;
+  background: #fff;
+  color: #9ca3af;
+}
+.rr-step.active .rr-step-dot {
+  border-color: #E8390E;
+  background: #E8390E;
+  color: #fff;
+}
+.rr-step.done .rr-step-dot {
+  border-color: #22c55e;
+  background: #22c55e;
+  color: #fff;
+}
+
+.rr-step-line {
+  flex: 1;
+  height: 2px;
+  background: #e5e7eb;
+  margin: 0 8px;
+  border-radius: 999px;
+  transition: background .3s;
+}
+.rr-step-line.done { background: #22c55e; }
+
+/* ── STEP FORM ── */
+.rr-step-form { margin: 0; }
+
+.rr-step-header { margin-bottom: 4px; }
+.rr-step-header h2 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #111;
+  margin: 0 0 6px;
+  letter-spacing: -.02em;
+}
+.rr-step-header p {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* ── CUISINE CHIPS ── */
+.label-hint {
+  font-weight: 400;
+  font-size: 12px;
+  color: #9ca3af;
+  margin-left: 4px;
+}
+
+.cuisine-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+.cuisine-chip {
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1.5px solid #e5e7eb;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+  transition: all .18s;
+}
+.cuisine-chip:hover { border-color: #E8390E; color: #E8390E; }
+.cuisine-chip.selected {
+  background: #E8390E;
+  border-color: #E8390E;
+  color: #fff;
+}
+
+/* ── BUTTON ROW ── */
+.rr-btn-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.rr-back-btn {
+  padding: 14px 20px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 999px;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+  transition: border-color .2s, color .2s;
+  white-space: nowrap;
+}
+.rr-back-btn:hover { border-color: #111; color: #111; }
+
+/* ── REVIEW CARD ── */
+.rr-review-card {
+  background: #fff;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.rr-review-card h3 {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: #9ca3af;
+  margin: 0 0 4px;
+}
+.rr-review-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  font-size: 14px;
+}
+.rr-review-row span { color: #6b7280; flex-shrink: 0; }
+.rr-review-row strong {
+  color: #111;
+  font-weight: 600;
+  text-align: right;
+  word-break: break-all;
+}
+
+/* ── NOTE ── */
+.rr-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: #f0fdf4;
+  border: 1.5px solid #bbf7d0;
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-size: 13px;
+  color: #166534;
+  line-height: 1.5;
+}
+.rr-note svg { color: #22c55e; flex-shrink: 0; margin-top: 1px; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .rr-page { grid-template-columns: 1fr; }
+  .rr-panel {
+    position: static;
+    height: auto;
+    min-height: auto;
+  }
+  .rr-panel-content { padding: 32px 24px; }
+  .rr-panel-quote { margin-top: 32px; }
+  .rr-form-side { padding: 40px 20px; }
+}

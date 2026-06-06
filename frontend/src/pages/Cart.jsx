@@ -8,18 +8,32 @@ import {
   ArrowRight,
   ChevronLeft,
   Store,
-  AlertTriangle,
+  ClipboardList,
   Loader2,
-  PackageOpen
+  PackageOpen,
+  ShieldCheck
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { fallbackFoodImage, resolveMediaUrl } from '../utils/customerData';
 import './Cart.css';
 
+const MAX_NOTE_WORDS = 200;
+
+const countWords = (value = '') => value.trim().split(/\s+/).filter(Boolean).length;
+
+const trimToWordLimit = (value, limit = MAX_NOTE_WORDS) => {
+  const words = value.trim().split(/\s+/).filter(Boolean);
+  if (words.length <= limit) return value;
+  return words.slice(0, limit).join(' ');
+};
+
 const Cart = () => {
-  const { cart, loading, updateQuantity, removeFromCart, clearCart, cartTotal, cartCount } = useCart();
+  const { cart, loading, updateQuantity, updateItemNotes, removeFromCart, clearCart, cartTotal, cartCount } = useCart();
   const navigate = useNavigate();
   const [removingId, setRemovingId] = useState(null);
   const [clearing, setClearing] = useState(false);
+  const [savingNoteId, setSavingNoteId] = useState(null);
+  const [noteDrafts, setNoteDrafts] = useState({});
 
   const DELIVERY_FEE = 50;
 
@@ -33,6 +47,33 @@ const Cart = () => {
     setClearing(true);
     await clearCart();
     setClearing(false);
+  };
+
+  const getNoteValue = (item) => noteDrafts[item._id] ?? item.special_notes ?? '';
+
+  const handleNoteChange = (itemId, value) => {
+    setNoteDrafts((prev) => ({
+      ...prev,
+      [itemId]: trimToWordLimit(value)
+    }));
+  };
+
+  const handleNoteSave = async (item) => {
+    const nextNote = (noteDrafts[item._id] ?? item.special_notes ?? '').trim();
+    const currentNote = (item.special_notes ?? '').trim();
+    if (nextNote === currentNote) return;
+
+    setSavingNoteId(item._id);
+    const result = await updateItemNotes(item._id, nextNote);
+    setSavingNoteId(null);
+
+    if (result?.success) {
+      setNoteDrafts((prev) => {
+        const next = { ...prev };
+        delete next[item._id];
+        return next;
+      });
+    }
   };
 
   if (loading) {
@@ -52,7 +93,7 @@ const Cart = () => {
             <PackageOpen size={72} strokeWidth={1.2} />
           </div>
           <h1>Your cart is empty</h1>
-          <p>Looks like you haven't added anything yet. Explore our restaurants and find something delicious!</p>
+          <p>Looks like you haven't added anything yet. Explore restaurants and find something delicious.</p>
           <Link to="/" className="browse-btn">
             Browse Restaurants <ArrowRight size={18} />
           </Link>
@@ -80,7 +121,7 @@ const Cart = () => {
             {cart.restaurant && (
               <div className="restaurant-chip">
                 <Store size={14} />
-                <span>Ordering from: <strong>{cart.restaurant?.name}</strong></span>
+                <span>Ordering from <strong>{cart.restaurant?.name}</strong></span>
               </div>
             )}
           </div>
@@ -97,6 +138,7 @@ const Cart = () => {
               const price = item.menuItem?.price || 0;
               const itemTotal = price * item.quantity;
               const isRemoving = removingId === item._id;
+              const imageSrc = resolveMediaUrl(item.menuItem?.image_url || item.menuItem?.image, fallbackFoodImage);
 
               return (
                 <div
@@ -105,8 +147,11 @@ const Cart = () => {
                 >
                   <div className="item-img">
                     <img
-                      src={item.menuItem?.image_url || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200&q=80'}
+                      src={imageSrc}
                       alt={item.menuItem?.name}
+                      onError={(event) => {
+                        event.currentTarget.src = fallbackFoodImage;
+                      }}
                     />
                   </div>
                   <div className="item-details">
@@ -115,15 +160,33 @@ const Cart = () => {
                       {item.menuItem?.category?.name && (
                         <span className="item-category">{item.menuItem.category.name}</span>
                       )}
-                      {item.special_notes && (
-                        <p className="item-note">
-                          <AlertTriangle size={12} /> {item.special_notes}
-                        </p>
-                      )}
                     </div>
                     <div className="item-pricing">
                       <span className="unit-price">Rs. {price} each</span>
                       <span className="item-total">Rs. {itemTotal}</span>
+                    </div>
+                    <div className="note-editor">
+                      <div className="note-label-row">
+                        <label htmlFor={`note-${item._id}`}>
+                          <ClipboardList size={14} />
+                          Optional item note
+                        </label>
+                        <span className={countWords(getNoteValue(item)) >= MAX_NOTE_WORDS ? 'word-count limit' : 'word-count'}>
+                          {countWords(getNoteValue(item))}/{MAX_NOTE_WORDS} words
+                        </span>
+                      </div>
+                      <textarea
+                        id={`note-${item._id}`}
+                        value={getNoteValue(item)}
+                        onChange={(event) => handleNoteChange(item._id, event.target.value)}
+                        onBlur={() => handleNoteSave(item)}
+                        placeholder="Example: no onions, less spicy, sauce on the side"
+                        rows={3}
+                      />
+                      <div className="note-helper">
+                        <span>Saved with this item for the restaurant.</span>
+                        {savingNoteId === item._id && <span className="saving-note">Saving...</span>}
+                      </div>
                     </div>
                   </div>
                   <div className="item-controls">
@@ -203,7 +266,7 @@ const Cart = () => {
                 Proceed to Checkout <ArrowRight size={18} />
               </button>
 
-              <p className="secure-text">🔒 Secure & Fast Delivery</p>
+              <p className="secure-text"><ShieldCheck size={14} /> Secure checkout and fast delivery</p>
             </div>
           </div>
         </div>

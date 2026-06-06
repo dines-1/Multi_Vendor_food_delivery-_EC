@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
-import { User, Mail, Phone, Lock, ArrowRight, Truck, Store } from 'lucide-react';
+import { User, Mail, Phone, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import './Auth.css';
 
 const Register = () => {
@@ -12,47 +12,24 @@ const Register = () => {
     email: '',
     phone: '',
     password: '',
-    role: 'customer',
-    // Vendor specific fields
-    restaurantName: '',
-    restaurantStreet: '',
-    restaurantArea: '',
-    restaurantCity: '',
-    cuisines: ''
   });
-
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  
+
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
+  const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      let endpoint = '/auth/register';
-      let payload = { ...formData };
-
-      if (formData.role === 'vendor') {
-        endpoint = '/auth/register-vendor';
-        // Format restaurant address
-        payload.restaurantAddress = {
-          street: formData.restaurantStreet,
-          area: formData.restaurantArea,
-          city: formData.restaurantCity
-        };
-        // Format cuisines as array
-        payload.cuisines = formData.cuisines.split(',').map(c => c.trim()).filter(c => c !== '');
-      }
-
-      const res = await api.post(endpoint, payload);
+      const res = await api.post('/auth/register', { ...formData, role: 'customer' });
       login(res.data.token);
-      toast.success(formData.role === 'vendor' ? 'Registration submitted! Awaiting approval.' : 'Account created successfully!');
-      navigate(formData.role === 'vendor' ? '/vendor' : '/');
+      toast.success('Account created successfully!');
+      navigate('/');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Registration failed');
     } finally {
@@ -60,42 +37,31 @@ const Register = () => {
     }
   };
 
-
   return (
     <div className="auth-container fade-in">
       <div className="auth-card">
+
+        {/* Decorative top bar */}
+        <div className="auth-top-bar" />
+
         <div className="auth-header">
-          <h2>Create Account</h2>
-          <p>Join the community and enjoy delicious food</p>
+          <div className="auth-logo-ring">
+            <User size={26} />
+          </div>
+          <h2>Create your account</h2>
+          <p>Join thousands of food lovers in Kathmandu</p>
         </div>
 
-        {/* Role Selector */}
-        <div className="role-selector">
-          <div 
-            className={`role-item ${formData.role === 'customer' ? 'active' : ''}`}
-            onClick={() => setFormData({ ...formData, role: 'customer' })}
-          >
-            <User size={20} />
-            <span>Customer</span>
-          </div>
-          <div 
-            className={`role-item ${formData.role === 'vendor' ? 'active' : ''}`}
-            onClick={() => setFormData({ ...formData, role: 'vendor' })}
-          >
-            <Store size={20} />
-            <span>Restaurant</span>
-          </div>
-        </div>
-        
         <form onSubmit={handleSubmit} className="auth-form">
+          {/* Name */}
           <div className="form-group">
             <label>Full Name</label>
             <div className="input-wrapper">
-              <User size={18} color="#636E72" />
-              <input 
+              <User size={17} />
+              <input
                 name="name"
-                type="text" 
-                placeholder="John Doe" 
+                type="text"
+                placeholder="e.g. Aarav Sharma"
                 value={formData.name}
                 onChange={handleChange}
                 required
@@ -103,15 +69,16 @@ const Register = () => {
             </div>
           </div>
 
+          {/* Email + Phone side by side */}
           <div className="form-group-row">
             <div className="form-group">
               <label>Email Address</label>
               <div className="input-wrapper">
-                <Mail size={18} color="#636E72" />
-                <input 
+                <Mail size={17} />
+                <input
                   name="email"
-                  type="email" 
-                  placeholder="john@example.com" 
+                  type="email"
+                  placeholder="you@example.com"
                   value={formData.email}
                   onChange={handleChange}
                   required
@@ -121,11 +88,11 @@ const Register = () => {
             <div className="form-group">
               <label>Phone Number</label>
               <div className="input-wrapper">
-                <Phone size={18} color="#636E72" />
-                <input 
+                <Phone size={17} />
+                <input
                   name="phone"
-                  type="text" 
-                  placeholder="98XXXXXXXX" 
+                  type="tel"
+                  placeholder="98XXXXXXXX"
                   value={formData.phone}
                   onChange={handleChange}
                   required
@@ -133,95 +100,51 @@ const Register = () => {
               </div>
             </div>
           </div>
+
+          {/* Password */}
           <div className="form-group">
             <label>Password</label>
             <div className="input-wrapper">
-              <Lock size={18} color="#636E72" />
-              <input 
+              <Lock size={17} />
+              <input
                 name="password"
-                type="password" 
-                placeholder="••••••••" 
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Min. 8 characters"
                 value={formData.password}
                 onChange={handleChange}
+                minLength={8}
                 required
               />
+              <button
+                type="button"
+                className="input-eye-btn"
+                onClick={() => setShowPassword((v) => !v)}
+                aria-label="Toggle password visibility"
+              >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
             </div>
           </div>
 
-          {formData.role === 'vendor' && (
-
-            <div className="vendor-fields">
-              <h3 style={{ margin: '20px 0 10px', fontSize: '1rem', color: '#2D3436' }}>Restaurant Details</h3>
-              <div className="form-group">
-                <label>Restaurant Name</label>
-                <div className="input-wrapper">
-                  <Store size={18} color="#636E72" />
-                  <input 
-                    name="restaurantName"
-                    type="text" 
-                    placeholder="e.g. Tasty Bites" 
-                    value={formData.restaurantName}
-                    onChange={handleChange}
-                    required={formData.role === 'vendor'}
-                  />
-                </div>
-              </div>
-              <div className="form-group-row">
-                <div className="form-group">
-                  <label>Street</label>
-                  <input 
-                    name="restaurantStreet"
-                    type="text" 
-                    placeholder="123 Street" 
-                    value={formData.restaurantStreet}
-                    onChange={handleChange}
-                    required={formData.role === 'vendor'}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Area</label>
-                  <input 
-                    name="restaurantArea"
-                    type="text" 
-                    placeholder="Downtown" 
-                    value={formData.restaurantArea}
-                    onChange={handleChange}
-                    required={formData.role === 'vendor'}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>City</label>
-                  <input 
-                    name="restaurantCity"
-                    type="text" 
-                    placeholder="City Name" 
-                    value={formData.restaurantCity}
-                    onChange={handleChange}
-                    required={formData.role === 'vendor'}
-                  />
-                </div>
-              </div>
-              <div className="form-group">
-                <label>Cuisines (comma separated)</label>
-                <div className="input-wrapper">
-                  <input 
-                    name="cuisines"
-                    type="text" 
-                    placeholder="Italian, Pizza, Chinese" 
-                    value={formData.cuisines}
-                    onChange={handleChange}
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-
-
           <button type="submit" className="auth-submit-btn" disabled={loading}>
-            {loading ? 'Creating Account...' : 'Get Started'} <ArrowRight size={18} />
+            {loading ? (
+              <span className="btn-loader" />
+            ) : (
+              <>Get Started <ArrowRight size={17} /></>
+            )}
           </button>
         </form>
-        
+
+        <div className="auth-divider"><span>or</span></div>
+
+        {/* Restaurant CTA */}
+        <div className="auth-restaurant-cta">
+          <span>Own a restaurant?</span>
+          <Link to="/register-restaurant" className="auth-restaurant-link">
+            List it on our platform <ArrowRight size={14} />
+          </Link>
+        </div>
+
         <div className="auth-footer">
           <p>Already have an account? <Link to="/login">Sign In</Link></p>
         </div>

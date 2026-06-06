@@ -1,2 +1,2 @@
-# Multi_Vendor_food_delivery-_EC
-These is a Multi vender Food delivery web application which handles restaurant, delivery person  and customer under adminstrative control enviroment
+# Chulo
+Chulo is a multi-vendor food delivery web application for restaurants, delivery personnel, customers, and administrators.

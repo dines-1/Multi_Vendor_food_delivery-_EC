@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Facebook, Twitter, Instagram, Mail, Phone, MapPin, UtensilsCrossed } from 'lucide-react';
 import './Footer.css';
 
@@ -11,7 +12,7 @@ const Footer = () => {
             <div className="logo-icon">
               <UtensilsCrossed size={20} color="#FFF" />
             </div>
-            <span>FoodHub</span>
+            <span>Chulo</span>
           </div>
           <p>Delivering happiness to your doorstep, one meal at a time. The best restaurants in town, just a click away.</p>
           <div className="social-links">
@@ -24,9 +25,9 @@ const Footer = () => {
         <div className="footer-section links">
           <h3>Quick Links</h3>
           <ul>
-            <li><a href="#">About Us</a></li>
-            <li><a href="#">Browse Menu</a></li>
-            <li><a href="#">Featured Restaurants</a></li>
+            <li><Link to="/about">About Us</Link></li>
+            <li><Link to="/explore">Browse Menu</Link></li>
+            <li><Link to="/explore">Featured Restaurants</Link></li>
             <li><a href="#">Join as Vendor</a></li>
             <li><a href="#">Become a Rider</a></li>
           </ul>
@@ -35,7 +36,7 @@ const Footer = () => {
         <div className="footer-section support">
           <h3>Support</h3>
           <ul>
-            <li><a href="#">Help Center</a></li>
+            <li><Link to="/contact">Help Center</Link></li>
             <li><a href="#">Privacy Policy</a></li>
             <li><a href="#">Terms of Service</a></li>
             <li><a href="#">Refund Policy</a></li>
@@ -55,14 +56,14 @@ const Footer = () => {
             </li>
             <li>
               <Mail size={18} />
-              <span>support@foodhub.com</span>
+              <span>support@chulo.com</span>
             </li>
           </ul>
         </div>
       </div>
 
       <div className="footer-bottom">
-        <p>&copy; {new Date().getFullYear()} FoodHub. Developed by Dinesh Kadel.</p>
+        <p>&copy; {new Date().getFullYear()} Chulo. Developed by Dinesh Kadel.</p>
       </div>
     </footer>
   );
