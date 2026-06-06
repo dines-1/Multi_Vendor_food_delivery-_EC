@@ -90,7 +90,7 @@ const TrackOrder = () => {
 
   useEffect(() => {
     fetchOrderDetails();
-    
+
     const socket = socketService.connect();
     socketService.joinOrderRoom(id);
 
@@ -103,7 +103,7 @@ const TrackOrder = () => {
     socketService.onStatusUpdate((data) => {
       setOrder(prev => ({ ...prev, status: data.status }));
       toast.success(`Order status updated: ${data.status.replace('_', ' ')}`);
-      
+
       if (data.status === 'delivered') {
         setShowCelebration(true);
         setTimeout(() => setShowCelebration(false), 5000);
@@ -126,7 +126,7 @@ const TrackOrder = () => {
         deliveryLocation.lat, deliveryLocation.lng,
         customerCoords[0], customerCoords[1]
       );
-      
+
       const totalDist = calcDistance(
         restaurantCoords[0], restaurantCoords[1],
         customerCoords[0], customerCoords[1]
@@ -173,10 +173,10 @@ const TrackOrder = () => {
   if (loading) return <div className="loading">Loading Tracker...</div>;
   if (!order) return <div className="error">Order not found.</div>;
 
-  const customerCoords = order.delivery_address?.coordinates 
-    ? [order.delivery_address.coordinates.lat, order.delivery_address.coordinates.lng] 
+  const customerCoords = order.delivery_address?.coordinates
+    ? [order.delivery_address.coordinates.lat, order.delivery_address.coordinates.lng]
     : [27.7000, 85.3000];
-  
+
   const activeMarkers = [restaurantCoords, customerCoords];
   if (deliveryLocation) {
     activeMarkers.push([deliveryLocation.lat, deliveryLocation.lng]);
@@ -189,7 +189,7 @@ const TrackOrder = () => {
   ];
 
   // Planned route (dashed line to customer)
-  const plannedRoute = deliveryLocation 
+  const plannedRoute = deliveryLocation
     ? [[deliveryLocation.lat, deliveryLocation.lng], customerCoords]
     : [restaurantCoords, customerCoords];
 
@@ -267,23 +267,23 @@ const TrackOrder = () => {
           </div>
 
           {isDelivered && (
-          <div className="action-buttons-grid">
-            {isDelivered && (
-              <button className="action-card-btn review" onClick={() => setShowReview(true)}>
-                <Star size={20} />
-                <span>Rate Order</span>
-              </button>
-            )}
-          </div>
+            <div className="action-buttons-grid">
+              {isDelivered && (
+                <button className="action-card-btn review" onClick={() => setShowReview(true)}>
+                  <Star size={20} />
+                  <span>Rate Order</span>
+                </button>
+              )}
+            </div>
           )}
 
           {/* MOCK CONTROLLER FOR DEMO PURPOSES */}
           <div className="demo-controls">
             <h4>Demo Controls (Delivery Simulation)</h4>
             <div className="btn-group">
-                <button onClick={() => socketService.updateLocation(id, { lat: 27.7140, lng: 85.3180 })}>Start Route</button>
-                <button onClick={() => socketService.updateLocation(id, { lat: 27.7100, lng: 85.3100 })}>Midway</button>
-                <button onClick={() => socketService.updateLocation(id, { lat: 27.7050, lng: 85.3050 })}>Near Home</button>
+              <button onClick={() => socketService.updateLocation(id, { lat: 27.7140, lng: 85.3180 })}>Start Route</button>
+              <button onClick={() => socketService.updateLocation(id, { lat: 27.7100, lng: 85.3100 })}>Midway</button>
+              <button onClick={() => socketService.updateLocation(id, { lat: 27.7050, lng: 85.3050 })}>Near Home</button>
             </div>
           </div>
         </div>
@@ -294,7 +294,7 @@ const TrackOrder = () => {
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             />
-            
+
             {/* Restaurant marker */}
             <Marker position={restaurantCoords} icon={restaurantIcon}>
               <Popup>Restaurant: {order.restaurant?.name}</Popup>
@@ -333,8 +333,8 @@ const TrackOrder = () => {
 
             {/* Delivery person marker with pulse */}
             {deliveryLocation && (
-              <Marker 
-                position={[deliveryLocation.lat, deliveryLocation.lng]} 
+              <Marker
+                position={[deliveryLocation.lat, deliveryLocation.lng]}
                 icon={riderIcon.current}
               >
                 <Popup>Delivery Person is here</Popup>

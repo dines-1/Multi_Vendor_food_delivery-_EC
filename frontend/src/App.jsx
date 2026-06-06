@@ -33,6 +33,7 @@ import VendorOrders from './pages/vendor/VendorOrders';
 import VendorRevenue from './pages/vendor/VendorRevenue';
 import VendorProfile from './pages/vendor/VendorProfile';
 import NotFound from './pages/NotFound';
+import Orders from './pages/Orders';
 
 import { CartProvider } from './context/CartContext';
 import Cart from './pages/Cart';
@@ -46,7 +47,7 @@ function App() {
       <AuthProvider>
         <CartProvider>
           <div className="app">
-            <Toaster 
+            <Toaster
               position="top-right"
               toastOptions={{
                 duration: 3000,
@@ -74,55 +75,57 @@ function App() {
               <Route path="/cart" element={<><Navbar /><main className="main-content"><Cart /></main><Footer /></>} />
               <Route path="/checkout" element={<><Navbar /><main className="main-content"><Checkout /></main><Footer /></>} />
               <Route path="/payment-result" element={<><Navbar /><main className="main-content"><PaymentResult /></main><Footer /></>} />
+
+
               {/* Legacy redirect so old links still work */}
               <Route path="/payment-success/:method" element={<><Navbar /><main className="main-content"><PaymentResult /></main><Footer /></>} />
 
-            {/* Admin Routes */}
-            <Route 
-              path="/admin" 
-              element={
-                <AdminRoute>
-                  <AdminLayout />
-                </AdminRoute>
-              }
-            >
-              <Route index element={<AdminDashboard />} />
-              <Route path="vendors" element={<VendorManagement />} />
-              <Route path="users" element={<UserManagement />} />
-              <Route path="products" element={<ProductModeration />} />
-              <Route path="orders" element={<OrderManagement />} />
-              <Route path="finance" element={<FinanceManager />} />
-              <Route path="settings" element={<PlatformSettings />} />
-            </Route>
+              {/* Admin Routes */}
+              <Route
+                path="/admin"
+                element={
+                  <AdminRoute>
+                    <AdminLayout />
+                  </AdminRoute>
+                }
+              >
+                <Route index element={<AdminDashboard />} />
+                <Route path="vendors" element={<VendorManagement />} />
+                <Route path="users" element={<UserManagement />} />
+                <Route path="products" element={<ProductModeration />} />
+                <Route path="orders" element={<OrderManagement />} />
+                <Route path="finance" element={<FinanceManager />} />
+                <Route path="settings" element={<PlatformSettings />} />
+              </Route>
 
 
 
-            {/* Vendor/Restaurant Routes */}
-            <Route 
-              path="/vendor" 
-              element={
-                <VendorRoute>
-                  <VendorLayout />
-                </VendorRoute>
-              }
-            >
-              <Route index element={<VendorDashboard />} />
-              <Route path="dashboard" element={<VendorDashboard />} />
-              <Route path="menu" element={<VendorMenu />} />
-              <Route path="orders" element={<VendorOrders />} />
-              <Route path="revenue" element={<VendorRevenue />} />
-              <Route path="profile" element={<VendorProfile />} />
-            </Route>
+              {/* Vendor/Restaurant Routes */}
+              <Route
+                path="/vendor"
+                element={
+                  <VendorRoute>
+                    <VendorLayout />
+                  </VendorRoute>
+                }
+              >
+                <Route index element={<VendorDashboard />} />
+                <Route path="dashboard" element={<VendorDashboard />} />
+                <Route path="menu" element={<VendorMenu />} />
+                <Route path="orders" element={<VendorOrders />} />
+                <Route path="revenue" element={<VendorRevenue />} />
+                <Route path="profile" element={<VendorProfile />} />
+              </Route>
 
-            {/* 404 Route */}
-            <Route path="*" element={<><Navbar /><NotFound /><Footer /></>} />
+              {/* 404 Route */}
+              <Route path="*" element={<><Navbar /><NotFound /><Footer /></>} />
 
-          </Routes>
-        </div>
-      </CartProvider>
-    </AuthProvider>
-  </Router>
-);
+            </Routes>
+          </div>
+        </CartProvider>
+      </AuthProvider>
+    </Router>
+  );
 }
 
 export default App;
