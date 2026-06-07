@@ -40,15 +40,11 @@ const Register = () => {
   return (
     <div className="auth-container fade-in">
       <div className="auth-card">
-
-        {/* Decorative top bar */}
-        <div className="auth-top-bar" />
-
         <div className="auth-header">
           <div className="auth-logo-ring">
-            <User size={26} />
+            <User size={24} />
           </div>
-          <h2>Create your account</h2>
+          <h2>Create Account</h2>
           <p>Join thousands of food lovers in Kathmandu</p>
         </div>
 
@@ -57,7 +53,7 @@ const Register = () => {
           <div className="form-group">
             <label>Full Name</label>
             <div className="input-wrapper">
-              <User size={17} />
+              <User size={18} />
               <input
                 name="name"
                 type="text"
@@ -74,7 +70,7 @@ const Register = () => {
             <div className="form-group">
               <label>Email Address</label>
               <div className="input-wrapper">
-                <Mail size={17} />
+                <Mail size={18} />
                 <input
                   name="email"
                   type="email"
@@ -88,7 +84,7 @@ const Register = () => {
             <div className="form-group">
               <label>Phone Number</label>
               <div className="input-wrapper">
-                <Phone size={17} />
+                <Phone size={18} />
                 <input
                   name="phone"
                   type="tel"
@@ -105,7 +101,7 @@ const Register = () => {
           <div className="form-group">
             <label>Password</label>
             <div className="input-wrapper">
-              <Lock size={17} />
+              <Lock size={18} />
               <input
                 name="password"
                 type={showPassword ? 'text' : 'password'}
@@ -127,11 +123,7 @@ const Register = () => {
           </div>
 
           <button type="submit" className="auth-submit-btn" disabled={loading}>
-            {loading ? (
-              <span className="btn-loader" />
-            ) : (
-              <>Get Started <ArrowRight size={17} /></>
-            )}
+            {loading ? <span className="btn-loader" /> : <>Get Started <ArrowRight size={18} /></>}
           </button>
         </form>
 

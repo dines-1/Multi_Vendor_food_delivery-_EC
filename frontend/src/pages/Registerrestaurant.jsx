@@ -5,10 +5,10 @@ import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import {
   User, Mail, Phone, Lock, ArrowRight, Store,
-  MapPin, Utensils, Eye, EyeOff, CheckCircle,
+  MapPin, Utensils, Eye, EyeOff, CheckCircle, ArrowLeft,
 } from 'lucide-react';
 import './Auth.css';
-import './RegisterRestaurant.css';
+import './Registerrestaurant.css';
 
 const STEPS = ['Your Account', 'Restaurant Info', 'Review'];
 
@@ -74,7 +74,7 @@ const RegisterRestaurant = () => {
       const res = await api.post('/auth/register-vendor', payload);
       login(res.data.token);
       toast.success('Application submitted! We will review it shortly.');
-      navigate('/restaurant');
+      navigate('/vendor');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Registration failed');
     } finally {
@@ -87,7 +87,9 @@ const RegisterRestaurant = () => {
       {/* Left panel */}
       <div className="rr-panel">
         <div className="rr-panel-content">
-          <Link to="/" className="rr-back-home">← Back to home</Link>
+          <Link to="/" className="rr-back-home">
+            <ArrowLeft size={16} /> Back to home
+          </Link>
           <div className="rr-panel-brand">🍽️</div>
           <h1>Grow your restaurant with us</h1>
           <p>Join Kathmandu's fastest-growing food platform and reach hundreds of thousands of hungry customers every day.</p>
@@ -146,7 +148,7 @@ const RegisterRestaurant = () => {
               <div className="form-group">
                 <label>Full Name</label>
                 <div className="input-wrapper">
-                  <User size={17} />
+                  <User size={18} />
                   <input name="name" type="text" placeholder="e.g. Bikash Tamang" value={form.name} onChange={handle} required />
                 </div>
               </div>
@@ -155,14 +157,14 @@ const RegisterRestaurant = () => {
                 <div className="form-group">
                   <label>Email Address</label>
                   <div className="input-wrapper">
-                    <Mail size={17} />
+                    <Mail size={18} />
                     <input name="email" type="email" placeholder="you@restaurant.com" value={form.email} onChange={handle} required />
                   </div>
                 </div>
                 <div className="form-group">
                   <label>Phone Number</label>
                   <div className="input-wrapper">
-                    <Phone size={17} />
+                    <Phone size={18} />
                     <input name="phone" type="tel" placeholder="98XXXXXXXX" value={form.phone} onChange={handle} required />
                   </div>
                 </div>
@@ -171,7 +173,7 @@ const RegisterRestaurant = () => {
               <div className="form-group">
                 <label>Password</label>
                 <div className="input-wrapper">
-                  <Lock size={17} />
+                  <Lock size={18} />
                   <input
                     name="password"
                     type={showPassword ? 'text' : 'password'}
@@ -188,7 +190,7 @@ const RegisterRestaurant = () => {
               </div>
 
               <button type="submit" className="auth-submit-btn">
-                Continue <ArrowRight size={17} />
+                Continue <ArrowRight size={18} />
               </button>
             </form>
           )}
@@ -204,7 +206,7 @@ const RegisterRestaurant = () => {
               <div className="form-group">
                 <label>Restaurant Name</label>
                 <div className="input-wrapper">
-                  <Store size={17} />
+                  <Store size={18} />
                   <input name="restaurantName" type="text" placeholder="e.g. The Himalayan Kitchen" value={form.restaurantName} onChange={handle} required />
                 </div>
               </div>
@@ -212,7 +214,7 @@ const RegisterRestaurant = () => {
               <div className="form-group">
                 <label>Street Address</label>
                 <div className="input-wrapper">
-                  <MapPin size={17} />
+                  <MapPin size={18} />
                   <input name="restaurantStreet" type="text" placeholder="e.g. 45 Boudha Road" value={form.restaurantStreet} onChange={handle} required />
                 </div>
               </div>
@@ -247,15 +249,15 @@ const RegisterRestaurant = () => {
               <div className="form-group">
                 <label>Other cuisines <span className="label-hint">(comma separated)</span></label>
                 <div className="input-wrapper">
-                  <Utensils size={17} />
+                  <Utensils size={18} />
                   <input name="customCuisines" type="text" placeholder="e.g. Tibetan, Fusion" value={form.customCuisines} onChange={handle} />
                 </div>
               </div>
 
               <div className="rr-btn-row">
-                <button type="button" className="rr-back-btn" onClick={prevStep}>← Back</button>
+                <button type="button" className="rr-back-btn" onClick={prevStep}>Back</button>
                 <button type="submit" className="auth-submit-btn">
-                  Review Application <ArrowRight size={17} />
+                  Review Application <ArrowRight size={18} />
                 </button>
               </div>
             </form>
@@ -295,9 +297,9 @@ const RegisterRestaurant = () => {
               </div>
 
               <div className="rr-btn-row">
-                <button type="button" className="rr-back-btn" onClick={prevStep}>← Back</button>
+                <button type="button" className="rr-back-btn" onClick={prevStep}>Back</button>
                 <button type="submit" className="auth-submit-btn" disabled={loading}>
-                  {loading ? <span className="btn-loader" /> : <>Submit Application <ArrowRight size={17} /></>}
+                  {loading ? <span className="btn-loader" /> : <>Submit Application <ArrowRight size={18} /></>}
                 </button>
               </div>
             </form>

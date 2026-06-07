@@ -33,7 +33,11 @@ import VendorOrders from './pages/vendor/VendorOrders';
 import VendorRevenue from './pages/vendor/VendorRevenue';
 import VendorProfile from './pages/vendor/VendorProfile';
 import NotFound from './pages/NotFound';
-import Orders from './pages/Orders';
+import DeliveryRoute from './components/DeliveryRoute';
+import DeliveryLayout from './pages/delivery/DeliveryLayout';
+import DeliveryDashboard from './pages/delivery/DeliveryDashboard';
+import DeliveryHistory from './pages/delivery/DeliveryHistory';
+import DeliveryProfile from './pages/delivery/DeliveryProfile';
 
 import { CartProvider } from './context/CartContext';
 import Cart from './pages/Cart';
@@ -115,6 +119,22 @@ function App() {
                 <Route path="orders" element={<VendorOrders />} />
                 <Route path="revenue" element={<VendorRevenue />} />
                 <Route path="profile" element={<VendorProfile />} />
+              </Route>
+
+              {/* Delivery Routes */}
+              <Route
+                path="/delivery"
+                element={
+                  <DeliveryRoute>
+                    <DeliveryLayout />
+                  </DeliveryRoute>
+                }
+              >
+                <Route index element={<DeliveryDashboard />} />
+                <Route path="dashboard" element={<DeliveryDashboard />} />
+                <Route path="history" element={<DeliveryHistory />} />
+                <Route path="earnings" element={<DeliveryDashboard />} />
+                <Route path="profile" element={<DeliveryProfile />} />
               </Route>
 
               {/* 404 Route */}

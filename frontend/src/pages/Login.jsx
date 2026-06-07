@@ -3,12 +3,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
-import { Mail, Lock, ArrowRight } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import './Auth.css';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   
   const { login } = useAuth();
@@ -38,6 +39,9 @@ const Login = () => {
     <div className="auth-container fade-in">
       <div className="auth-card">
         <div className="auth-header">
+          <div className="auth-logo-ring">
+            <Lock size={24} />
+          </div>
           <h2>Welcome Back</h2>
           <p>Sign in to continue your food journey</p>
         </div>
@@ -46,10 +50,10 @@ const Login = () => {
           <div className="form-group">
             <label>Email Address</label>
             <div className="input-wrapper">
-              <Mail size={18} color="#636E72" />
+              <Mail size={18} />
               <input 
                 type="email" 
-                placeholder="Email Address" 
+                placeholder="you@example.com" 
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -60,14 +64,22 @@ const Login = () => {
           <div className="form-group">
             <label>Password</label>
             <div className="input-wrapper">
-              <Lock size={18} color="#636E72" />
+              <Lock size={18} />
               <input 
-                type="password" 
-                placeholder="Password" 
+                type={showPassword ? 'text' : 'password'} 
+                placeholder="Enter password" 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
+              <button 
+                type="button" 
+                className="input-eye-btn"
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label="Toggle password visibility"
+              >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
             </div>
           </div>
 
@@ -76,10 +88,19 @@ const Login = () => {
           </div>
 
           <button type="submit" className="auth-submit-btn" disabled={loading}>
-            {loading ? 'Please wait...' : 'Sign In'} <ArrowRight size={18} />
+            {loading ? <span className="btn-loader" /> : <>Sign In <ArrowRight size={18} /></>}
           </button>
         </form>
         
+        <div className="auth-divider"><span>or</span></div>
+        
+        <div className="auth-restaurant-cta">
+          <span>Own a restaurant?</span>
+          <Link to="/register-restaurant" className="auth-restaurant-link">
+            List it on our platform <ArrowRight size={14} />
+          </Link>
+        </div>
+
         <div className="auth-footer">
           <p>Don't have an account? <Link to="/register">Create Account</Link></p>
         </div>

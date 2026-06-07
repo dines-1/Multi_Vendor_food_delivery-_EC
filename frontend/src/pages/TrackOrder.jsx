@@ -84,9 +84,48 @@ const TrackOrder = () => {
   const [showCelebration, setShowCelebration] = useState(false);
   const [eta, setEta] = useState(null);
   const [progress, setProgress] = useState(0);
+  const [isSimulating, setIsSimulating] = useState(false);
 
   const restaurantCoords = [27.7172, 85.3240];
   const riderIcon = useRef(createRiderIcon());
+
+  const handleAutoSimulate = () => {
+    if (isSimulating) return;
+    setIsSimulating(true);
+    toast.success('Starting automatic delivery route simulation...');
+
+    const start = restaurantCoords;
+    const end = order.delivery_address?.coordinates
+      ? [order.delivery_address.coordinates.lat, order.delivery_address.coordinates.lng]
+      : [27.7000, 85.3000];
+
+    const steps = 15;
+    const path = [];
+    for (let i = 0; i <= steps; i++) {
+      const pct = i / steps;
+      const lat = start[0] + (end[0] - start[0]) * pct;
+      const lng = start[1] + (end[1] - start[1]) * pct;
+      path.push({ lat, lng });
+    }
+
+    let currentStep = 0;
+    const interval = setInterval(() => {
+      if (currentStep >= path.length) {
+        clearInterval(interval);
+        setIsSimulating(false);
+        // Simulate order delivery completion
+        setOrder(prev => ({ ...prev, status: 'delivered' }));
+        setShowCelebration(true);
+        setTimeout(() => setShowCelebration(false), 5000);
+        toast.success('Rider arrived! Order marked as delivered.');
+        return;
+      }
+
+      const point = path[currentStep];
+      socketService.updateLocation(id, point);
+      currentStep++;
+    }, 1200);
+  };
 
   useEffect(() => {
     fetchOrderDetails();
@@ -279,11 +318,15 @@ const TrackOrder = () => {
 
           {/* MOCK CONTROLLER FOR DEMO PURPOSES */}
           <div className="demo-controls">
-            <h4>Demo Controls (Delivery Simulation)</h4>
+            <h4>Live Tracking Simulator</h4>
             <div className="btn-group">
-              <button onClick={() => socketService.updateLocation(id, { lat: 27.7140, lng: 85.3180 })}>Start Route</button>
-              <button onClick={() => socketService.updateLocation(id, { lat: 27.7100, lng: 85.3100 })}>Midway</button>
-              <button onClick={() => socketService.updateLocation(id, { lat: 27.7050, lng: 85.3050 })}>Near Home</button>
+              <button 
+                onClick={handleAutoSimulate} 
+                disabled={isSimulating}
+                style={{ background: '#FF5C1A', color: '#fff', fontWeight: 'bold', width: '100%' }}
+              >
+                {isSimulating ? 'Animating Journey...' : '🚀 Start Auto-Simulation'}
+              </button>
             </div>
           </div>
         </div>

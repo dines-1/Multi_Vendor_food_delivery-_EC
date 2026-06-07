@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MapPin, CreditCard, Banknote, ShieldCheck, ArrowRight, ChevronLeft, Wallet } from 'lucide-react';
 import { useCart } from '../context/CartContext';
@@ -16,6 +16,24 @@ const Checkout = () => {
     area: '',
     city: 'Kathmandu'
   });
+  const [coordinates, setCoordinates] = useState({ lat: 27.7000, lng: 85.3000 }); // Default Kathmandu
+
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setCoordinates({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+          toast.success('Delivery location pinned via GPS!');
+        },
+        (error) => {
+          console.warn('Geolocation failed, using default coordinates.', error);
+        }
+      );
+    }
+  }, []);
 
   if (!cart || cart.items.length === 0) {
     navigate('/cart');
@@ -41,7 +59,10 @@ const Checkout = () => {
       // 1. Create Order
       const orderRes = await api.post('/orders/checkout', {
         paymentMethod,
-        delivery_address: address,
+        delivery_address: {
+          ...address,
+          coordinates
+        },
         delivery_fee: deliveryFee
       });
 

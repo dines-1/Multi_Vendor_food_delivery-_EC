@@ -2,6 +2,7 @@ import Order from '../models/Order.js';
 import Cart from '../models/Cart.js';
 import MenuItem from '../models/MenuItem.js';
 import Restaurant from '../models/Restaurant.js';
+import DeliveryPerson from '../models/DeliveryPerson.js';
 import { createNotification } from '../utils/notifications.js';
 
 // Valid status transitions
@@ -59,6 +60,85 @@ const autoCancelStaleOrders = async () => {
     }
   } catch (err) {
     console.error('Error auto-cancelling stale orders:', err);
+  }
+};
+
+// Simple auto-assignment of delivery partner based on distance to the restaurant
+const autoAssignDeliveryPerson = async (order) => {
+  try {
+    const restaurant = await Restaurant.findById(order.restaurant);
+    let restLat = 27.7172;
+    let restLng = 85.3240;
+
+    if (restaurant && restaurant.address && restaurant.address.coordinates) {
+      if (restaurant.address.coordinates.lat && restaurant.address.coordinates.lng) {
+        restLat = restaurant.address.coordinates.lat;
+        restLng = restaurant.address.coordinates.lng;
+      }
+    }
+
+    // Find all available delivery personnel
+    const availableRiders = await DeliveryPerson.find({
+      isAvailable: true,
+      'current_location.lat': { $exists: true },
+      'current_location.lng': { $exists: true }
+    });
+
+    if (availableRiders.length === 0) {
+      console.log('Auto-assignment: No available riders found.');
+      return;
+    }
+
+    // Helper to calculate Haversine distance
+    const getDistance = (lat1, lon1, lat2, lon2) => {
+      const R = 6371; // km
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return R * c;
+    };
+
+    let closestRider = null;
+    let minDistance = Infinity;
+
+    for (const rider of availableRiders) {
+      const dist = getDistance(
+        restLat,
+        restLng,
+        rider.current_location.lat,
+        rider.current_location.lng
+      );
+      if (dist < minDistance) {
+        minDistance = dist;
+        closestRider = rider;
+      }
+    }
+
+    if (closestRider) {
+      order.delivery_person_id = closestRider._id;
+      closestRider.isAvailable = false; // Mark rider as busy
+      await closestRider.save();
+      await order.save();
+
+      console.log(`Auto-assigned Rider ${closestRider._id} to Order ${order.orderNumber} (Distance: ${minDistance.toFixed(2)} km)`);
+
+      if (global.io) {
+        global.io.to(`order_${order._id}`).emit('status-updated', {
+          orderId: order._id,
+          status: order.status,
+          delivery_person_id: closestRider._id
+        });
+        global.io.to(`user_${closestRider.user}`).emit('new-delivery-assignment', {
+          orderId: order._id,
+          orderNumber: order.orderNumber
+        });
+      }
+    }
+  } catch (err) {
+    console.error('Error during auto-assignment:', err);
   }
 };
 
@@ -355,6 +435,9 @@ export const acceptOrder = async (req, res) => {
     });
     await order.save();
 
+    // Trigger auto-assignment of delivery rider
+    await autoAssignDeliveryPerson(order);
+
     await createNotification({
       recipient: order.customer,
       sender: req.user.id,
@@ -373,7 +456,9 @@ export const acceptOrder = async (req, res) => {
       });
     }
 
-    const populated = await Order.findById(order._id).populate('customer', 'name phone');
+    const populated = await Order.findById(order._id)
+      .populate('customer', 'name phone')
+      .populate('delivery_person_id');
     res.status(200).json({ success: true, data: populated });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
