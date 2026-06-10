@@ -14,6 +14,27 @@ import api from '../../services/api';
 import toast from 'react-hot-toast';
 import './DeliveryDashboard.css';
 
+const getInitials = (name = '') => {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return 'DP';
+  return parts.slice(0, 2).map((part) => part[0]?.toUpperCase()).join('');
+};
+
+const formatRelativeTime = (dateValue) => {
+  if (!dateValue) return 'New';
+
+  const diffMs = Date.now() - new Date(dateValue).getTime();
+  const diffMinutes = Math.max(0, Math.floor(diffMs / 60000));
+
+  if (diffMinutes < 1) return 'Now';
+  if (diffMinutes < 60) return `${diffMinutes} min ago`;
+
+  const diffHours = Math.floor(diffMinutes / 60);
+  if (diffHours < 24) return `${diffHours} hr ago`;
+
+  return `${Math.floor(diffHours / 24)} day ago`;
+};
+
 const DeliveryDashboard = () => {
   const [isOnline, setIsOnline] = useState(true);
   const [stats, setStats] = useState({
@@ -21,8 +42,10 @@ const DeliveryDashboard = () => {
     todayDeliveries: 0,
     rating: 4.9
   });
+  const [profile, setProfile] = useState(null);
   const [requests, setRequests] = useState([]);
   const [activeDelivery, setActiveDelivery] = useState(null);
+  const [recentDeliveries, setRecentDeliveries] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -31,17 +54,20 @@ const DeliveryDashboard = () => {
 
   const fetchDeliveryData = async () => {
     try {
-      const [statsRes, requestsRes, activeRes] = await Promise.all([
+      const [profileRes, statsRes, requestsRes, activeRes, historyRes] = await Promise.all([
+        api.get('/delivery/profile'),
         api.get('/delivery/stats'),
         api.get('/delivery/requests'),
-        api.get('/delivery/active-orders')
+        api.get('/delivery/active-orders'),
+        api.get('/delivery/history')
       ]);
 
+      setProfile(profileRes.data.data);
+      setIsOnline(Boolean(profileRes.data.data?.isAvailable));
       setStats(statsRes.data.data);
       setRequests(requestsRes.data.data);
-      if (activeRes.data.data.length > 0) {
-        setActiveDelivery(activeRes.data.data[0]);
-      }
+      setActiveDelivery(activeRes.data.data[0] || null);
+      setRecentDeliveries((historyRes.data.data || []).slice(0, 3));
     } catch (err) {
       console.error('Failed to fetch data', err);
     } finally {
@@ -70,7 +96,28 @@ const DeliveryDashboard = () => {
       }
   }
 
+  const handleAvailabilityToggle = async () => {
+    const nextAvailability = !isOnline;
+    setIsOnline(nextAvailability);
+
+    try {
+      const res = await api.put('/delivery/profile', { isAvailable: nextAvailability });
+      setProfile(res.data.data);
+      toast.success(nextAvailability ? 'You are online' : 'You are offline');
+    } catch (err) {
+      setIsOnline(!nextAvailability);
+      toast.error('Failed to update availability');
+    }
+  };
+
   if (loading) return <div className="delivery-loading">Connecting to Fleet...</div>;
+
+  const riderName = profile?.user?.name || 'Delivery Partner';
+  const riderInitials = getInitials(riderName);
+  const riderAvatar = profile?.user?.avatar;
+  const vehicleLabel = profile?.vehicle_type
+    ? profile.vehicle_type.charAt(0).toUpperCase() + profile.vehicle_type.slice(1)
+    : 'Rider';
 
   return (
     <div className="delivery-container">
@@ -79,11 +126,13 @@ const DeliveryDashboard = () => {
         <div className="tb-content">
           <div className="tb-user">
             <span className="tb-greeting">Good Morning</span>
-            <h2 className="tb-name">Bikash Tamang</h2>
+            <h2 className="tb-name">{riderName}</h2>
           </div>
           <div className="tb-actions">
             <div className="tb-icon-btn"><Bell size={20} /></div>
-            <div className="tb-avatar">BT</div>
+            <div className="tb-avatar">
+              {riderAvatar ? <img src={riderAvatar} alt={riderName} /> : riderInitials}
+            </div>
           </div>
         </div>
       </div>
@@ -99,7 +148,7 @@ const DeliveryDashboard = () => {
         </div>
         <div 
           className={`toggle-switch ${isOnline ? 'on' : 'off'}`}
-          onClick={() => setIsOnline(!isOnline)}
+          onClick={handleAvailabilityToggle}
         >
           <div className="switch-handle"></div>
         </div>
@@ -129,14 +178,14 @@ const DeliveryDashboard = () => {
         {activeDelivery ? (
           <div className="active-card fade-in">
             <div className="card-header">
-              <span className="badge-active">Moto • Active Delivery</span>
+              <span className="badge-active">{vehicleLabel} • Active Delivery</span>
               <span className="order-num">#{activeDelivery.orderNumber}</span>
             </div>
             
             <div className="map-mockup">
                 <div className="rider-icon">🏍️</div>
                 <div className="dest-icon">📍</div>
-                <div className="map-timer">🟢 Live • ~12 min</div>
+                <div className="map-timer">{activeDelivery.status?.replaceAll('_', ' ') || 'Active'}</div>
             </div>
 
             <div className="step-timeline">
@@ -187,7 +236,7 @@ const DeliveryDashboard = () => {
               <div key={order._id} className="request-card">
                 <div className="req-header">
                   <strong>New Order Request</strong>
-                  <span className="req-time">Just now</span>
+                  <span className="req-time">{formatRelativeTime(order.createdAt)}</span>
                 </div>
                 <div className="req-body">
                   <div className="req-location">
@@ -228,22 +277,24 @@ const DeliveryDashboard = () => {
             <span className="view-all">Details</span>
           </div>
           <div className="mini-history">
-            <div className="history-item">
-                <div className="hist-icon">✅</div>
+            {recentDeliveries.map((order) => (
+              <div className="history-item" key={order._id}>
+                <div className="hist-icon">✓</div>
                 <div className="hist-info">
-                    <strong>Momo House Thamel</strong>
-                    <span>Delivered to Lazimpat • 2.4 km</span>
+                  <strong>{order.restaurant?.name || 'Restaurant'}</strong>
+                  <span>
+                    Delivered to {[order.delivery_address?.area, order.delivery_address?.city].filter(Boolean).join(', ') || 'customer'}
+                  </span>
                 </div>
-                <div className="hist-earn">+Rs 85</div>
-            </div>
-            <div className="history-item">
-                <div className="hist-icon">✅</div>
-                <div className="hist-info">
-                    <strong>Pizza Palace KTM</strong>
-                    <span>Delivered to Baluwatar • 3.1 km</span>
-                </div>
-                <div className="hist-earn">+Rs 110</div>
-            </div>
+                <div className="hist-earn">+Rs {order.delivery_fee || 0}</div>
+              </div>
+            ))}
+            {recentDeliveries.length === 0 && (
+              <div className="empty-requests">
+                <Clock size={28} />
+                <p>No completed deliveries yet.</p>
+              </div>
+            )}
           </div>
         </div>
       </div>

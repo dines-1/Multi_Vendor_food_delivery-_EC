@@ -406,6 +406,31 @@ const Home = () => {
         </div>
       </section>
 
+      {/* DELIVERY PARTNER */}
+      <section className="delivery-partner-section">
+        <div className="delivery-partner-inner">
+          <div className="delivery-partner-copy">
+            <span className="section-kicker">Delivery partnership</span>
+            <h2>Ride with Chulo and manage deliveries your way.</h2>
+            <p>
+              Join as a delivery partner, accept available orders, and update each delivery manually from pickup to drop-off.
+            </p>
+          </div>
+          <div className="delivery-partner-actions">
+            <div className="delivery-partner-points">
+              <span><Bike size={16} /> Manual order acceptance</span>
+              <span><Package size={16} /> Simple delivery dashboard</span>
+              <span><CheckCircle size={16} /> Track completed earnings</span>
+            </div>
+            <button className="partner-cta" onClick={() => navigate('/register-delivery')}>
+              <Bike size={18} />
+              Register as delivery partner
+              <ArrowRight size={16} />
+            </button>
+          </div>
+        </div>
+      </section>
+
       {/* ── TESTIMONIALS ── */}
       <section className="home-section home-section--surface">
         <div className="section-header">

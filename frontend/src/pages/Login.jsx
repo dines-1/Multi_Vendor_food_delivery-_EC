@@ -101,6 +101,13 @@ const Login = () => {
           </Link>
         </div>
 
+        <div className="auth-restaurant-cta">
+          <span>Deliver with us?</span>
+          <Link to="/register-delivery" className="auth-restaurant-link">
+            Become a rider partner <ArrowRight size={14} />
+          </Link>
+        </div>
+
         <div className="auth-footer">
           <p>Don't have an account? <Link to="/register">Create Account</Link></p>
         </div>

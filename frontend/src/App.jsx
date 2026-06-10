@@ -36,7 +36,6 @@ import NotFound from './pages/NotFound';
 import DeliveryRoute from './components/DeliveryRoute';
 import DeliveryLayout from './pages/delivery/DeliveryLayout';
 import DeliveryDashboard from './pages/delivery/DeliveryDashboard';
-import DeliveryHistory from './pages/delivery/DeliveryHistory';
 import DeliveryProfile from './pages/delivery/DeliveryProfile';
 
 import { CartProvider } from './context/CartContext';
@@ -44,6 +43,7 @@ import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import PaymentResult from './pages/PaymentResult';
 import Registerrestaurants from './pages/Registerrestaurant'
+import RegisterDelivery from './pages/RegisterDelivery';
 
 function App() {
   return (
@@ -72,6 +72,8 @@ function App() {
               <Route path="/login" element={<><Navbar /><main className="main-content"><Login /></main><Footer /></>} />
               <Route path="/register" element={<><Navbar /><main className="main-content"><Register /></main><Footer /></>} />
               <Route path="//register-restaurant" element={<><Navbar /><main className="main-content"><Registerrestaurants /></main><Footer /></>} />
+              <Route path="/register-restaurant" element={<><Navbar /><main className="main-content"><Registerrestaurants /></main><Footer /></>} />
+              <Route path="/register-delivery" element={<><Navbar /><main className="main-content"><RegisterDelivery /></main><Footer /></>} />
               <Route path="/restaurant/:id" element={<><Navbar /><main className="main-content"><RestaurantDetail /></main><Footer /></>} />
               <Route path="/food/:id" element={<><Navbar /><main className="main-content"><FoodDetail /></main><Footer /></>} />
               <Route path="/orders" element={<><Navbar /><main className="main-content"><MyOrders /></main><Footer /></>} />
@@ -132,8 +134,6 @@ function App() {
               >
                 <Route index element={<DeliveryDashboard />} />
                 <Route path="dashboard" element={<DeliveryDashboard />} />
-                <Route path="history" element={<DeliveryHistory />} />
-                <Route path="earnings" element={<DeliveryDashboard />} />
                 <Route path="profile" element={<DeliveryProfile />} />
               </Route>
 

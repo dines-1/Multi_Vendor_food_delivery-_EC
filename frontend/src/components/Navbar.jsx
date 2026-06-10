@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingCart, LogOut, UtensilsCrossed, Package } from 'lucide-react';
+import { Bike, ShoppingCart, LogOut, UtensilsCrossed, Package } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import api from '../services/api';
@@ -74,10 +74,17 @@ const Navbar = () => {
                     {activeOrderCount > 0 && <span className="cart-badge">{activeOrderCount}</span>}
                   </Link>
                 )}
-                <Link to="/cart" className="action-btn cart-btn">
-                  <ShoppingCart size={20} />
-                  {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
-                </Link>
+                {user.role === 'delivery' && (
+                  <Link to="/delivery/dashboard" className="action-btn orders-nav-btn" title="Delivery Dashboard">
+                    <Bike size={20} />
+                  </Link>
+                )}
+                {user.role === 'customer' && (
+                  <Link to="/cart" className="action-btn cart-btn">
+                    <ShoppingCart size={20} />
+                    {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
+                  </Link>
+                )}
                 <div className="user-profile">
                   <div className="avatar-mini">
                     {user.name.charAt(0)}
@@ -92,6 +99,8 @@ const Navbar = () => {
                     )}
 
                     {user.role === 'admin' && <Link to="/admin">Admin Panel</Link>}
+                    {user.role === 'vendor' && <Link to="/vendor">Vendor Dashboard</Link>}
+                    {user.role === 'delivery' && <Link to="/delivery">Delivery Dashboard</Link>}
                     <button onClick={handleLogout} className="logout-btn">
                       <LogOut size={16} /> Logout
                     </button>

@@ -594,6 +594,60 @@
 }
 .partner-cta:hover { background: var(--c-primary-d); transform: scale(1.03); }
 
+.delivery-partner-section {
+  background: #111;
+  color: #fff;
+  padding: 64px 32px;
+}
+
+.delivery-partner-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(280px, .8fr);
+  gap: 40px;
+  align-items: center;
+}
+
+.delivery-partner-copy h2 {
+  font-size: clamp(1.6rem, 3vw, 2.5rem);
+  line-height: 1.15;
+  margin: 8px 0 14px;
+}
+
+.delivery-partner-copy p {
+  max-width: 620px;
+  color: rgba(255,255,255,.72);
+  line-height: 1.7;
+  margin: 0;
+}
+
+.delivery-partner-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.delivery-partner-points {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  color: rgba(255,255,255,.82);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.delivery-partner-points span {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.delivery-partner-points svg {
+  color: var(--c-accent);
+}
+
 /* ══════════════════════════════════════════════
    TESTIMONIALS
 ══════════════════════════════════════════════ */
@@ -669,6 +723,8 @@
   .hero-search  { max-width: 100%; }
   .about-teaser { padding: 60px 20px; }
   .partner-inner { padding: 60px 20px; }
+  .delivery-partner-section { padding: 48px 20px; }
+  .delivery-partner-inner { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 480px) {

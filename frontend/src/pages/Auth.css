@@ -155,6 +155,27 @@
   color: #94A3B8;
 }
 
+.form-group > input,
+.form-group > select {
+  width: 100%;
+  border: 1.5px solid var(--auth-border);
+  border-radius: 14px;
+  background: var(--auth-light-bg);
+  color: var(--auth-dark);
+  font-family: var(--auth-font);
+  font-size: 0.95rem;
+  padding: 14px 16px;
+  outline: none;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.form-group > input:focus,
+.form-group > select:focus {
+  border-color: var(--auth-primary);
+  box-shadow: 0 0 0 4px var(--auth-primary-glow);
+  background: #fff;
+}
+
 .input-eye-btn {
   background: transparent;
   border: none;

@@ -25,13 +25,17 @@ export const getProfile = async (req, res) => {
 export const updateProfile = async (req, res) => {
   try {
     const { vehicle_type, license_plate, isAvailable, name, phone } = req.body;
+    const deliveryUpdate = {};
+
+    if (vehicle_type !== undefined) deliveryUpdate.vehicle_type = vehicle_type;
+    if (license_plate !== undefined) deliveryUpdate.license_plate = license_plate;
+    if (isAvailable !== undefined) deliveryUpdate.isAvailable = isAvailable;
     
-    // Update Delivery Person details
     const delivery = await DeliveryPerson.findOneAndUpdate(
       { user: req.user.id },
-      { vehicle_type, license_plate, isAvailable },
+      deliveryUpdate,
       { new: true, runValidators: true }
-    );
+    ).populate('user', 'name email phone avatar');
 
     // Update User details if name or phone provided
     if (name || phone) {
@@ -83,17 +87,18 @@ export const acceptOrder = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Order already accepted by someone else' });
     }
 
-    order.delivery_person_id = delivery._id;
-    order.status = 'preparing'; // Or 'out_for_delivery' based on flow
-    await order.save();
-
-    // Emit socket event for status update
-    if (global.io) {
-      global.io.to(`order_${order._id}`).emit('status-updated', {
-        orderId: order._id,
-        status: order.status
-      });
+    if (order.status !== 'confirmed') {
+      return res.status(400).json({ success: false, message: 'Only confirmed orders can be accepted for delivery' });
     }
+
+    order.delivery_person_id = delivery._id;
+    order.status = 'preparing';
+    order.statusHistory.push({
+      status: 'preparing',
+      changedBy: req.user.id,
+      note: 'Delivery accepted by rider'
+    });
+    await order.save();
 
     res.status(200).json({ success: true, data: order });
   } catch (error) {

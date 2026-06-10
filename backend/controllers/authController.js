@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import Restaurant from '../models/Restaurant.js';
+import DeliveryPerson from '../models/DeliveryPerson.js';
 
 
 // @desc    Register user
@@ -57,6 +58,49 @@ export const registerVendor = async (req, res) => {
       name: restaurantName,
       address: restaurantAddress,
       cuisines: cuisines || [],
+      status: 'pending'
+    });
+
+    sendTokenResponse(user, 201, res);
+  } catch (err) {
+    let message = err.message;
+    if (err.code === 11000) {
+      const field = Object.keys(err.keyValue)[0];
+      message = `${field.charAt(0).toUpperCase() + field.slice(1)} already exists`;
+    }
+    res.status(400).json({ success: false, message });
+  }
+};
+
+// @desc    Register delivery partner with rider profile
+// @route   POST /api/auth/register-delivery
+// @access  Public
+export const registerDelivery = async (req, res) => {
+  try {
+    const {
+      name, email, phone, password, address,
+      vehicle_type, license_plate, avatar
+    } = req.body;
+
+    if (!avatar) {
+      return res.status(400).json({ success: false, message: 'Profile image is required' });
+    }
+
+    const user = await User.create({
+      name,
+      email,
+      phone,
+      password,
+      role: 'delivery',
+      address,
+      avatar
+    });
+
+    await DeliveryPerson.create({
+      user: user._id,
+      vehicle_type,
+      license_plate,
+      isAvailable: true,
       status: 'pending'
     });
 
