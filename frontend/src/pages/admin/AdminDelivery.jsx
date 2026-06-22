@@ -1,24 +1,20 @@
-                          import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import adminService from '../../services/adminService';
 import { toast } from 'react-hot-toast';
-import { Search, Bike, ShieldCheck, ShieldAlert } from 'lucide-react';
+import { Bike } from 'lucide-react';
 
 const AdminDelivery = () => {
   const [deliveryPartners, setDeliveryPartners] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('');
 
-  useEffect(() => {
-    fetchDeliveryPartners();
-  }, [filter]);
+  useEffect(() => { fetchDeliveryPartners(); }, [filter]);
 
   const fetchDeliveryPartners = async () => {
     try {
       const data = await adminService.getDeliveryPersonnel(filter);
-      if (data.success) {
-        setDeliveryPartners(data.data);
-      }
-    } catch (error) {
+      if (data.success) setDeliveryPartners(data.data);
+    } catch {
       toast.error('Failed to fetch delivery partners');
     } finally {
       setLoading(false);
@@ -29,24 +25,21 @@ const AdminDelivery = () => {
     try {
       const data = await adminService.updateDeliveryStatus(id, newStatus);
       if (data.success) {
-        toast.success(`Delivery partner ${newStatus} successfully`);
+        toast.success(`Partner ${newStatus}`);
         fetchDeliveryPartners();
       }
-    } catch (error) {
-      toast.error('Failed to update status');
-    }
+    } catch { toast.error('Failed to update status'); }
   };
 
   return (
     <div className="admin-page">
       <div className="admin-header">
-        <div className="admin-title">Manage Delivery Partners</div>
-        <div className="admin-actions" style={{ display: 'flex', gap: '1rem' }}>
-          <select 
+        <div className="admin-title">Delivery Partners</div>
+        <div className="admin-actions">
+          <select
             className="filter-select"
             value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            style={{ padding: '0.6rem 1rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}
+            onChange={e => setFilter(e.target.value)}
           >
             <option value="">All Status</option>
             <option value="pending">Pending Approval</option>
@@ -58,7 +51,7 @@ const AdminDelivery = () => {
 
       <div className="admin-table-container">
         {loading ? (
-          <div style={{ padding: '2rem', textAlign: 'center' }}>Loading...</div>
+          <div className="loading-spinner"><div className="spinner" /></div>
         ) : (
           <table className="admin-table">
             <thead>
@@ -74,48 +67,31 @@ const AdminDelivery = () => {
               {deliveryPartners.map((partner) => (
                 <tr key={partner._id}>
                   <td>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                      <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#f0fdf4', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <Bike size={20} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#D1FAE5', color: '#065F46', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <Bike size={16} />
                       </div>
                       <div>
-                        <div style={{ fontWeight: 600 }}>{partner.user?.name}</div>
-                        <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{partner.user?.email}</div>
+                        <div style={{ fontWeight: 600, color: '#0F172A', fontSize: '0.78rem' }}>{partner.user?.name}</div>
+                        <div style={{ fontSize: '0.7rem', color: '#94A3B8' }}>{partner.user?.email}</div>
                       </div>
                     </div>
                   </td>
                   <td style={{ textTransform: 'capitalize' }}>{partner.vehicle_type}</td>
-                  <td>{partner.license_plate || 'N/A'}</td>
+                  <td>{partner.license_plate || '—'}</td>
                   <td>
-                    <span className={`status-badge status-${partner.status}`}>
-                      {partner.status}
-                    </span>
+                    <span className={`status-badge status-${partner.status}`}>{partner.status}</span>
                   </td>
                   <td>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <div className="btn-group">
                       {partner.status === 'pending' && (
-                        <button 
-                          onClick={() => handleStatusUpdate(partner._id, 'active')}
-                          className="action-btn btn-approve"
-                        >
-                          Approve
-                        </button>
+                        <button onClick={() => handleStatusUpdate(partner._id, 'active')} className="action-btn btn-approve">Approve</button>
                       )}
                       {partner.status === 'active' ? (
-                        <button 
-                          onClick={() => handleStatusUpdate(partner._id, 'suspended')}
-                          className="action-btn btn-suspend"
-                        >
-                          Suspend
-                        </button>
+                        <button onClick={() => handleStatusUpdate(partner._id, 'suspended')} className="action-btn btn-suspend">Suspend</button>
                       ) : (
                         partner.status !== 'pending' && (
-                          <button 
-                            onClick={() => handleStatusUpdate(partner._id, 'active')}
-                            className="action-btn btn-approve"
-                          >
-                            Activate
-                          </button>
+                          <button onClick={() => handleStatusUpdate(partner._id, 'active')} className="action-btn btn-approve">Activate</button>
                         )
                       )}
                     </div>
@@ -123,9 +99,7 @@ const AdminDelivery = () => {
                 </tr>
               ))}
               {deliveryPartners.length === 0 && (
-                <tr>
-                  <td colSpan="5" style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>No delivery partners found</td>
-                </tr>
+                <tr><td colSpan="5"><div className="empty-state"><p>No delivery partners found</p></div></td></tr>
               )}
             </tbody>
           </table>

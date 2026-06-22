@@ -2,22 +2,20 @@ import React from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Store, Users, Package, ShoppingCart,
-  DollarSign, Settings, LogOut, ChevronRight
+  DollarSign, Settings, LogOut, ChevronRight, Truck
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import './Admin.css';
 
 const navItems = [
-  { section: 'Main' },
+  { section: 'Overview' },
   { to: '/admin', icon: LayoutDashboard, label: 'Dashboard', end: true },
-  { section: 'Management' },
   { to: '/admin/vendors', icon: Store, label: 'Vendors' },
   { to: '/admin/users', icon: Users, label: 'Users' },
+  { to: '/admin/delivery', icon: Truck, label: 'Delivery' },
   { to: '/admin/products', icon: Package, label: 'Products' },
   { to: '/admin/orders', icon: ShoppingCart, label: 'Orders' },
-  { section: 'Finance' },
   { to: '/admin/finance', icon: DollarSign, label: 'Finance' },
-  { section: 'System' },
   { to: '/admin/settings', icon: Settings, label: 'Settings' },
 ];
 
@@ -33,9 +31,11 @@ const AdminLayout = () => {
   return (
     <div className="admin-layout">
       <aside className="admin-sidebar">
-        <div className="sidebar-header">
-          <span>FoodDash</span> Admin
+        <div className="sidebar-logo">
+          <div className="logo-mark"><span>Chulo</span>  Admin</div>
+
         </div>
+
         <nav className="sidebar-nav">
           {navItems.map((item, i) =>
             item.section ? (
@@ -53,28 +53,30 @@ const AdminLayout = () => {
             )
           )}
         </nav>
-        <div style={{ padding: '0.75rem' }}>
-          <button onClick={handleLogout} className="nav-item" style={{ background: 'none', border: 'none', width: '100%', cursor: 'pointer', color: '#94a3b8' }}>
-            <LogOut /> Logout
-          </button>
+
+        <div className="sidebar-footer">
+          <div className="sidebar-user">
+            <div className="sidebar-avatar">{user?.name?.charAt(0) || 'A'}</div>
+            <div className="sidebar-user-info">
+              <div className="sidebar-user-name">{user?.name || 'Admin'}</div>
+              <div className="sidebar-user-role">Super Admin</div>
+            </div>
+            <button className="btn-logout" onClick={handleLogout} title="Logout">
+              <LogOut size={14} />
+            </button>
+          </div>
         </div>
       </aside>
 
       <main className="admin-main">
-        <header className="admin-header">
-          <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
-            Admin Panel <ChevronRight size={12} style={{ verticalAlign: 'middle' }} />
+        <header className="admin-topbar">
+          <div className="topbar-breadcrumb">
+            <span>Chulo</span>
+            <ChevronRight />
+            <span>Admin Panel</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <div style={{
-              width: 32, height: 32, borderRadius: '50%',
-              background: 'linear-gradient(135deg, #6366f1, #818cf8)',
-              color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '0.75rem', fontWeight: 700
-            }}>
-              {user?.name?.charAt(0) || 'A'}
-            </div>
-            <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>{user?.name || 'Admin'}</span>
+          <div className="topbar-right">
+            <span className="topbar-badge">Live</span>
           </div>
         </header>
         <Outlet />

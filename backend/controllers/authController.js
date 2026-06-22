@@ -37,9 +37,9 @@ export const register = async (req, res) => {
 // @access  Public
 export const registerVendor = async (req, res) => {
   try {
-    const { 
+    const {
       name, email, phone, password, address,
-      restaurantName, restaurantAddress, cuisines 
+      restaurantName, restaurantAddress, cuisines
     } = req.body;
 
     // Create user first
@@ -192,6 +192,15 @@ const sendTokenResponse = (user, statusCode, res) => {
   res.status(statusCode).json({
     success: true,
     token,
-    role: user.role
+    role: user.role, // kept for any existing code that reads this directly
+    user: {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      role: user.role,
+      address: user.address,
+      avatar: user.avatar
+    }
   });
 };

@@ -65,12 +65,9 @@ const ProductModeration = () => {
     data.append('name', form.name);
     if (form.parentCategory) data.append('parentCategory', form.parentCategory);
     if (form.image) data.append('image', form.image);
-
     try {
       if (modal?.editId) await adminService.updateCategory(modal.editId, data);
-      else {
-        await adminService.createCategory(data);
-      }
+      else await adminService.createCategory(data);
       toast.success(modal?.editId ? 'Updated' : 'Created');
       setModal(null); setForm({ name: '', image: null, parentCategory: '' }); setImagePreview(null); loadCategories();
     } catch { toast.error('Failed to save'); }
@@ -92,10 +89,10 @@ const ProductModeration = () => {
   const ImageCell = ({ src, alt }) => {
     const imageUrl = getImageUrl(src);
     return imageUrl ? (
-      <img src={imageUrl} alt={alt} style={{ width: 40, height: 40, borderRadius: 8, objectFit: 'cover', background: '#f1f5f9' }} />
+      <img src={imageUrl} alt={alt} style={{ width: 38, height: 38, borderRadius: 8, objectFit: 'cover' }} />
     ) : (
-      <div style={{ width: 40, height: 40, borderRadius: 8, background: '#f1f5f9', color: '#94a3b8', display: 'grid', placeItems: 'center' }}>
-        <ImageIcon size={16} />
+      <div style={{ width: 38, height: 38, borderRadius: 8, background: '#F1F5F9', color: '#94A3B8', display: 'grid', placeItems: 'center' }}>
+        <ImageIcon size={14} />
       </div>
     );
   };
@@ -124,63 +121,72 @@ const ProductModeration = () => {
           </div>
 
           {loading ? <div className="loading-spinner"><div className="spinner" /></div> :
-           products.length === 0 ? <div className="empty-state"><Package /><p>No products found</p></div> : (
-            <>
-              <table className="admin-table">
-                <thead><tr><th>Image</th><th>Name</th><th>Vendor</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead>
-                <tbody>
-                  {products.map(p => (
-                    <tr key={p._id}>
-                      <td><ImageCell src={p.image_url || p.image} alt={p.name} /></td>
-                      <td style={{ fontWeight: 600 }}>{p.name}</td>
-                      <td>{p.restaurant?.name || '-'}</td>
-                      <td>{formatNPR(p.price)}</td>
-                      <td><span className={`badge ${p.approvalStatus === 'approved' ? 'badge-success' : p.approvalStatus === 'rejected' ? 'badge-danger' : 'badge-warning'}`}>{p.approvalStatus}</span></td>
-                      <td>
-                        <div className="btn-group">
-                          {p.approvalStatus === 'pending' && <>
-                            <button className="btn btn-success btn-sm" onClick={() => handleProductAction(p._id, 'approve')}>Approve</button>
-                            <button className="btn btn-danger btn-sm" onClick={() => handleProductAction(p._id, 'reject')}>Reject</button>
-                          </>}
-                          <button className="btn btn-outline btn-sm" onClick={() => handleProductAction(p._id, 'featured')}>
-                            {p.isFeatured ? 'Unfeature' : 'Feature'}
-                          </button>
-                          <button className="btn btn-danger btn-sm" onClick={() => handleProductAction(p._id, 'remove')}>Remove</button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {pagination.pages > 1 && (
-                <div className="pagination">
-                  <button disabled={page <= 1} onClick={() => setPage(p => p - 1)}>Prev</button>
-                  <span style={{ fontSize: '0.75rem' }}>{page} / {pagination.pages}</span>
-                  <button disabled={page >= pagination.pages} onClick={() => setPage(p => p + 1)}>Next</button>
-                </div>
-              )}
-            </>
-          )}
+            products.length === 0 ? <div className="empty-state"><Package /><p>No products found</p></div> : (
+              <>
+                <table className="admin-table">
+                  <thead>
+                    <tr><th>Image</th><th>Name</th><th>Vendor</th><th>Price</th><th>Status</th><th>Actions</th></tr>
+                  </thead>
+                  <tbody>
+                    {products.map(p => (
+                      <tr key={p._id}>
+                        <td><ImageCell src={p.image_url || p.image} alt={p.name} /></td>
+                        <td style={{ fontWeight: 600, color: '#0F172A' }}>{p.name}</td>
+                        <td>{p.restaurant?.name || '—'}</td>
+                        <td>{formatNPR(p.price)}</td>
+                        <td>
+                          <span className={`badge ${p.approvalStatus === 'approved' ? 'badge-success' : p.approvalStatus === 'rejected' ? 'badge-danger' : 'badge-warning'}`}>
+                            {p.approvalStatus}
+                          </span>
+                        </td>
+                        <td>
+                          <div className="btn-group">
+                            {p.approvalStatus === 'pending' && <>
+                              <button className="btn btn-success btn-sm" onClick={() => handleProductAction(p._id, 'approve')}>Approve</button>
+                              <button className="btn btn-danger btn-sm" onClick={() => handleProductAction(p._id, 'reject')}>Reject</button>
+                            </>}
+                            <button className="btn btn-outline btn-sm" onClick={() => handleProductAction(p._id, 'featured')}>
+                              {p.isFeatured ? 'Unfeature' : 'Feature'}
+                            </button>
+                            <button className="btn btn-danger btn-sm" onClick={() => handleProductAction(p._id, 'remove')}>Remove</button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {pagination.pages > 1 && (
+                  <div className="pagination">
+                    <button disabled={page <= 1} onClick={() => setPage(p => p - 1)}>Prev</button>
+                    <span style={{ fontSize: '0.72rem', color: '#64748B' }}>{page} / {pagination.pages}</span>
+                    <button disabled={page >= pagination.pages} onClick={() => setPage(p => p + 1)}>Next</button>
+                  </div>
+                )}
+              </>
+            )}
         </div>
       )}
 
       {tab === 'categories' && (
         <div className="admin-table-container">
-            <div className="table-toolbar">
-              <h3>All Categories</h3>
-              <button className="btn btn-primary btn-sm" onClick={() => { setForm({ name: '', image: null, parentCategory: '' }); setImagePreview(null); setModal({ type: 'category' }); }}><Plus size={12} /> Add</button>
-            </div>
-            {loading ? <div className="loading-spinner"><div className="spinner" /></div> :
-             categories.length === 0 ? <div className="empty-state"><FolderTree /><p>No categories</p></div> : (
+          <div className="table-toolbar">
+            <h3>All Categories</h3>
+            <button className="btn btn-primary btn-sm" onClick={() => { setForm({ name: '', image: null, parentCategory: '' }); setImagePreview(null); setModal({ type: 'category' }); }}>
+              <Plus size={12} /> Add Category
+            </button>
+          </div>
+          {loading ? <div className="loading-spinner"><div className="spinner" /></div> :
+            categories.length === 0 ? <div className="empty-state"><FolderTree /><p>No categories</p></div> : (
               <table className="admin-table">
-                <thead><tr><th>Image</th><th>Name</th><th>Owner</th><th>Slug</th><th>Status</th><th>Actions</th></tr></thead>
+                <thead>
+                  <tr><th>Image</th><th>Name</th><th>Owner</th><th>Status</th><th>Actions</th></tr>
+                </thead>
                 <tbody>
                   {categories.map(c => (
                     <tr key={c._id}>
                       <td><ImageCell src={c.image} alt={c.name} /></td>
-                      <td style={{ fontWeight: 600 }}>{c.name}</td>
-                      <td>{c.restaurant?.name || 'Admin / Platform'}</td>
-                      <td>{c.slug ? `/${c.slug}` : '-'}</td>
+                      <td style={{ fontWeight: 600, color: '#0F172A' }}>{c.name}</td>
+                      <td>{c.restaurant?.name || 'Platform'}</td>
                       <td><span className={`badge ${c.isActive ? 'badge-success' : 'badge-danger'}`}>{c.isActive ? 'Active' : 'Inactive'}</span></td>
                       <td>
                         <div className="btn-group">
@@ -196,17 +202,22 @@ const ProductModeration = () => {
         </div>
       )}
 
-      {/* Category Modal */}
       {modal?.type === 'category' && (
         <div className="modal-overlay" onClick={() => setModal(null)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <div className="modal-header"><h3>{modal.editId ? 'Edit' : 'Add'} Category</h3><button className="modal-close" onClick={() => setModal(null)}><X size={18} /></button></div>
+            <div className="modal-header">
+              <h3>{modal.editId ? 'Edit' : 'Add'} Category</h3>
+              <button className="modal-close" onClick={() => setModal(null)}><X size={16} /></button>
+            </div>
             <div className="modal-body">
-              <div className="form-group"><label className="form-label">Name</label><input className="form-input" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} /></div>
+              <div className="form-group">
+                <label className="form-label">Name</label>
+                <input className="form-input" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
+              </div>
               <div className="form-group">
                 <label className="form-label">Category Image</label>
-                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                  {imagePreview && <img src={imagePreview} alt="Preview" style={{ width: 50, height: 50, borderRadius: 8, objectFit: 'cover' }} />}
+                <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                  {imagePreview && <img src={imagePreview} alt="Preview" style={{ width: 48, height: 48, borderRadius: 8, objectFit: 'cover' }} />}
                   <input type="file" onChange={handleFileChange} accept="image/*" />
                 </div>
               </div>

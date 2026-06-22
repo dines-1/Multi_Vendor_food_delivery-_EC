@@ -15,6 +15,7 @@ import AdminLayout from './pages/admin/AdminLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import VendorManagement from './pages/admin/VendorManagement';
 import UserManagement from './pages/admin/UserManagement';
+import AdminDelivery from './pages/admin/AdminDelivery'
 import ProductModeration from './pages/admin/ProductModeration';
 import OrderManagement from './pages/admin/OrderManagement';
 import FinanceManager from './pages/admin/FinanceManager';
@@ -98,6 +99,7 @@ function App() {
                 <Route index element={<AdminDashboard />} />
                 <Route path="vendors" element={<VendorManagement />} />
                 <Route path="users" element={<UserManagement />} />
+                <Route path="delivery" element={<AdminDelivery />} />
                 <Route path="products" element={<ProductModeration />} />
                 <Route path="orders" element={<OrderManagement />} />
                 <Route path="finance" element={<FinanceManager />} />

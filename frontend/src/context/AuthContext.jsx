@@ -11,12 +11,17 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     if (token) {
       localStorage.setItem('token', token);
-      fetchUser();
+      if (!user) {
+        fetchUser();
+      } else {
+        setLoading(false);
+      }
     } else {
       localStorage.removeItem('token');
       setUser(null);
       setLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
   const fetchUser = async () => {
@@ -30,8 +35,12 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const login = (newToken) => {
+  const login = (newToken, userData) => {
     setToken(newToken);
+    if (userData) {
+      setUser(userData);
+    }
+    setLoading(false);
   };
 
   const logout = () => {

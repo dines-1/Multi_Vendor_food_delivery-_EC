@@ -8,7 +8,7 @@ const formatNPR = (v) => `NPR ${Number(v || 0).toLocaleString()}`;
 const formatDate = (d) => {
   if (!d) return '-';
   const dt = new Date(d);
-  return `${String(dt.getDate()).padStart(2,'0')}/${String(dt.getMonth()+1).padStart(2,'0')}/${dt.getFullYear()}`;
+  return `${String(dt.getDate()).padStart(2, '0')}/${String(dt.getMonth() + 1).padStart(2, '0')}/${dt.getFullYear()}`;
 };
 
 const FinanceManager = () => {
@@ -83,19 +83,18 @@ const FinanceManager = () => {
 
       {!loading && tab === 'revenue' && (
         <>
-          <div className="stats-grid">
-            <div className="stat-card">
-              <div className="stat-icon" style={{ background: '#ede9fe', color: '#6366f1' }}><DollarSign /></div>
-              <div className="stat-info"><div className="stat-label">GMV</div><div className="stat-value">{formatNPR(revenue?.totalGMV)}</div></div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-icon" style={{ background: '#dcfce7', color: '#10b981' }}><Percent /></div>
-              <div className="stat-info"><div className="stat-label">Commission Earned</div><div className="stat-value">{formatNPR(revenue?.commissionEarned)}</div></div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-icon" style={{ background: '#dbeafe', color: '#3b82f6' }}><DollarSign /></div>
-              <div className="stat-info"><div className="stat-label">Net Revenue</div><div className="stat-value">{formatNPR(revenue?.netRevenue)}</div></div>
-            </div>
+          <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(3,1fr)' }}>
+            {[
+              { label: 'Gross Merchandise Value', value: formatNPR(revenue?.totalGMV), icon: DollarSign, bg: '#EDE9FE', color: '#6366F1' },
+              { label: 'Commission Earned', value: formatNPR(revenue?.commissionEarned), icon: Percent, bg: '#D1FAE5', color: '#10B981' },
+              { label: 'Net Revenue', value: formatNPR(revenue?.netRevenue), icon: DollarSign, bg: '#DBEAFE', color: '#3B82F6' },
+            ].map((c, i) => (
+              <div key={i} className="stat-card">
+                <div className="stat-icon" style={{ background: c.bg, color: c.color }}><c.icon /></div>
+                <div className="stat-label">{c.label}</div>
+                <div className="stat-value">{c.value}</div>
+              </div>
+            ))}
           </div>
 
           <div className="chart-row-equal">
@@ -103,13 +102,13 @@ const FinanceManager = () => {
               <div className="admin-card-header"><h3>Revenue Trend</h3></div>
               <div className="admin-card-body">
                 {revenue?.chartData?.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={250}>
+                  <ResponsiveContainer width="100%" height={220}>
                     <LineChart data={revenue.chartData.map(d => ({ date: d._id?.slice(5), gmv: d.gmv }))}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                      <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-                      <YAxis tick={{ fontSize: 11 }} />
-                      <Tooltip formatter={v => formatNPR(v)} />
-                      <Line type="monotone" dataKey="gmv" stroke="#6366f1" strokeWidth={2} dot={false} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
+                      <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#94A3B8' }} />
+                      <YAxis tick={{ fontSize: 10, fill: '#94A3B8' }} />
+                      <Tooltip formatter={v => formatNPR(v)} contentStyle={{ borderRadius: 8, border: '1px solid #E2E8F0', fontSize: 12 }} />
+                      <Line type="monotone" dataKey="gmv" stroke="#6366F1" strokeWidth={2.5} dot={false} />
                     </LineChart>
                   </ResponsiveContainer>
                 ) : <div className="empty-state"><DollarSign /><p>No data yet</p></div>}
@@ -121,12 +120,14 @@ const FinanceManager = () => {
               <div className="admin-card-body">
                 <div className="form-group">
                   <label className="form-label">Global Commission Rate (%)</label>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <div style={{ display: 'flex', gap: 8 }}>
                     <input className="form-input" type="number" value={globalRate} onChange={e => setGlobalRate(e.target.value)} />
                     <button className="btn btn-primary" onClick={updateGlobalCommission}>Save</button>
                   </div>
                 </div>
-                <button className="btn btn-outline" style={{ width: '100%', marginTop: '0.5rem' }} onClick={exportCSV}><Download size={14} /> Export Finance CSV</button>
+                <button className="btn btn-outline" style={{ width: '100%', marginTop: 8, justifyContent: 'center' }} onClick={exportCSV}>
+                  <Download size={13} /> Export Finance CSV
+                </button>
               </div>
             </div>
           </div>
@@ -138,16 +139,18 @@ const FinanceManager = () => {
           <div className="table-toolbar"><h3>Vendor Earnings Ledger</h3></div>
           {earnings.length === 0 ? <div className="empty-state"><DollarSign /><p>No earnings data</p></div> : (
             <table className="admin-table">
-              <thead><tr><th>Vendor</th><th>Gross Sales</th><th>Commission %</th><th>Commission</th><th>Refunds</th><th>Net Payable</th></tr></thead>
+              <thead>
+                <tr><th>Vendor</th><th>Gross Sales</th><th>Commission %</th><th>Commission</th><th>Refunds</th><th>Net Payable</th></tr>
+              </thead>
               <tbody>
                 {earnings.map(e => (
                   <tr key={e.vendorId}>
-                    <td style={{ fontWeight: 600 }}>{e.vendorName}</td>
+                    <td style={{ fontWeight: 600, color: '#0F172A' }}>{e.vendorName}</td>
                     <td>{formatNPR(e.grossSales)}</td>
                     <td>{e.commissionRate}%</td>
-                    <td style={{ color: '#ef4444' }}>-{formatNPR(e.commissionDeducted)}</td>
-                    <td style={{ color: '#f59e0b' }}>-{formatNPR(e.refunds)}</td>
-                    <td style={{ fontWeight: 700 }}>{formatNPR(e.netPayable)}</td>
+                    <td style={{ color: '#EF4444', fontWeight: 600 }}>−{formatNPR(e.commissionDeducted)}</td>
+                    <td style={{ color: '#F59E0B', fontWeight: 600 }}>−{formatNPR(e.refunds)}</td>
+                    <td style={{ fontWeight: 700, color: '#10B981' }}>{formatNPR(e.netPayable)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -161,13 +164,19 @@ const FinanceManager = () => {
           <div className="table-toolbar"><h3>Payout Requests</h3></div>
           {payouts.length === 0 ? <div className="empty-state"><DollarSign /><p>No payout requests</p></div> : (
             <table className="admin-table">
-              <thead><tr><th>Vendor</th><th>Amount</th><th>Status</th><th>Requested</th><th>Actions</th></tr></thead>
+              <thead>
+                <tr><th>Vendor</th><th>Amount</th><th>Status</th><th>Requested</th><th>Actions</th></tr>
+              </thead>
               <tbody>
                 {payouts.map(p => (
                   <tr key={p._id}>
-                    <td style={{ fontWeight: 600 }}>{p.restaurantName || '-'}</td>
-                    <td>{formatNPR(p.amount)}</td>
-                    <td><span className={`badge ${p.status === 'paid' ? 'badge-success' : p.status === 'rejected' ? 'badge-danger' : 'badge-warning'}`}>{p.status}</span></td>
+                    <td style={{ fontWeight: 600, color: '#0F172A' }}>{p.restaurantName || '—'}</td>
+                    <td style={{ fontWeight: 600 }}>{formatNPR(p.amount)}</td>
+                    <td>
+                      <span className={`badge ${p.status === 'paid' ? 'badge-success' : p.status === 'rejected' ? 'badge-danger' : 'badge-warning'}`}>
+                        {p.status}
+                      </span>
+                    </td>
                     <td>{formatDate(p.createdAt)}</td>
                     <td>
                       {p.status === 'pending' && (
@@ -185,13 +194,18 @@ const FinanceManager = () => {
         </div>
       )}
 
-      {/* Payout Modal */}
       {modal?.type === 'payout' && (
         <div className="modal-overlay" onClick={() => setModal(null)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <div className="modal-header"><h3>Process Payout</h3><button className="modal-close" onClick={() => setModal(null)}><X size={18} /></button></div>
+            <div className="modal-header">
+              <h3>Process Payout</h3>
+              <button className="modal-close" onClick={() => setModal(null)}><X size={16} /></button>
+            </div>
             <div className="modal-body">
-              <div className="form-group"><label className="form-label">Transaction Reference</label><input className="form-input" value={txnRef} onChange={e => setTxnRef(e.target.value)} placeholder="e.g. TXN-123456" /></div>
+              <div className="form-group">
+                <label className="form-label">Transaction Reference</label>
+                <input className="form-input" value={txnRef} onChange={e => setTxnRef(e.target.value)} placeholder="e.g. TXN-123456" />
+              </div>
             </div>
             <div className="modal-footer">
               <button className="btn btn-outline" onClick={() => setModal(null)}>Cancel</button>

@@ -1,23 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import adminService from '../../services/adminService';
 import { toast } from 'react-hot-toast';
-import { Search, UserMinus, UserCheck, Shield } from 'lucide-react';
+import { Search, UserMinus, UserCheck } from 'lucide-react';
 
 const AdminUsers = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
+  useEffect(() => { fetchUsers(); }, []);
 
   const fetchUsers = async () => {
     try {
       const data = await adminService.getCustomers();
-      if (data.success) {
-        setUsers(data.data.docs);
-      }
-    } catch (error) {
+      if (data.success) setUsers(data.data.docs);
+    } catch {
       toast.error('Failed to fetch users');
     } finally {
       setLoading(false);
@@ -28,12 +24,10 @@ const AdminUsers = () => {
     try {
       const data = await adminService.updateUserStatus(id, !currentStatus);
       if (data.success) {
-        toast.success(`User ${!currentStatus ? 'activated' : 'suspended'} successfully`);
+        toast.success(`User ${!currentStatus ? 'activated' : 'suspended'}`);
         fetchUsers();
       }
-    } catch (error) {
-      toast.error('Failed to update user status');
-    }
+    } catch { toast.error('Failed to update user status'); }
   };
 
   return (
@@ -41,12 +35,13 @@ const AdminUsers = () => {
       <div className="admin-header">
         <div className="admin-title">Manage Customers</div>
         <div className="admin-actions">
-          <div className="search-box" style={{ position: 'relative' }}>
-            <Search size={18} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-            <input 
-              type="text" 
-              placeholder="Search customers..." 
-              style={{ padding: '0.6rem 1rem 0.6rem 2.5rem', borderRadius: '10px', border: '1px solid #e2e8f0' }} 
+          <div style={{ position: 'relative' }}>
+            <Search size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
+            <input
+              type="text"
+              placeholder="Search customers..."
+              className="form-input"
+              style={{ paddingLeft: 32, width: 220 }}
             />
           </div>
         </div>
@@ -54,14 +49,14 @@ const AdminUsers = () => {
 
       <div className="admin-table-container">
         {loading ? (
-          <div style={{ padding: '2rem', textAlign: 'center' }}>Loading...</div>
+          <div className="loading-spinner"><div className="spinner" /></div>
         ) : (
           <table className="admin-table">
             <thead>
               <tr>
                 <th>Customer</th>
-                <th>Contact info</th>
-                <th>Joined Date</th>
+                <th>Contact</th>
+                <th>Joined</th>
                 <th>Status</th>
                 <th>Actions</th>
               </tr>
@@ -70,16 +65,16 @@ const AdminUsers = () => {
               {users.map((user) => (
                 <tr key={user._id}>
                   <td>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                      <div style={{ width: '35px', height: '35px', borderRadius: '50%', background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <div style={{ width: 34, height: 34, borderRadius: '50%', background: '#EEF2FF', color: '#6366F1', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '0.75rem', flexShrink: 0 }}>
                         {user.name.charAt(0)}
                       </div>
-                      <div style={{ fontWeight: 600 }}>{user.name}</div>
+                      <span style={{ fontWeight: 600, color: '#0F172A' }}>{user.name}</span>
                     </div>
                   </td>
                   <td>
-                    <div style={{ fontSize: '0.875rem' }}>{user.email}</div>
-                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{user.phone}</div>
+                    <div style={{ fontSize: '0.78rem' }}>{user.email}</div>
+                    <div style={{ fontSize: '0.7rem', color: '#94A3B8' }}>{user.phone}</div>
                   </td>
                   <td>{new Date(user.createdAt).toLocaleDateString()}</td>
                   <td>
@@ -88,20 +83,23 @@ const AdminUsers = () => {
                     </span>
                   </td>
                   <td>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      <button 
-                        onClick={() => handleToggleActive(user._id, user.isActive)}
-                        className={`action-btn ${user.isActive ? 'btn-suspend' : 'btn-approve'}`}
-                      >
-                        {user.isActive ? <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><UserMinus size={14} /> Suspend</div> : <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><UserCheck size={14} /> Activate</div>}
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => handleToggleActive(user._id, user.isActive)}
+                      className={`btn btn-sm ${user.isActive ? 'btn-danger' : 'btn-success'}`}
+                    >
+                      {user.isActive
+                        ? <><UserMinus size={12} /> Suspend</>
+                        : <><UserCheck size={12} /> Activate</>
+                      }
+                    </button>
                   </td>
                 </tr>
               ))}
               {users.length === 0 && (
                 <tr>
-                  <td colSpan="5" style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>No customers found</td>
+                  <td colSpan="5">
+                    <div className="empty-state"><p>No customers found</p></div>
+                  </td>
                 </tr>
               )}
             </tbody>
