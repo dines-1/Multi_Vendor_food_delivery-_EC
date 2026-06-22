@@ -9,7 +9,8 @@ import {
   cancelOrder,
   reorder,
   getVendorOrders,
-  getVendorRevenue
+  getVendorRevenue,
+  reRequestRider
 } from '../controllers/orderController.js';
 import { protect, authorize } from '../middleware/auth.js';
 
@@ -28,6 +29,7 @@ router.get('/vendor/my-orders', authorize('vendor'), getVendorOrders);
 router.get('/vendor/revenue', authorize('vendor'), getVendorRevenue);
 router.post('/:id/accept', authorize('vendor'), acceptOrder);
 router.post('/:id/reject', authorize('vendor'), rejectOrder);
+router.post('/:id/re-request', authorize('vendor'), reRequestRider);
 
 // Status update (vendor / delivery / admin)
 router.put('/:id/status', authorize('vendor', 'delivery', 'admin'), updateOrderStatus);

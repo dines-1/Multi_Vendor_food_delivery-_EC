@@ -31,11 +31,18 @@ const notificationSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    readAt: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,
   }
 );
+
+// TTL index to automatically delete read notifications after 24 hours (86400 seconds)
+notificationSchema.index({ readAt: 1 }, { expireAfterSeconds: 86400 });
 
 const Notification = mongoose.model('Notification', notificationSchema);
 export default Notification;

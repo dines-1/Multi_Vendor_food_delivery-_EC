@@ -84,10 +84,12 @@ export const toggleFeatured = async (req, res) => {
 
 // ==================== CATEGORIES (using existing Category model) ====================
 
-// Get global categories (restaurant = null, parentCategory = null)
+// Get all top-level categories (global and restaurant-specific)
 export const getCategories = async (req, res) => {
   try {
-    const categories = await Category.find({ restaurant: null, parentCategory: null }).sort({ sortOrder: 1 });
+    const categories = await Category.find({ parentCategory: null })
+      .populate('restaurant', 'name')
+      .sort({ restaurant: 1, sortOrder: 1, name: 1 });
     res.json({ success: true, data: categories });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -125,9 +127,14 @@ export const deleteCategory = async (req, res) => {
   try {
     const category = await Category.findByIdAndDelete(req.params.id);
     if (!category) return res.status(404).json({ success: false, message: 'Category not found' });
-    // Also delete subcategories
+
+    const subcategories = await Category.find({ parentCategory: req.params.id }).select('_id');
+    const categoryIds = [category._id, ...subcategories.map((sub) => sub._id)];
+
+    await MenuItem.deleteMany({ category: { $in: categoryIds } });
     await Category.deleteMany({ parentCategory: req.params.id });
-    res.json({ success: true, message: 'Category deleted' });
+
+    res.json({ success: true, message: 'Category and related products deleted' });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

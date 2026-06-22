@@ -23,16 +23,18 @@ L.Icon.Default.mergeOptions({
 });
 
 // Custom Icons
-const restaurantIcon = new L.Icon({
-  iconUrl: 'https://cdn-icons-png.flaticon.com/512/3170/3170733.png',
-  iconSize: [40, 40],
-  iconAnchor: [20, 40],
+const restaurantIcon = new L.divIcon({
+  className: 'custom-marker-res',
+  html: '<div style="font-size: 30px; line-height: 1; filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.35))">🏪</div>',
+  iconSize: [30, 30],
+  iconAnchor: [15, 30],
 });
 
-const customerIcon = new L.Icon({
-  iconUrl: 'https://cdn-icons-png.flaticon.com/512/1275/1275302.png',
-  iconSize: [40, 40],
-  iconAnchor: [20, 40],
+const customerIcon = new L.divIcon({
+  className: 'custom-marker-cust',
+  html: '<div style="font-size: 30px; line-height: 1; filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.35))">🏠</div>',
+  iconSize: [30, 30],
+  iconAnchor: [15, 30],
 });
 
 // Pulsing rider marker

@@ -31,6 +31,7 @@ export const markAsRead = async (req, res) => {
     }
 
     notification.isRead = true;
+    notification.readAt = new Date();
     await notification.save();
 
     res.status(200).json({ success: true, data: notification });
@@ -46,7 +47,7 @@ export const markAllAsRead = async (req, res) => {
   try {
     await Notification.updateMany(
       { recipient: req.user.id, isRead: false },
-      { isRead: true }
+      { isRead: true, readAt: new Date() }
     );
 
     res.status(200).json({ success: true, message: 'Notifications marked as read' });

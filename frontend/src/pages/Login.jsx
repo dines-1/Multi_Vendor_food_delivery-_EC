@@ -72,14 +72,6 @@ const Login = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
-              <button 
-                type="button" 
-                className="input-eye-btn"
-                onClick={() => setShowPassword(!showPassword)}
-                aria-label="Toggle password visibility"
-              >
-                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
             </div>
           </div>
 
@@ -101,12 +93,7 @@ const Login = () => {
           </Link>
         </div>
 
-        <div className="auth-restaurant-cta">
-          <span>Deliver with us?</span>
-          <Link to="/register-delivery" className="auth-restaurant-link">
-            Become a rider partner <ArrowRight size={14} />
-          </Link>
-        </div>
+  
 
         <div className="auth-footer">
           <p>Don't have an account? <Link to="/register">Create Account</Link></p>

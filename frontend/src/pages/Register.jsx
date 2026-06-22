@@ -111,14 +111,6 @@ const Register = () => {
                 minLength={8}
                 required
               />
-              <button
-                type="button"
-                className="input-eye-btn"
-                onClick={() => setShowPassword((v) => !v)}
-                aria-label="Toggle password visibility"
-              >
-                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
             </div>
           </div>
 

@@ -295,6 +295,12 @@ const VendorOrders = () => {
                       <User size={13} />
                       <span>{order.customer?.name || 'Customer'}</span>
                     </div>
+                    {order.delivery_person_id?.user?.name && (
+                      <div className="rider-row" style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.75rem', color: '#6366F1', marginTop: '2px', marginBottom: '2px' }}>
+                        <Truck size={12} />
+                        <span>Rider: {order.delivery_person_id.user.name}</span>
+                      </div>
+                    )}
                     <div className="order-summary-row">
                       <ShoppingBag size={13} />
                       <span>{order.items.length} item{order.items.length !== 1 ? 's' : ''}</span>
@@ -379,6 +385,36 @@ const VendorOrders = () => {
                   </div>
                 </div>
               </div>
+
+              {/* Delivery Partner */}
+              {selectedOrder.delivery_person_id && (
+                <div className="details-section">
+                  <h3 className="section-title">
+                    <Truck size={16} /> Delivery Partner
+                  </h3>
+                  <div className="info-grid">
+                    <div className="info-item">
+                      <label>Rider Name</label>
+                      <span>{selectedOrder.delivery_person_id.user?.name || '—'}</span>
+                    </div>
+                    <div className="info-item">
+                      <Phone size={14} />
+                      <label>Phone</label>
+                      <span>{selectedOrder.delivery_person_id.user?.phone || '—'}</span>
+                    </div>
+                    <div className="info-item">
+                      <label>Vehicle</label>
+                      <span style={{ textTransform: 'capitalize' }}>
+                        {selectedOrder.delivery_person_id.vehicle_type || '—'}
+                      </span>
+                    </div>
+                    <div className="info-item">
+                      <label>License Plate</label>
+                      <span>{selectedOrder.delivery_person_id.license_plate || '—'}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Payment */}
               <div className="details-section">

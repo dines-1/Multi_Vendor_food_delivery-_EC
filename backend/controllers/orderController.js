@@ -10,13 +10,12 @@ const VENDOR_STATUS_FLOW = {
   pending: ['confirmed', 'cancelled'],
   confirmed: ['preparing', 'cancelled'],
   preparing: ['out_for_delivery', 'cancelled'],
-  out_for_delivery: ['delivered'],
+  out_for_delivery: ['cancelled'],
   delivered: [],
   cancelled: []
 };
 
 const DELIVERY_STATUS_FLOW = {
-  preparing: ['out_for_delivery'],
   out_for_delivery: ['delivered'],
 };
 
@@ -173,7 +172,14 @@ export const getMyOrders = async (req, res) => {
     await autoCancelStaleOrders();
     const orders = await Order.find({ customer: req.user.id })
       .sort('-createdAt')
-      .populate('restaurant', 'name logo_url');
+      .populate('restaurant', 'name logo_url')
+      .populate({
+        path: 'delivery_person_id',
+        populate: {
+          path: 'user',
+          select: 'name phone avatar'
+        }
+      });
 
     res.status(200).json({ success: true, data: orders });
   } catch (err) {
@@ -190,7 +196,13 @@ export const getOrderById = async (req, res) => {
     const order = await Order.findById(req.params.id)
       .populate('customer', 'name phone email')
       .populate('restaurant', 'name logo_url address phone')
-      .populate('delivery_person_id', 'name phone');
+      .populate({
+        path: 'delivery_person_id',
+        populate: {
+          path: 'user',
+          select: 'name phone avatar'
+        }
+      });
 
     if (!order) {
       return res.status(404).json({ success: false, message: 'Order not found' });
@@ -281,7 +293,14 @@ export const updateOrderStatus = async (req, res) => {
 
     const populated = await Order.findById(order._id)
       .populate('customer', 'name phone email')
-      .populate('restaurant', 'name logo_url');
+      .populate('restaurant', 'name logo_url')
+      .populate({
+        path: 'delivery_person_id',
+        populate: {
+          path: 'user',
+          select: 'name phone avatar'
+        }
+      });
 
     // Real-time update via socket
     if (global.io) {
@@ -323,7 +342,14 @@ export const getVendorOrders = async (req, res) => {
       .sort('-createdAt')
       .skip((page - 1) * limit)
       .limit(Number(limit))
-      .populate('customer', 'name phone email');
+      .populate('customer', 'name phone email')
+      .populate({
+        path: 'delivery_person_id',
+        populate: {
+          path: 'user',
+          select: 'name phone avatar'
+        }
+      });
 
     const total = await Order.countDocuments(filter);
 
@@ -542,6 +568,44 @@ export const getVendorRevenue = async (req, res) => {
       success: true,
       data: { totalEarnings, totalOrders, dailyRevenue, restaurantBalance: restaurant.earnings || 0 }
     });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+};
+
+// @desc    Re-request rider (vendor resets 2-min timer)
+// @route   POST /api/orders/:id/re-request
+// @access  Private (vendor)
+export const reRequestRider = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
+
+    if (order.status !== 'out_for_delivery' || order.delivery_person_id) {
+      return res.status(400).json({ success: false, message: 'Order must be out for delivery and without a rider' });
+    }
+
+    order.statusHistory.push({
+      status: 'out_for_delivery',
+      changedBy: req.user.id,
+      note: 'Rider re-requested by restaurant',
+      timestamp: new Date()
+    });
+
+    await order.save();
+
+    const populated = await Order.findById(order._id)
+      .populate('customer', 'name phone email')
+      .populate('restaurant', 'name logo_url')
+      .populate({
+        path: 'delivery_person_id',
+        populate: {
+          path: 'user',
+          select: 'name phone avatar'
+        }
+      });
+
+    res.status(200).json({ success: true, data: populated });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
   }

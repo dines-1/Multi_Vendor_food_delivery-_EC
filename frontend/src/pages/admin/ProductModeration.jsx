@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Package, Star, CheckCircle, XCircle, Trash2, Plus, X, FolderTree } from 'lucide-react';
+import { Package, Plus, X, FolderTree, ImageIcon } from 'lucide-react';
 import adminService from '../../services/adminService';
 import toast from 'react-hot-toast';
 
@@ -36,9 +36,7 @@ const ProductModeration = () => {
     setLoading(true);
     try {
       const cats = await adminService.getCategories();
-      const all = cats.data || [];
-      // Only display global platform categories
-      setCategories(all.filter(c => !c.parentCategory && !c.restaurant));
+      setCategories((cats.data || []).filter(c => !c.parentCategory));
     } catch { toast.error('Failed to load categories'); }
     setLoading(false);
   };
@@ -79,14 +77,27 @@ const ProductModeration = () => {
   };
 
   const handleDeleteCategory = async (id) => {
-    if (!confirm('Delete this category?')) return;
+    if (!confirm('Delete this category? All products in this category will also be deleted.')) return;
     try { await adminService.deleteCategory(id); toast.success('Deleted'); loadCategories(); } catch { toast.error('Failed'); }
   };
 
   const getImageUrl = (url) => {
     if (!url) return null;
     if (url.startsWith('http')) return url;
-    return `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}${url}`;
+    const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+    const origin = apiBase.replace(/\/api\/?$/, '');
+    return `${origin}${url}`;
+  };
+
+  const ImageCell = ({ src, alt }) => {
+    const imageUrl = getImageUrl(src);
+    return imageUrl ? (
+      <img src={imageUrl} alt={alt} style={{ width: 40, height: 40, borderRadius: 8, objectFit: 'cover', background: '#f1f5f9' }} />
+    ) : (
+      <div style={{ width: 40, height: 40, borderRadius: 8, background: '#f1f5f9', color: '#94a3b8', display: 'grid', placeItems: 'center' }}>
+        <ImageIcon size={16} />
+      </div>
+    );
   };
 
   return (
@@ -120,7 +131,7 @@ const ProductModeration = () => {
                 <tbody>
                   {products.map(p => (
                     <tr key={p._id}>
-                      <td><img src={getImageUrl(p.image)} alt="" style={{ width: 40, height: 40, borderRadius: 8, objectFit: 'cover' }} /></td>
+                      <td><ImageCell src={p.image_url || p.image} alt={p.name} /></td>
                       <td style={{ fontWeight: 600 }}>{p.name}</td>
                       <td>{p.restaurant?.name || '-'}</td>
                       <td>{formatNPR(p.price)}</td>
@@ -154,33 +165,34 @@ const ProductModeration = () => {
       )}
 
       {tab === 'categories' && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
-          <div className="admin-card">
-            <div className="admin-card-header">
-              <h3>Global Categories</h3>
+        <div className="admin-table-container">
+            <div className="table-toolbar">
+              <h3>All Categories</h3>
               <button className="btn btn-primary btn-sm" onClick={() => { setForm({ name: '', image: null, parentCategory: '' }); setImagePreview(null); setModal({ type: 'category' }); }}><Plus size={12} /> Add</button>
             </div>
             {loading ? <div className="loading-spinner"><div className="spinner" /></div> :
              categories.length === 0 ? <div className="empty-state"><FolderTree /><p>No categories</p></div> : (
-              <div className="widget-list">
-                {categories.map(c => (
-                  <div key={c._id} className="widget-item">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <img src={getImageUrl(c.image)} alt="" style={{ width: 32, height: 32, borderRadius: 6, objectFit: 'cover', background: '#f1f5f9' }} />
-                      <div>
-                        <div style={{ fontWeight: 600, fontSize: '0.8rem' }}>{c.name}</div>
-                        <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>/{c.slug}</div>
-                      </div>
-                    </div>
-                    <div className="btn-group">
-                      <button className="btn btn-outline btn-sm" onClick={() => { setForm({ name: c.name, image: null, parentCategory: '' }); setImagePreview(getImageUrl(c.image)); setModal({ type: 'category', editId: c._id }); }}>Edit</button>
-                      <button className="btn btn-danger btn-sm" onClick={() => handleDeleteCategory(c._id)}>Delete</button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <table className="admin-table">
+                <thead><tr><th>Image</th><th>Name</th><th>Owner</th><th>Slug</th><th>Status</th><th>Actions</th></tr></thead>
+                <tbody>
+                  {categories.map(c => (
+                    <tr key={c._id}>
+                      <td><ImageCell src={c.image} alt={c.name} /></td>
+                      <td style={{ fontWeight: 600 }}>{c.name}</td>
+                      <td>{c.restaurant?.name || 'Admin / Platform'}</td>
+                      <td>{c.slug ? `/${c.slug}` : '-'}</td>
+                      <td><span className={`badge ${c.isActive ? 'badge-success' : 'badge-danger'}`}>{c.isActive ? 'Active' : 'Inactive'}</span></td>
+                      <td>
+                        <div className="btn-group">
+                          <button className="btn btn-outline btn-sm" onClick={() => { setForm({ name: c.name, image: null, parentCategory: '' }); setImagePreview(getImageUrl(c.image)); setModal({ type: 'category', editId: c._id }); }}>Edit</button>
+                          <button className="btn btn-danger btn-sm" onClick={() => handleDeleteCategory(c._id)}>Delete</button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             )}
-          </div>
         </div>
       )}
 

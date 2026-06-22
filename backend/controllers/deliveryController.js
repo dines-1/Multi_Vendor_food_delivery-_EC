@@ -58,8 +58,8 @@ export const updateProfile = async (req, res) => {
 export const getOrderRequests = async (req, res) => {
   try {
     const orders = await Order.find({
-      status: 'confirmed',
-      delivery_person_id: null
+      delivery_person_id: null,
+      status: 'out_for_delivery'
     }).populate('restaurant', 'name address coordinates').sort('-createdAt');
 
     res.status(200).json({ success: true, data: orders });
@@ -87,16 +87,15 @@ export const acceptOrder = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Order already accepted by someone else' });
     }
 
-    if (order.status !== 'confirmed') {
-      return res.status(400).json({ success: false, message: 'Only confirmed orders can be accepted for delivery' });
+    if (order.status !== 'out_for_delivery') {
+      return res.status(400).json({ success: false, message: 'Only ready/out-for-delivery orders can be accepted' });
     }
 
     order.delivery_person_id = delivery._id;
-    order.status = 'preparing';
     order.statusHistory.push({
-      status: 'preparing',
+      status: 'out_for_delivery',
       changedBy: req.user.id,
-      note: 'Delivery accepted by rider'
+      note: 'Delivery request accepted by rider'
     });
     await order.save();
 
@@ -114,7 +113,7 @@ export const getActiveOrders = async (req, res) => {
     const delivery = await DeliveryPerson.findOne({ user: req.user.id });
     const orders = await Order.find({
       delivery_person_id: delivery._id,
-      status: { $in: ['preparing', 'out_for_delivery'] }
+      status: 'out_for_delivery'
     }).populate('restaurant', 'name address coordinates').sort('-createdAt');
 
     res.status(200).json({ success: true, data: orders });

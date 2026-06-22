@@ -49,8 +49,14 @@ const DeliveryDashboard = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchDeliveryData();
-  }, []);
+  fetchDeliveryData();
+  const interval = setInterval(() => {
+    api.get('/delivery/requests')
+      .then(res => setRequests(res.data.data))
+      .catch(err => console.error('Failed to fetch requests', err));
+  }, 30000);
+  return () => clearInterval(interval);
+}, []);
 
   const fetchDeliveryData = async () => {
     try {
@@ -189,21 +195,14 @@ const DeliveryDashboard = () => {
             </div>
 
             <div className="step-timeline">
-              <div className={`step-item ${['preparing', 'out_for_delivery', 'delivered'].includes(activeDelivery.status) ? 'done' : 'current'}`}>
+              <div className="step-item done">
                 <div className="step-point"><CheckCircle size={16} /></div>
                 <div className="step-info">
-                  <strong>Order Accepted</strong>
-                  <span>Head to restaurant</span>
-                </div>
-              </div>
-              <div className={`step-item ${activeDelivery.status === 'out_for_delivery' || activeDelivery.status === 'delivered' ? 'done' : activeDelivery.status === 'preparing' ? 'current' : ''}`}>
-                <div className="step-point"><Package size={16} /></div>
-                <div className="step-info">
-                  <strong>Pick up order</strong>
+                  <strong>Order Picked Up</strong>
                   <span>{activeDelivery.restaurant?.name}</span>
                 </div>
               </div>
-              <div className={`step-item ${activeDelivery.status === 'delivered' ? 'done' : activeDelivery.status === 'out_for_delivery' ? 'current' : ''}`}>
+              <div className={`step-item ${activeDelivery.status === 'delivered' ? 'done' : 'current'}`}>
                 <div className="step-point"><Navigation size={16} /></div>
                 <div className="step-info">
                   <strong>Deliver to customer</strong>
@@ -215,13 +214,10 @@ const DeliveryDashboard = () => {
             <button 
                 className="action-btn-primary"
                 onClick={() => {
-                    if (activeDelivery.status === 'preparing') handleUpdateStatus(activeDelivery._id, 'out_for_delivery');
-                    else if (activeDelivery.status === 'out_for_delivery') handleUpdateStatus(activeDelivery._id, 'delivered');
-                    else handleUpdateStatus(activeDelivery._id, 'preparing');
+                    handleUpdateStatus(activeDelivery._id, 'delivered');
                 }}
             >
-                {activeDelivery.status === 'preparing' ? '📦 Confirm Pickup' : 
-                 activeDelivery.status === 'out_for_delivery' ? '✅ Confirm Delivery' : '📍 Start Pickup'}
+                Confirm Delivery
             </button>
           </div>
         ) : (

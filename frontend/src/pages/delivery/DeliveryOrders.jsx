@@ -198,13 +198,8 @@ const DeliveryOrders = () => {
                     </div>
 
                     <div className="active-actions">
-                        {order.status === 'preparing' && (
-                            <button className="status-btn yellow" onClick={() => handleUpdateStatus(order._id, 'out_for_delivery')}>
-                                Mark as Picked Up
-                            </button>
-                        )}
                         {order.status === 'out_for_delivery' && (
-                            <button className="status-btn green" onClick={() => handleUpdateStatus(order._id, 'delivered')}>
+                            <button className="status-btn green" style={{ width: '100%' }} onClick={() => handleUpdateStatus(order._id, 'delivered')}>
                                 <CheckCircle size={18} /> Mark as Delivered
                             </button>
                         )}
