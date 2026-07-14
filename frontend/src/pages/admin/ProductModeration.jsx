@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Package, Plus, X, FolderTree, ImageIcon } from 'lucide-react';
 import adminService from '../../services/adminService';
 import toast from 'react-hot-toast';
+import { resolveMediaUrl } from '../../utils/customerData';
 
 const formatNPR = (v) => `NPR ${Number(v || 0).toLocaleString()}`;
 
@@ -79,11 +80,7 @@ const ProductModeration = () => {
   };
 
   const getImageUrl = (url) => {
-    if (!url) return null;
-    if (url.startsWith('http')) return url;
-    const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-    const origin = apiBase.replace(/\/api\/?$/, '');
-    return `${origin}${url}`;
+    return resolveMediaUrl(url, null);
   };
 
   const ImageCell = ({ src, alt }) => {

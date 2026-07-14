@@ -8,7 +8,6 @@ import Home from './pages/Home';
 import HomeRedirect from './components/HomeRedirect';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import Profile from './pages/Profile';
 import RestaurantDetail from './pages/RestaurantDetail';
 import FoodDetail from './pages/FoodDetail';
 import AdminLayout from './pages/admin/AdminLayout';
@@ -69,7 +68,6 @@ function App() {
               <Route path="/explore" element={<><Navbar /><main className="main-content"><Explore /></main><Footer /></>} />
               <Route path="/about" element={<><Navbar /><main className="main-content"><AboutUs /></main><Footer /></>} />
               <Route path="/contact" element={<><Navbar /><main className="main-content"><Contact /></main><Footer /></>} />
-              <Route path="/profile" element={<><Navbar /><main className="main-content"><Profile /></main><Footer /></>} />
               <Route path="/login" element={<><Navbar /><main className="main-content"><Login /></main><Footer /></>} />
               <Route path="/register" element={<><Navbar /><main className="main-content"><Register /></main><Footer /></>} />
               <Route path="//register-restaurant" element={<><Navbar /><main className="main-content"><Registerrestaurants /></main><Footer /></>} />

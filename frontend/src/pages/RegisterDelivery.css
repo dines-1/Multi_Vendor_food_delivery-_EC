@@ -1,81 +1,81 @@
-.restaurant-signup-page {
+.driver-signup-page {
   min-height: 100vh;
   background: #f8fafc;
   padding: 48px 20px;
   color: #172033;
 }
 
-.restaurant-signup-shell {
-  width: min(1100px, 100%);
+.driver-signup-shell {
+  width: min(1040px, 100%);
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 0.85fr 1.15fr;
+  grid-template-columns: 0.8fr 1.2fr;
   gap: 32px;
   align-items: start;
 }
 
-.restaurant-signup-intro,
-.restaurant-signup-form {
+.driver-signup-intro,
+.driver-signup-form {
   background: #ffffff;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
   box-shadow: 0 14px 35px rgba(15, 23, 42, 0.07);
 }
 
-.restaurant-signup-intro {
+.driver-signup-intro {
   padding: 32px;
   position: sticky;
   top: 24px;
 }
 
-.restaurant-signup-back,
-.restaurant-signup-footer a {
-  color: #d97706;
+.driver-signup-back,
+.driver-signup-footer a {
+  color: #2563eb;
   font-weight: 700;
   text-decoration: none;
 }
 
-.restaurant-signup-back:hover,
-.restaurant-signup-footer a:hover {
-  color: #92400e;
+.driver-signup-back:hover,
+.driver-signup-footer a:hover {
+  color: #1d4ed8;
 }
 
-.restaurant-signup-kicker {
+.driver-signup-kicker {
   margin: 36px 0 10px;
-  color: #d97706;
+  color: #2563eb;
   font-size: 0.78rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
-.restaurant-signup-intro h1 {
+.driver-signup-intro h1 {
   margin: 0 0 14px;
-  font-size: clamp(2rem, 4vw, 3.35rem);
+  font-size: clamp(2rem, 4vw, 3.25rem);
   line-height: 1.05;
   color: #111827;
 }
 
-.restaurant-signup-intro p:last-child {
+.driver-signup-intro p:last-child {
   color: #64748b;
   line-height: 1.7;
   font-size: 1rem;
 }
 
-.restaurant-signup-form {
+.driver-signup-form {
   padding: 32px;
   display: flex;
   flex-direction: column;
   gap: 26px;
 }
 
-.signup-section {
+.driver-form-section {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-.signup-section h2 {
+.driver-form-section h2 {
   font-size: 1rem;
   color: #111827;
   margin: 0;
@@ -83,13 +83,13 @@
   border-bottom: 1px solid #e5e7eb;
 }
 
-.signup-grid.two-columns {
+.driver-form-grid.two-columns {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
 }
 
-.restaurant-signup-form label {
+.driver-signup-form label {
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -98,7 +98,8 @@
   font-weight: 700;
 }
 
-.restaurant-signup-form input {
+.driver-signup-form input,
+.driver-signup-form select {
   width: 100%;
   min-height: 46px;
   border: 1px solid #cbd5e1;
@@ -111,84 +112,63 @@
   outline: none;
 }
 
-.restaurant-signup-form input:focus {
-  border-color: #d97706;
-  box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.14);
+.driver-signup-form input:focus,
+.driver-signup-form select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.13);
 }
 
-.restaurant-signup-form input::placeholder {
+.driver-signup-form input::placeholder {
   color: #94a3b8;
 }
 
-.cuisine-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.cuisine-list button {
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  background: #ffffff;
-  color: #475569;
-  cursor: pointer;
-  font-weight: 700;
-  padding: 10px 14px;
-}
-
-.cuisine-list button.selected {
-  border-color: #d97706;
-  background: #fff7ed;
-  color: #92400e;
-}
-
-.restaurant-signup-submit {
+.driver-signup-submit {
   min-height: 50px;
   border: 0;
   border-radius: 8px;
-  background: #d97706;
+  background: #2563eb;
   color: #ffffff;
   cursor: pointer;
   font-size: 0.98rem;
   font-weight: 800;
 }
 
-.restaurant-signup-submit:hover:not(:disabled) {
-  background: #b45309;
+.driver-signup-submit:hover:not(:disabled) {
+  background: #1d4ed8;
 }
 
-.restaurant-signup-submit:disabled {
+.driver-signup-submit:disabled {
   opacity: 0.7;
   cursor: not-allowed;
 }
 
-.restaurant-signup-footer {
+.driver-signup-footer {
   color: #64748b;
   text-align: center;
   margin: 0;
 }
 
 @media (max-width: 860px) {
-  .restaurant-signup-shell {
+  .driver-signup-shell {
     grid-template-columns: 1fr;
   }
 
-  .restaurant-signup-intro {
+  .driver-signup-intro {
     position: static;
   }
 }
 
 @media (max-width: 560px) {
-  .restaurant-signup-page {
+  .driver-signup-page {
     padding: 24px 14px;
   }
 
-  .restaurant-signup-intro,
-  .restaurant-signup-form {
+  .driver-signup-intro,
+  .driver-signup-form {
     padding: 22px;
   }
 
-  .signup-grid.two-columns {
+  .driver-form-grid.two-columns {
     grid-template-columns: 1fr;
   }
 }

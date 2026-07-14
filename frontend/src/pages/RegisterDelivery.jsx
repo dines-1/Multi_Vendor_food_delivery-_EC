@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, Bike, Eye, EyeOff, Image, Lock, Mail, MapPin, Phone, User } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import './Auth.css';
+import './RegisterDelivery.css';
 
 const RegisterDelivery = () => {
-  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     name: '',
@@ -19,7 +17,7 @@ const RegisterDelivery = () => {
     area: '',
     city: '',
     vehicle_type: 'bike',
-    license_plate: ''
+    license_plate: '',
   });
 
   const { login } = useAuth();
@@ -43,14 +41,14 @@ const RegisterDelivery = () => {
         address: {
           street: form.street,
           area: form.area,
-          city: form.city
+          city: form.city,
         },
         vehicle_type: form.vehicle_type,
-        license_plate: form.license_plate
+        license_plate: form.license_plate,
       });
 
       login(res.data.token);
-      toast.success('Delivery partner application submitted!');
+      toast.success('Driver application submitted.');
       navigate('/delivery');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Registration failed');
@@ -60,124 +58,93 @@ const RegisterDelivery = () => {
   };
 
   return (
-    <div className="auth-container fade-in">
-      <div className="auth-card">
-        <Link to="/" className="auth-restaurant-link">
-          <ArrowLeft size={14} /> Back to home
-        </Link>
-
-        <div className="auth-header">
-          <div className="auth-logo-ring">
-            <Bike size={24} />
-          </div>
-          <h2>Become a Delivery Partner</h2>
-          <p>Register your rider account and start managing deliveries.</p>
+    <section className="driver-signup-page">
+      <div className="driver-signup-shell">
+        <div className="driver-signup-intro">
+          <Link to="/" className="driver-signup-back">Back to home</Link>
+          <p className="driver-signup-kicker">Driver partner</p>
+          <h1>Create your driver profile</h1>
+          <p>
+            Add your contact, address, and vehicle details so your delivery
+            partner account can be reviewed.
+          </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="auth-form">
-          <div className="form-group">
-            <label>Full Name</label>
-            <div className="input-wrapper">
-              <User size={18} />
-              <input name="name" value={form.name} onChange={handleChange} placeholder="e.g. Bikash Tamang" required />
-            </div>
-          </div>
-
-          <div className="form-group-row">
-            <div className="form-group">
-              <label>Email</label>
-              <div className="input-wrapper">
-                <Mail size={18} />
-                <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="you@example.com" required />
-              </div>
-            </div>
-            <div className="form-group">
-              <label>Phone</label>
-              <div className="input-wrapper">
-                <Phone size={18} />
+        <form className="driver-signup-form" onSubmit={handleSubmit}>
+          <div className="driver-form-section">
+            <h2>Profile details</h2>
+            <div className="driver-form-grid two-columns">
+              <label>
+                Full name
+                <input name="name" value={form.name} onChange={handleChange} placeholder="Bikash Tamang" required />
+              </label>
+              <label>
+                Phone
                 <input name="phone" value={form.phone} onChange={handleChange} placeholder="98XXXXXXXX" required />
-              </div>
+              </label>
             </div>
+            <div className="driver-form-grid two-columns">
+              <label>
+                Email
+                <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="you@example.com" required />
+              </label>
+              <label>
+                Password
+                <input name="password" type="password" value={form.password} onChange={handleChange} placeholder="Minimum 8 characters" minLength={8} required />
+              </label>
+            </div>
+            <label>
+              Profile image URL
+              <input name="avatar" type="url" value={form.avatar} onChange={handleChange} placeholder="https://example.com/photo.jpg" required />
+            </label>
           </div>
 
-          <div className="form-group">
-            <label>Password</label>
-            <div className="input-wrapper">
-              <Lock size={18} />
-              <input
-                name="password"
-                type={showPassword ? 'text' : 'password'}
-                value={form.password}
-                onChange={handleChange}
-                placeholder="Min. 8 characters"
-                minLength={8}
-                required
-              />
-              <button type="button" className="input-eye-btn" onClick={() => setShowPassword((value) => !value)}>
-                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label>Profile Image URL</label>
-            <div className="input-wrapper">
-              <Image size={18} />
-              <input
-                name="avatar"
-                type="url"
-                value={form.avatar}
-                onChange={handleChange}
-                placeholder="https://example.com/your-photo.jpg"
-                required
-              />
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label>Address</label>
-            <div className="input-wrapper">
-              <MapPin size={18} />
+          <div className="driver-form-section">
+            <h2>Address</h2>
+            <label>
+              Street address
               <input name="street" value={form.street} onChange={handleChange} placeholder="Street address" required />
+            </label>
+            <div className="driver-form-grid two-columns">
+              <label>
+                Area
+                <input name="area" value={form.area} onChange={handleChange} placeholder="Thamel" required />
+              </label>
+              <label>
+                City
+                <input name="city" value={form.city} onChange={handleChange} placeholder="Kathmandu" required />
+              </label>
             </div>
           </div>
 
-          <div className="form-group-row">
-            <div className="form-group">
-              <label>Area</label>
-              <input name="area" value={form.area} onChange={handleChange} placeholder="Thamel" required />
-            </div>
-            <div className="form-group">
-              <label>City</label>
-              <input name="city" value={form.city} onChange={handleChange} placeholder="Kathmandu" required />
-            </div>
-          </div>
-
-          <div className="form-group-row">
-            <div className="form-group">
-              <label>Vehicle</label>
-              <select name="vehicle_type" value={form.vehicle_type} onChange={handleChange} required>
-                <option value="bike">Bike</option>
-                <option value="scooter">Scooter</option>
-                <option value="bicycle">Bicycle</option>
-              </select>
-            </div>
-            <div className="form-group">
-              <label>License Plate</label>
-              <input name="license_plate" value={form.license_plate} onChange={handleChange} placeholder="Ba 99 Pa 9999" />
+          <div className="driver-form-section">
+            <h2>Vehicle</h2>
+            <div className="driver-form-grid two-columns">
+              <label>
+                Vehicle type
+                <select name="vehicle_type" value={form.vehicle_type} onChange={handleChange} required>
+                  <option value="bike">Bike</option>
+                  <option value="scooter">Scooter</option>
+                  <option value="bicycle">Bicycle</option>
+                </select>
+              </label>
+              <label>
+                License plate
+                <input name="license_plate" value={form.license_plate} onChange={handleChange} placeholder="Ba 99 Pa 9999" />
+              </label>
             </div>
           </div>
 
-          <button type="submit" className="auth-submit-btn" disabled={loading}>
-            {loading ? <span className="btn-loader" /> : <>Submit Application <ArrowRight size={18} /></>}
+          <button className="driver-signup-submit" type="submit" disabled={loading}>
+            {loading ? 'Submitting...' : 'Submit driver application'}
           </button>
-        </form>
 
-        <div className="auth-footer">
-          <p>Already registered? <Link to="/login">Sign In</Link></p>
-        </div>
+          <p className="driver-signup-footer">
+            Already registered? <Link to="/login">Sign in</Link>
+          </p>
+        </form>
       </div>
-    </div>
+    </section>
   );
 };
 

@@ -11,6 +11,7 @@ import {
 import ReviewModal from '../components/ReviewModal';
 import { useCart } from '../context/CartContext';
 import toast from 'react-hot-toast';
+import { fallbackRestaurantImage, resolveMediaUrl } from '../utils/customerData';
 import './MyOrders.css';
 
 /* ── Status config ─────────────────────────────────────── */
@@ -162,7 +163,7 @@ const OrderDetailsDrawer = ({ order, onClose, onCancel, onReorder, onRate, onRec
 
         <div className="drawer-header">
           <div className="drawer-title-group">
-            <img src={order.restaurant?.logo_url || 'https://via.placeholder.com/44'} alt={order.restaurant?.name} className="drawer-rest-logo" />
+            <img src={resolveMediaUrl(order.restaurant?.logo_url, fallbackRestaurantImage)} alt={order.restaurant?.name} className="drawer-rest-logo" />
             <div>
               <h2 className="drawer-rest-name">{order.restaurant?.name}</h2>
               <span className="drawer-order-num">#{order.orderNumber}</span>
@@ -303,7 +304,7 @@ const ActiveCard = ({ order, onOpen, onCancel, cancellingId }) => {
 
       <div className="ac-header">
         <div className="ac-rest">
-          <img src={order.restaurant?.logo_url || 'https://via.placeholder.com/44'} alt="" className="ac-logo" />
+          <img src={resolveMediaUrl(order.restaurant?.logo_url, fallbackRestaurantImage)} alt="" className="ac-logo" />
           <div>
             <strong>{order.restaurant?.name}</strong>
             <span className="ac-num"><Hash size={11} />{order.orderNumber}</span>

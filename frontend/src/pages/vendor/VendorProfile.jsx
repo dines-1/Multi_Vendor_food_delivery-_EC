@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
+import { fallbackRestaurantImage, resolveMediaUrl } from '../../utils/customerData';
 import { 
   Store, 
   User, 
@@ -58,7 +59,7 @@ const VendorProfile = () => {
           logo: null
         });
         if (data.logo_url) {
-          setLogoPreview(data.logo_url.startsWith('http') ? data.logo_url : `${import.meta.env.VITE_BACKEND_ORIGIN || 'http://localhost:5000'}${data.logo_url}`);
+          setLogoPreview(resolveMediaUrl(data.logo_url, fallbackRestaurantImage));
         }
       }
     } catch (err) {

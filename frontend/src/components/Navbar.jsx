@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Bike, ShoppingCart, LogOut, UtensilsCrossed, Package } from 'lucide-react';
+import { Bike, ShoppingCart, LogOut, UtensilsCrossed, Package, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import api from '../services/api';
@@ -14,6 +14,7 @@ const Navbar = () => {
   const { cartCount } = useCart();
   const navigate = useNavigate();
   const [activeOrderCount, setActiveOrderCount] = useState(0);
+  const [showProfile, setShowProfile] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -44,9 +45,16 @@ const Navbar = () => {
   }, [user]);
 
   const handleLogout = () => {
+    setShowProfile(false);
     logout();
     navigate('/login');
   };
+
+  const userAddress = [
+    user?.address?.street,
+    user?.address?.area,
+    user?.address?.city,
+  ].filter(Boolean).join(', ');
 
   return (
     <nav className="navbar">
@@ -90,7 +98,9 @@ const Navbar = () => {
                   {user.name.charAt(0)}
                 </div>
                 <div className="profile-dropdown">
-                  <Link to="/profile">My Profile</Link>
+                  <button type="button" className="profile-menu-btn" onClick={() => setShowProfile(true)}>
+                    My Profile
+                  </button>
                   {user.role === 'customer' && (
                     <Link to="/orders?tab=live" className="dropdown-with-badge">
                       <span>My Orders</span>
@@ -106,6 +116,51 @@ const Navbar = () => {
                   </button>
                 </div>
               </div>
+              {showProfile && (
+                <div className="profile-modal-backdrop" onClick={() => setShowProfile(false)}>
+                  <div className="profile-modal" onClick={(e) => e.stopPropagation()}>
+                    <div className="profile-modal-header">
+                      <div className="profile-modal-avatar">
+                        {user.name?.charAt(0)?.toUpperCase() || 'U'}
+                      </div>
+                      <div>
+                        <h2>{user.name || 'User'}</h2>
+                        <span>{user.role || 'customer'}</span>
+                      </div>
+                      <button type="button" className="profile-modal-close" onClick={() => setShowProfile(false)}>
+                        <X size={18} />
+                      </button>
+                    </div>
+
+                    <div className="profile-detail-list">
+                      <div className="profile-detail-row">
+                        <span>Email</span>
+                        <strong>{user.email || '-'}</strong>
+                      </div>
+                      <div className="profile-detail-row">
+                        <span>Phone</span>
+                        <strong>{user.phone || '-'}</strong>
+                      </div>
+                      <div className="profile-detail-row">
+                        <span>Address</span>
+                        <strong>{userAddress || '-'}</strong>
+                      </div>
+                      <div className="profile-detail-row">
+                        <span>Account type</span>
+                        <strong>{user.role || 'customer'}</strong>
+                      </div>
+                    </div>
+
+                    <div className="profile-modal-actions">
+                      {user.role === 'admin' && <button type="button" onClick={() => { setShowProfile(false); navigate('/admin'); }}>Admin Panel</button>}
+                      {user.role === 'vendor' && <button type="button" onClick={() => { setShowProfile(false); navigate('/vendor'); }}>Vendor Dashboard</button>}
+                      {user.role === 'delivery' && <button type="button" onClick={() => { setShowProfile(false); navigate('/delivery'); }}>Delivery Dashboard</button>}
+                      {user.role === 'customer' && <button type="button" onClick={() => { setShowProfile(false); navigate('/orders?tab=live'); }}>My Orders</button>}
+                      <button type="button" className="profile-modal-logout" onClick={handleLogout}>Logout</button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </>
           ) : (
             <div className="auth-btns">

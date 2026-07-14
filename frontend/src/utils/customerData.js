@@ -18,9 +18,13 @@ export const getEntity = (payload) => payload?.data || payload || null;
 
 export const resolveMediaUrl = (value, fallback) => {
   if (!value) return fallback;
-  if (/^https?:\/\//i.test(value)) return value;
-  if (value.startsWith('/uploads')) return `${BACKEND_ORIGIN}${value}`;
-  return value;
+  const path = String(value).trim();
+  if (!path) return fallback;
+  if (/^(https?:)?\/\//i.test(path) || /^data:/i.test(path) || /^blob:/i.test(path)) return path;
+  if (path.startsWith('/uploads')) return `${BACKEND_ORIGIN}${path}`;
+  if (path.startsWith('uploads/')) return `${BACKEND_ORIGIN}/${path}`;
+  if (path.startsWith('/')) return `${BACKEND_ORIGIN}${path}`;
+  return path;
 };
 
 export const getCategoryName = (category) => {

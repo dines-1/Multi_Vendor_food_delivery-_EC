@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
+import { fallbackFoodImage, resolveMediaUrl } from '../../utils/customerData';
 import './VendorDashboard.css';
 
 const VendorMenu = () => {
@@ -133,7 +134,7 @@ const VendorMenu = () => {
     });
     const imgField = item.image_url || item.image;
     if (imgField) {
-      setImagePreview(imgField.startsWith('http') ? imgField : `${import.meta.env.VITE_BACKEND_ORIGIN || 'http://localhost:5000'}${imgField}`);
+      setImagePreview(resolveMediaUrl(imgField, fallbackFoodImage));
     }
     setShowModal(true);
   };
@@ -195,9 +196,7 @@ const VendorMenu = () => {
   };
 
   const getImageUrl = (url) => {
-    if (!url) return 'https://via.placeholder.com/300x200?text=Food+Image';
-    if (url.startsWith('http')) return url;
-    return `${import.meta.env.VITE_BACKEND_ORIGIN || 'http://localhost:5000'}${url}`;
+    return resolveMediaUrl(url, fallbackFoodImage);
   };
 
   if (loading) return <div className="vendor-loading">Loading Menu...</div>;

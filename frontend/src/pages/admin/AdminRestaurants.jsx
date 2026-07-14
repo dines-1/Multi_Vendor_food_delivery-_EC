@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import adminService from '../../services/adminService';
 import { toast } from 'react-hot-toast';
 import { Search } from 'lucide-react';
+import { fallbackRestaurantImage, resolveMediaUrl } from '../../utils/customerData';
 
 const AdminRestaurants = () => {
   const [restaurants, setRestaurants] = useState([]);
@@ -69,7 +70,7 @@ const AdminRestaurants = () => {
                   <td>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                       <div style={{ width: 36, height: 36, borderRadius: 8, background: '#F1F5F9', overflow: 'hidden', flexShrink: 0 }}>
-                        <img src={res.logo_url || 'https://via.placeholder.com/36'} alt={res.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <img src={resolveMediaUrl(res.logo_url, fallbackRestaurantImage)} alt={res.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       </div>
                       <span style={{ fontWeight: 600, color: '#0F172A' }}>{res.name}</span>
                     </div>
