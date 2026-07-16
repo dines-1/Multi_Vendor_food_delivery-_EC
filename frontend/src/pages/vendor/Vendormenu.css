@@ -1,0 +1,93 @@
+
+.vm-filters {
+  display: flex;
+  align-items: center;
+  gap: var(--vp-space-3);
+  margin-bottom: var(--vp-space-5);
+}
+
+.vm-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--vp-space-5);
+}
+
+.vm-item-card { overflow: hidden; display: flex; flex-direction: column; }
+
+.vm-item-image {
+  position: relative;
+  height: 160px;
+  background: var(--vp-surface-sunken);
+}
+.vm-item-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.vm-status-badge { position: absolute; top: var(--vp-space-3); left: var(--vp-space-3); }
+
+.vm-veg-dot {
+  position: absolute;
+  top: var(--vp-space-3);
+  right: var(--vp-space-3);
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px rgba(42,34,28,0.15);
+}
+.vm-veg-dot.veg { background: var(--vp-sage); }
+.vm-veg-dot.non-veg { background: var(--vp-rust); }
+
+.vm-item-body { padding: var(--vp-space-4); flex: 1; display: flex; flex-direction: column; gap: var(--vp-space-2); }
+
+.vm-item-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--vp-space-2);
+}
+.vm-item-header h3 { font-size: 1rem; }
+.vm-item-price { color: var(--vp-wine); font-weight: 600; font-size: 0.9rem; }
+
+.vm-item-desc {
+  font-size: 0.82rem;
+  color: var(--vp-ink-soft);
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.vm-item-footer {
+  margin-top: auto;
+  padding-top: var(--vp-space-3);
+  border-top: 1px solid var(--vp-line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.vm-item-actions { display: flex; gap: 4px; }
+
+.vm-category-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.vm-category-label-row label { margin-bottom: 0; }
+
+.vm-file-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--vp-space-3);
+}
+
+.vm-image-preview-sm {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--vp-radius-sm);
+  overflow: hidden;
+  border: 1px solid var(--vp-line);
+  flex-shrink: 0;
+}
+.vm-image-preview-sm img { width: 100%; height: 100%; object-fit: cover; }

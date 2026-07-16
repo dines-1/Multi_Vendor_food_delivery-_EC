@@ -1,19 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Plus, 
-  Search, 
-  Edit2, 
-  Trash2, 
-  MoreVertical,
+import {
+  Plus,
+  Search,
+  Edit2,
+  Trash2,
   Filter,
   Package,
-  Check,
   X
 } from 'lucide-react';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 import { fallbackFoodImage, resolveMediaUrl } from '../../utils/customerData';
-import './VendorDashboard.css';
+import './vendor-theme.css';
+import './Vendormenu.css';
 
 const VendorMenu = () => {
   const [menuItems, setMenuItems] = useState([]);
@@ -87,14 +86,11 @@ const VendorMenu = () => {
       });
       if (res.data.success) {
         toast.success('Category created successfully');
-        // Reload categories
         const updatedCats = await api.get('/menu/vendor/categories');
         if (updatedCats.data.success) {
           setCategories(updatedCats.data.data);
         }
-        // Auto-select the newly created category in the food form
         setFormData(prev => ({ ...prev, category: res.data.data._id }));
-        // Close category modal and reset fields
         setShowCategoryModal(false);
         setNewCategoryName('');
         setNewCategoryImage(null);
@@ -161,7 +157,7 @@ const VendorMenu = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     const data = new FormData();
     data.append('name', formData.name);
     data.append('description', formData.description);
@@ -170,7 +166,7 @@ const VendorMenu = () => {
     data.append('isVeg', formData.isVeg);
     data.append('isAvailable', formData.isAvailable);
     data.append('ingredients', formData.ingredients);
-    
+
     if (formData.image) {
       data.append('image', formData.image);
     }
@@ -195,57 +191,53 @@ const VendorMenu = () => {
     }
   };
 
-  const getImageUrl = (url) => {
-    return resolveMediaUrl(url, fallbackFoodImage);
-  };
+  const getImageUrl = (url) => resolveMediaUrl(url, fallbackFoodImage);
 
-  if (loading) return <div className="vendor-loading">Loading Menu...</div>;
+  if (loading) return <div className="vp-scope vp-loading">Loading menu</div>;
 
   return (
-    <div className="vendor-dashboard fade-in">
-      <div className="dashboard-header">
+    <div className="vp-scope fade-in">
+      <div className="vp-page-header">
         <div>
+          <span className="vp-eyebrow">Menu</span>
           <h1>Manage Menu</h1>
           <p>Add, edit or remove items from your restaurant menu</p>
+          <hr className="vp-rule" />
         </div>
-        <button className="btn-primary" onClick={() => { resetForm(); setShowModal(true); }}>
-          <Plus size={20} /> Add New Item
+        <button className="vp-btn vp-btn--primary" onClick={() => { resetForm(); setShowModal(true); }}>
+          <Plus size={18} /> Add new item
         </button>
       </div>
 
-      <div className="menu-filters">
-        <div className="search-box">
-          <Search size={18} />
+      <div className="vm-filters">
+        <div className="vp-search-box">
+          <Search size={16} />
           <input type="text" placeholder="Search menu items..." />
         </div>
-        <div className="filter-actions">
-          <button className="btn-filter"><Filter size={18} /> Filters</button>
-        </div>
+        <button className="vp-btn"><Filter size={16} /> Filters</button>
       </div>
 
-      <div className="menu-grid">
+      <div className="vm-grid">
         {menuItems.map(item => (
-          <div key={item._id} className="menu-item-card">
-            <div className="item-image">
+          <div key={item._id} className="vp-card vm-item-card">
+            <div className="vm-item-image">
               <img src={getImageUrl(item.image_url || item.image)} alt={item.name} />
-              <div className={`status-badge ${item.isAvailable ? 'available' : 'unavailable'}`}>
-                {item.isAvailable ? 'Available' : 'Sold Out'}
-              </div>
-              <div className="type-badge">
-                  <div className={`veg-indicator ${item.isVeg ? 'veg' : 'non-veg'}`}></div>
-              </div>
+              <span className={`vp-badge vm-status-badge ${item.isAvailable ? 'vp-badge--success' : 'vp-badge--neutral'}`}>
+                {item.isAvailable ? 'Available' : 'Sold out'}
+              </span>
+              <span className={`vm-veg-dot ${item.isVeg ? 'veg' : 'non-veg'}`} title={item.isVeg ? 'Vegetarian' : 'Non-vegetarian'} />
             </div>
-            <div className="item-info">
-              <div className="item-header">
+            <div className="vp-card-body vm-item-body">
+              <div className="vm-item-header">
                 <h3>{item.name}</h3>
-                <span className="item-price">Rs. {item.price}</span>
+                <span className="vp-mono vm-item-price">Rs. {item.price}</span>
               </div>
-              <p>{item.description}</p>
-              <div className="item-footer">
-                <span className="item-cat">{item.category?.name || 'Uncategorized'}</span>
-                <div className="item-actions">
-                  <button className="btn-edit" onClick={() => handleEdit(item)}><Edit2 size={16} /></button>
-                  <button className="btn-delete" onClick={() => handleDelete(item._id)}><Trash2 size={16} /></button>
+              <p className="vm-item-desc">{item.description}</p>
+              <div className="vm-item-footer">
+                <span className="vp-badge vp-badge--wine">{item.category?.name || 'Uncategorized'}</span>
+                <div className="vm-item-actions">
+                  <button className="vp-btn--icon" onClick={() => handleEdit(item)}><Edit2 size={15} /></button>
+                  <button className="vp-btn--icon danger" onClick={() => handleDelete(item._id)}><Trash2 size={15} /></button>
                 </div>
               </div>
             </div>
@@ -253,76 +245,60 @@ const VendorMenu = () => {
         ))}
 
         {menuItems.length === 0 && (
-          <div className="no-items">
-            <Package size={64} />
-            <p>Your menu is empty. Start adding delicious dishes!</p>
+          <div className="vp-empty">
+            <Package size={40} />
+            <p>Your menu is empty. Start adding dishes to your menu.</p>
           </div>
         )}
       </div>
 
       {showModal && (
-        <div className="modal-overlay">
-          <div className="modal-card">
-            <div className="modal-header">
-              <h2>{editingItem ? 'Edit Item' : 'Add New Dish'}</h2>
-              <button className="btn-close" onClick={() => setShowModal(false)}><X size={24} /></button>
+        <div className="vp-modal-overlay" onClick={() => setShowModal(false)}>
+          <div className="vp-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="vp-modal-header">
+              <h2>{editingItem ? 'Edit item' : 'Add new dish'}</h2>
+              <button className="vp-btn--icon" onClick={() => setShowModal(false)}><X size={20} /></button>
             </div>
-            <form onSubmit={handleSubmit} className="modal-form">
-              <div className="form-group">
-                <label>Item Name</label>
-                <input 
-                  type="text" 
-                  value={formData.name} 
-                  onChange={(e) => setFormData({...formData, name: e.target.value})} 
-                  required 
+            <form onSubmit={handleSubmit} className="vp-modal-body">
+              <div className="vp-field">
+                <label>Item name</label>
+                <input
+                  type="text"
+                  className="vp-input"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  required
                 />
               </div>
-              <div className="form-row">
-                <div className="form-group">
+              <div className="vp-field-row">
+                <div className="vp-field">
                   <label>Price (Rs.)</label>
-                  <input 
-                    type="number" 
-                    value={formData.price} 
-                    onChange={(e) => setFormData({...formData, price: e.target.value})} 
-                    required 
+                  <input
+                    type="number"
+                    className="vp-input"
+                    value={formData.price}
+                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                    required
                   />
                 </div>
-                <div className="form-group">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                    <label style={{ marginBottom: 0 }}>Category</label>
-                    <button 
-                      type="button" 
-                      onClick={() => setShowCategoryModal(true)} 
-                      style={{ 
-                        background: 'none', 
-                        border: 'none', 
-                        color: '#ef4444', 
-                        cursor: 'pointer',
-                        fontSize: '0.75rem',
-                        fontWeight: 600,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '2px'
-                      }}
+                <div className="vp-field">
+                  <div className="vm-category-label-row">
+                    <label>Category</label>
+                    <button
+                      type="button"
+                      className="vp-btn--text"
+                      onClick={() => setShowCategoryModal(true)}
                     >
-                      <Plus size={12} /> Add Custom
+                      <Plus size={12} /> Add custom
                     </button>
                   </div>
-                  <select 
-                    value={formData.category} 
-                    onChange={(e) => setFormData({...formData, category: e.target.value})} 
+                  <select
+                    className="vp-select"
+                    value={formData.category}
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                     required
-                    style={{
-                      width: '100%',
-                      padding: '10px',
-                      borderRadius: '8px',
-                      border: '1px solid #cbd5e1',
-                      background: '#fff',
-                      fontSize: '0.9rem',
-                      height: '42px'
-                    }}
                   >
-                    <option value="">-- Select Category --</option>
+                    <option value="">Select category</option>
                     {categories.map(cat => (
                       <option key={cat._id} value={cat._id}>
                         {cat.name} {cat.restaurant ? '(Custom)' : ''}
@@ -331,59 +307,57 @@ const VendorMenu = () => {
                   </select>
                 </div>
               </div>
-              <div className="form-group">
+              <div className="vp-field">
                 <label>Description</label>
-                <textarea 
-                  rows="3" 
-                  value={formData.description} 
-                  onChange={(e) => setFormData({...formData, description: e.target.value})} 
+                <textarea
+                  className="vp-textarea"
+                  rows="3"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   required
                 ></textarea>
               </div>
-              <div className="form-group">
+              <div className="vp-field">
                 <label>Ingredients (comma separated)</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
+                  className="vp-input"
                   placeholder="e.g. Tomato, Mozzarella, Basil, Olive Oil"
-                  value={formData.ingredients} 
-                  onChange={(e) => setFormData({...formData, ingredients: e.target.value})} 
+                  value={formData.ingredients}
+                  onChange={(e) => setFormData({ ...formData, ingredients: e.target.value })}
                 />
               </div>
-              <div className="form-group">
-                <label>Food Image</label>
-                <div className="file-input-wrapper">
+              <div className="vp-field">
+                <label>Food image</label>
+                <div className="vm-file-input-wrapper">
                   {imagePreview && (
-                    <div className="image-preview-sm">
+                    <div className="vm-image-preview-sm">
                       <img src={imagePreview} alt="Preview" />
                     </div>
                   )}
-                  <input 
-                    type="file" 
-                    onChange={handleFileChange} 
-                    accept="image/*"
+                  <input type="file" onChange={handleFileChange} accept="image/*" />
+                </div>
+              </div>
+              <div className="vp-toggle-row">
+                <label className="vp-toggle">
+                  <input
+                    type="checkbox"
+                    checked={formData.isVeg}
+                    onChange={(e) => setFormData({ ...formData, isVeg: e.target.checked })}
                   />
-                </div>
+                  Vegetarian
+                </label>
+                <label className="vp-toggle">
+                  <input
+                    type="checkbox"
+                    checked={formData.isAvailable}
+                    onChange={(e) => setFormData({ ...formData, isAvailable: e.target.checked })}
+                  />
+                  Available
+                </label>
               </div>
-              <div className="form-toggle-row">
-                <div className="toggle-group">
-                    <label>Vegetarian</label>
-                    <input 
-                        type="checkbox" 
-                        checked={formData.isVeg} 
-                        onChange={(e) => setFormData({...formData, isVeg: e.target.checked})} 
-                    />
-                </div>
-                <div className="toggle-group">
-                    <label>Available</label>
-                    <input 
-                        type="checkbox" 
-                        checked={formData.isAvailable} 
-                        onChange={(e) => setFormData({...formData, isAvailable: e.target.checked})} 
-                    />
-                </div>
-              </div>
-              <button type="submit" className="btn-submit">
-                {editingItem ? 'Update Information' : 'Add to Menu'}
+              <button type="submit" className="vp-btn vp-btn--primary vp-modal-submit">
+                {editingItem ? 'Update information' : 'Add to menu'}
               </button>
             </form>
           </div>
@@ -391,13 +365,13 @@ const VendorMenu = () => {
       )}
 
       {showCategoryModal && (
-        <div className="modal-overlay" style={{ zIndex: 1100 }}>
-          <div className="modal-card" style={{ maxWidth: '400px' }}>
-            <div className="modal-header">
-              <h2>Add Custom Category</h2>
-              <button 
-                type="button" 
-                className="btn-close" 
+        <div className="vp-modal-overlay" onClick={() => setShowCategoryModal(false)}>
+          <div className="vp-modal vp-modal--sm" onClick={(e) => e.stopPropagation()}>
+            <div className="vp-modal-header">
+              <h2>Add custom category</h2>
+              <button
+                type="button"
+                className="vp-btn--icon"
                 onClick={() => {
                   setShowCategoryModal(false);
                   setNewCategoryName('');
@@ -405,43 +379,44 @@ const VendorMenu = () => {
                   setNewCategoryImagePreview(null);
                 }}
               >
-                <X size={24} />
+                <X size={20} />
               </button>
             </div>
-            <form onSubmit={handleCreateCategory} className="modal-form">
-              <div className="form-group">
-                <label>Category Name</label>
-                <input 
-                  type="text" 
-                  value={newCategoryName} 
-                  onChange={(e) => setNewCategoryName(e.target.value)} 
+            <form onSubmit={handleCreateCategory} className="vp-modal-body">
+              <div className="vp-field">
+                <label>Category name</label>
+                <input
+                  type="text"
+                  className="vp-input"
+                  value={newCategoryName}
+                  onChange={(e) => setNewCategoryName(e.target.value)}
                   placeholder="e.g. Desserts, Chef Specials"
-                  required 
+                  required
                 />
               </div>
-              <div className="form-group">
-                <label>Category Image (Optional)</label>
-                <div className="file-input-wrapper">
+              <div className="vp-field">
+                <label>Category image (optional)</label>
+                <div className="vm-file-input-wrapper">
                   {newCategoryImagePreview && (
-                    <div className="image-preview-sm">
+                    <div className="vm-image-preview-sm">
                       <img src={newCategoryImagePreview} alt="Preview" />
                     </div>
                   )}
-                  <input 
-                    type="file" 
+                  <input
+                    type="file"
                     onChange={(e) => {
                       const file = e.target.files[0];
                       if (file) {
                         setNewCategoryImage(file);
                         setNewCategoryImagePreview(URL.createObjectURL(file));
                       }
-                    }} 
+                    }}
                     accept="image/*"
                   />
                 </div>
               </div>
-              <button type="submit" className="btn-submit">
-                Create Category
+              <button type="submit" className="vp-btn vp-btn--primary vp-modal-submit">
+                Create category
               </button>
             </form>
           </div>

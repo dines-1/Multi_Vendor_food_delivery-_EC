@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   ArrowRight,
@@ -10,7 +10,6 @@ import {
   Search,
   ShoppingBag,
   Star,
-  Utensils,
   Zap,
   Gift,
   TrendingUp,
@@ -19,6 +18,13 @@ import {
   Store,
   Heart,
   CheckCircle,
+  Soup,
+  Pizza,
+  UtensilsCrossed,
+  Sandwich,
+  Utensils,
+  Beef,
+  Fish,
 } from 'lucide-react';
 import restaurantService from '../services/restaurantService';
 import menuService from '../services/menuService';
@@ -30,15 +36,75 @@ import './Home.css';
 const activeStatuses = ['pending', 'confirmed', 'preparing', 'out_for_delivery'];
 
 const CATEGORIES = [
-  { name: 'Momos', icon: '🥟' },
-  { name: 'Pizza', icon: '🍕' },
-  { name: 'Thali', icon: '🍱' },
-  { name: 'Burgers', icon: '🍔' },
-  { name: 'Noodles', icon: '🍜' },
-  { name: 'Curry', icon: '🥘' },
-  { name: 'Sushi', icon: '🍣' },
-  { name: 'Desserts', icon: '🧁' },
+  { name: 'Momos', icon: Soup },
+  { name: 'Pizza', icon: Pizza },
+  { name: 'Thali', icon: UtensilsCrossed },
+  { name: 'Burgers', icon: Sandwich },
+  { name: 'Noodles', icon: Utensils },
+  { name: 'Curry', icon: Beef },
+  { name: 'Sushi', icon: Fish },
 ];
+
+const TESTIMONIALS = [
+  { initials: 'RK', name: 'Rajan K.', area: 'Thamel', stars: 5, text: 'Finally an app where what I see is what\'s actually available. No more ordering something already sold out.' },
+  { initials: 'SP', name: 'Sita P.', area: 'Lazimpat', stars: 5, text: 'Real delivery times, live tracking, and the momos arrived hot. The 30-minute guarantee is real.' },
+  { initials: 'AM', name: 'Anil M.', area: 'Baluwatar', stars: 4, text: 'Live menu categories helped me discover three restaurants I never knew existed in my area.' },
+];
+
+/* Wraps a section/card so it fades + rises in the first time it scrolls
+   into view, instead of everything appearing at once. `stagger` (ms)
+   offsets siblings in a grid so they cascade in rather than pop together. */
+const Reveal = ({ children, as: Tag = 'div', className = '', stagger = 0, ...rest }) => {
+  const ref = useRef(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return undefined;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          observer.unobserve(node);
+        }
+      },
+      { threshold: 0.15, rootMargin: '0px 0px -40px 0px' }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <Tag
+      ref={ref}
+      className={`hm-reveal ${visible ? 'hm-reveal-visible' : ''} ${className}`.trim()}
+      style={{ transitionDelay: `${stagger}ms` }}
+      {...rest}
+    >
+      {children}
+    </Tag>
+  );
+};
+
+/* Counts a stat up to its target once the data has loaded, rather than
+   having the number just appear. */
+const useCountUp = (target, active, duration = 900) => {
+  const [value, setValue] = useState(0);
+  useEffect(() => {
+    if (!active || typeof target !== 'number') return undefined;
+    let frame;
+    let start = null;
+    const step = (ts) => {
+      if (start === null) start = ts;
+      const progress = Math.min((ts - start) / duration, 1);
+      setValue(Math.round(progress * target));
+      if (progress < 1) frame = requestAnimationFrame(step);
+    };
+    frame = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(frame);
+  }, [active, target, duration]);
+  return value;
+};
 
 const Home = () => {
   const navigate = useNavigate();
@@ -86,9 +152,13 @@ const Home = () => {
   const displayCategories = featuredCategories.length > 0
     ? featuredCategories.map((name) => {
         const match = CATEGORIES.find((c) => c.name.toLowerCase() === name.toLowerCase());
-        return { name, icon: match?.icon || '🍽️' };
+        return { name, icon: match?.icon || Utensils };
       })
     : CATEGORIES;
+
+  const restaurantCount = useCountUp(restaurants.length, !loading);
+  const dishCount = useCountUp(menuItems.length, !loading);
+  const categoryCount = useCountUp(displayCategories.length, !loading);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -98,219 +168,226 @@ const Home = () => {
 
   const handleAddToCart = (e, id) => {
     e.stopPropagation();
+    const btn = e.currentTarget;
+    btn.classList.add('hm-bounce');
+    setTimeout(() => btn.classList.remove('hm-bounce'), 350);
     addToCart(id, 1);
   };
 
   return (
-    <div className="home-page">
+    <div className="hm-scope hm-page">
 
-      {/* ── HERO – full-screen ── */}
-      <section className="home-hero">
-        {/* Background image with overlay */}
-        <div className="hero-bg">
+      {/* ── HERO ── */}
+      <section className="hm-hero">
+        <div className="hm-hero-bg">
           <img
             src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1920&q=80"
             alt="Delicious food spread"
-            className="hero-bg-img"
+            className="hm-hero-bg-img"
           />
-          <div className="hero-bg-overlay" />
+          <div className="hm-hero-overlay" />
         </div>
 
-        <div className="hero-content">
-          <span className="hero-eyebrow">
-            <Zap size={14} /> Fresh from local kitchens · Kathmandu
+        <div className="hm-hero-content">
+          <span className="hm-eyebrow hm-hero-anim hm-hero-anim-1">
+            <Zap size={13} /> Fresh from local kitchens &middot; Kathmandu
           </span>
-          <h1 className="hero-title">
+          <h1 className="hm-hero-title hm-hero-anim hm-hero-anim-2">
             Food you love,<br />
             <em>at your door</em>
           </h1>
-          <p className="hero-sub">
+          <hr className="hm-rule hm-rule--light hm-rule--intro" />
+          <p className="hm-hero-sub hm-hero-anim hm-hero-anim-3">
             Real menu items, live restaurants, fresh from the kitchen.
             No stale placeholders, no guesswork.
           </p>
 
-          <form className="hero-search" onSubmit={handleSubmit}>
-            <MapPin size={17} className="search-pin" />
+          <form className="hm-hero-search hm-hero-anim hm-hero-anim-4" onSubmit={handleSubmit}>
+            <MapPin size={16} className="hm-search-pin" />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search dishes, cuisines, or restaurants…"
+              placeholder="Search dishes, cuisines, or restaurants..."
             />
-            <button type="submit" className="search-btn" aria-label="Search">
-              <Search size={17} />
+            <button type="submit" className="hm-search-btn" aria-label="Search">
+              <Search size={16} />
               <span>Search</span>
             </button>
           </form>
 
-          <div className="hero-stats">
-            <div className="hero-stat">
-              <strong>{loading ? '—' : `${restaurants.length}+`}</strong>
-              <span>restaurants</span>
+          <div className="hm-hero-stats hm-hero-anim hm-hero-anim-5">
+            <div className="hm-hero-stat">
+              <strong>{loading ? '—' : `${restaurantCount}+`}</strong>
+              <span>Restaurants</span>
             </div>
-            <div className="hero-stat-divider" />
-            <div className="hero-stat">
-              <strong>{loading ? '—' : `${menuItems.length}+`}</strong>
-              <span>dishes</span>
+            <div className="hm-hero-stat-divider" />
+            <div className="hm-hero-stat">
+              <strong>{loading ? '—' : `${dishCount}+`}</strong>
+              <span>Dishes</span>
             </div>
-            <div className="hero-stat-divider" />
-            <div className="hero-stat">
-              <strong>{loading ? '—' : displayCategories.length}</strong>
-              <span>categories</span>
+            <div className="hm-hero-stat-divider" />
+            <div className="hm-hero-stat">
+              <strong>{loading ? '—' : categoryCount}</strong>
+              <span>Categories</span>
             </div>
           </div>
-        </div>
-
-        {/* Scroll cue */}
-        <div className="hero-scroll-cue" aria-hidden="true">
-          <span />
         </div>
       </section>
 
       {/* ── ACTIVE ORDERS ── */}
       {activeOrders.length > 0 && (
-        <section className="home-section">
-          <div className="section-header">
+        <section className="hm-section">
+          <Reveal as="div" className="hm-section-header">
             <div>
-              <span className="section-kicker">Live</span>
-              <h2>Track what's on the way</h2>
+              <span className="hm-eyebrow hm-eyebrow--dark">Live</span>
+              <h2>Track what&rsquo;s on the way</h2>
+              <hr className="hm-rule" />
             </div>
-            <Link to="/orders" className="see-all-link">My orders <ArrowRight size={15} /></Link>
-          </div>
-          <div className="active-order-grid">
-            {activeOrders.slice(0, 3).map((order) => (
-              <Link className="active-order-card" to="/orders?tab=live" key={order._id}>
-                <div className="order-card-icon">
-                  <Package size={20} />
+            <Link to="/orders" className="hm-see-all">My orders <ArrowRight size={15} /></Link>
+          </Reveal>
+          <div className="hm-active-order-grid">
+            {activeOrders.slice(0, 3).map((order, i) => (
+              <Reveal as={Link} stagger={i * 70} className="hm-card hm-active-order-card" to="/orders?tab=live" key={order._id}>
+                <div className="hm-order-card-icon">
+                  <Package size={19} />
                 </div>
-                <div className="order-card-info">
+                <div className="hm-order-card-info">
                   <strong>{order.restaurant?.name || 'Your order'}</strong>
-                  <span className="order-status-wrap">
-                    <span className="pulse-dot" />
-                    <span className="status-text">{order.status?.replaceAll('_', ' ')}</span>
-                    <span className="status-divider">·</span>
-                    <span className="status-price">Rs. {order.total_amount || order.total || 0}</span>
+                  <span className="hm-order-status-wrap">
+                    <span className="hm-pulse-dot" />
+                    <span className="hm-status-text">{order.status?.replaceAll('_', ' ')}</span>
+                    <span className="hm-status-divider">&bull;</span>
+                    <span className="hm-mono hm-status-price">Rs. {order.total_amount || order.total || 0}</span>
                   </span>
                 </div>
-                <Navigation size={16} className="order-nav-icon" />
-              </Link>
+                <Navigation size={15} className="hm-order-nav-icon" />
+              </Reveal>
             ))}
           </div>
         </section>
       )}
 
       {/* ── PROMO STRIP ── */}
-      <div className="promo-strip">
-        <div className="promo-card promo-orange">
-          <Gift size={22} className="promo-icon" />
-          <div>
+      <div className="hm-promo-strip">
+        <Reveal as="div" className="hm-card hm-promo-card">
+          <div className="hm-promo-icon"><Gift size={20} /></div>
+          <div className="hm-promo-copy">
             <strong>Free delivery on your first order</strong>
             <span>New here? Your first delivery is on us.</span>
           </div>
-          <button className="promo-cta" onClick={() => navigate('/explore')}>
+          <button className="hm-btn hm-btn--primary" onClick={() => navigate('/explore')}>
             Claim <ArrowRight size={14} />
           </button>
-        </div>
-        <div className="promo-card promo-green">
-          <Clock size={22} className="promo-icon" />
-          <div>
-            <strong>30-min guarantee</strong>
+        </Reveal>
+        <Reveal as="div" stagger={90} className="hm-card hm-promo-card">
+          <div className="hm-promo-icon"><Clock size={20} /></div>
+          <div className="hm-promo-copy">
+            <strong>30-minute guarantee</strong>
             <span>Late? Your next meal is free.</span>
           </div>
-          <button className="promo-cta" onClick={() => navigate('/explore')}>
+          <button className="hm-btn hm-btn--primary" onClick={() => navigate('/explore')}>
             Order now <ArrowRight size={14} />
           </button>
-        </div>
+        </Reveal>
       </div>
 
       {/* ── CATEGORIES ── */}
-      <section className="home-section">
-        <div className="section-header">
+      <section className="hm-section">
+        <Reveal as="div" className="hm-section-header">
           <div>
-            <span className="section-kicker">Categories</span>
+            <span className="hm-eyebrow hm-eyebrow--dark">Categories</span>
             <h2>Start with a craving</h2>
+            <hr className="hm-rule" />
           </div>
-          <Link to="/explore" className="see-all-link">Explore all <ArrowRight size={15} /></Link>
-        </div>
-        <div className="category-grid">
+          <Link to="/explore" className="hm-see-all">Explore all <ArrowRight size={15} /></Link>
+        </Reveal>
+        <div className="hm-category-grid">
           {loading
-            ? Array.from({ length: 8 }).map((_, i) => <div className="skeleton cat-tile" key={i} />)
-            : displayCategories.map((cat) => (
-                <button
-                  className="cat-tile"
-                  key={cat.name}
-                  onClick={() => navigate(`/explore?search=${encodeURIComponent(cat.name)}`)}
-                >
-                  <span className="cat-emoji">{cat.icon}</span>
-                  <span className="cat-name">{cat.name}</span>
-                </button>
-              ))}
+            ? Array.from({ length: 8 }).map((_, i) => <div className="hm-skeleton hm-cat-tile" key={i} />)
+            : displayCategories.map((cat, i) => {
+                const Icon = cat.icon;
+                return (
+                  <Reveal
+                    as="button"
+                    stagger={i * 50}
+                    className="hm-cat-tile"
+                    key={cat.name}
+                    onClick={() => navigate(`/explore?search=${encodeURIComponent(cat.name)}`)}
+                  >
+                    <span className="hm-cat-icon"><Icon size={20} /></span>
+                    <span className="hm-cat-name">{cat.name}</span>
+                  </Reveal>
+                );
+              })}
         </div>
       </section>
 
       {/* ── RESTAURANTS ── */}
-      <section className="home-section home-section--surface">
-        <div className="section-header">
+      <section className="hm-section hm-section--sunken">
+        <Reveal as="div" className="hm-section-header">
           <div>
-            <span className="section-kicker">Restaurants</span>
+            <span className="hm-eyebrow hm-eyebrow--dark">Restaurants</span>
             <h2>Open kitchens near you</h2>
+            <hr className="hm-rule" />
           </div>
-          <Link to="/explore" className="see-all-link">View all <ArrowRight size={15} /></Link>
-        </div>
-        <div className="restaurant-grid">
+          <Link to="/explore" className="hm-see-all">View all <ArrowRight size={15} /></Link>
+        </Reveal>
+        <div className="hm-restaurant-grid">
           {loading
-            ? Array.from({ length: 3 }).map((_, i) => <div className="skeleton restaurant-card" key={i} />)
+            ? Array.from({ length: 3 }).map((_, i) => <div className="hm-skeleton hm-restaurant-card" key={i} />)
             : restaurants.length === 0
               ? (
-                <div className="empty-state">
-                  <ChefHat size={32} />
+                <div className="hm-empty">
+                  <ChefHat size={30} />
                   <h3>No active restaurants yet</h3>
                   <p>Restaurants appear here once an admin marks them active.</p>
                 </div>
               )
-              : restaurants.map((r) => (
-                <article className="restaurant-card" key={r.id} onClick={() => navigate(`/restaurant/${r.id}`)}>
-                  <div className="r-card-img-wrap">
+              : restaurants.map((r, i) => (
+                <Reveal as="article" stagger={i * 80} className="hm-card hm-restaurant-card" key={r.id} onClick={() => navigate(`/restaurant/${r.id}`)}>
+                  <div className="hm-r-img-wrap">
                     <img src={r.image} alt={r.name} />
-                    <span className="r-rating-badge"><Star size={12} fill="currentColor" /> {r.rating.toFixed(1)}</span>
+                    <span className="hm-r-rating-badge"><Star size={11} fill="currentColor" /> {r.rating.toFixed(1)}</span>
                   </div>
-                  <div className="r-card-body">
+                  <div className="hm-r-card-body">
                     <h3>{r.name}</h3>
-                    <p className="r-cuisines">{r.cuisines.join(', ') || r.description || 'Local favorites'}</p>
-                    <div className="r-meta">
-                      <span><MapPin size={13} /> {r.area}</span>
-                      <span><Clock size={13} /> {r.hours}</span>
+                    <p className="hm-r-cuisines">{r.cuisines.join(', ') || r.description || 'Local favorites'}</p>
+                    <div className="hm-r-meta">
+                      <span><MapPin size={12} /> {r.area}</span>
+                      <span><Clock size={12} /> {r.hours}</span>
                     </div>
                   </div>
-                </article>
+                </Reveal>
               ))}
         </div>
       </section>
 
       {/* ── MENU DISHES ── */}
-      <section className="home-section">
-        <div className="section-header">
+      <section className="hm-section">
+        <Reveal as="div" className="hm-section-header">
           <div>
-            <span className="section-kicker">Menu</span>
+            <span className="hm-eyebrow hm-eyebrow--dark">Menu</span>
             <h2>Fresh dishes from the kitchen</h2>
+            <hr className="hm-rule" />
           </div>
-          <Link to="/explore" className="see-all-link">See all <ArrowRight size={15} /></Link>
-        </div>
-        <div className="dish-grid">
+          <Link to="/explore" className="hm-see-all">See all <ArrowRight size={15} /></Link>
+        </Reveal>
+        <div className="hm-dish-grid">
           {loading
-            ? Array.from({ length: 4 }).map((_, i) => <div className="skeleton dish-card" key={i} />)
-            : menuItems.map((item) => (
-                <article className="dish-card" key={item.id} onClick={() => navigate(`/food/${item.id}`)}>
-                  <div className="dish-img-wrap">
+            ? Array.from({ length: 4 }).map((_, i) => <div className="hm-skeleton hm-dish-card" key={i} />)
+            : menuItems.map((item, i) => (
+                <Reveal as="article" stagger={i * 60} className="hm-card hm-dish-card" key={item.id} onClick={() => navigate(`/food/${item.id}`)}>
+                  <div className="hm-dish-img-wrap">
                     <img src={item.image} alt={item.name} />
                   </div>
-                  <div className="dish-card-body">
-                    <span className="dish-category">{item.categoryName}</span>
+                  <div className="hm-dish-card-body">
+                    <span className="hm-badge hm-badge--wine">{item.categoryName}</span>
                     <h3>{item.name}</h3>
-                    <p className="dish-restaurant">{item.restaurantName}</p>
-                    <div className="dish-footer">
-                      <strong className="dish-price">Rs. {item.price}</strong>
+                    <p className="hm-dish-restaurant">{item.restaurantName}</p>
+                    <div className="hm-dish-footer">
+                      <strong className="hm-mono hm-dish-price">Rs. {item.price}</strong>
                       <button
-                        className="add-cart-btn"
+                        className="hm-btn--icon"
                         onClick={(e) => handleAddToCart(e, item.id)}
                         aria-label={`Add ${item.name} to cart`}
                       >
@@ -318,144 +395,122 @@ const Home = () => {
                       </button>
                     </div>
                   </div>
-                </article>
+                </Reveal>
               ))}
         </div>
       </section>
 
       {/* ── ABOUT US TEASER ── */}
-      <section className="about-teaser">
-        <div className="about-teaser-inner">
-          <div className="about-teaser-visual">
+      <section className="hm-about-teaser">
+        <Reveal as="div" className="hm-about-teaser-inner">
+          <div className="hm-about-teaser-visual">
             <img
               src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80"
               alt="Our team delivering food"
             />
-            <div className="about-teaser-badge">
-              <Heart size={18} fill="currentColor" />
+            <div className="hm-about-teaser-badge">
+              <Heart size={17} fill="currentColor" />
               <span>Serving Kathmandu since 2020</span>
             </div>
           </div>
-          <div className="about-teaser-text">
-            <span className="section-kicker">Who we are</span>
+          <div className="hm-about-teaser-text">
+            <span className="hm-eyebrow hm-eyebrow--dark">Who we are</span>
             <h2>Built for Kathmandu, by people who live here</h2>
+            <hr className="hm-rule" />
             <p>
               We started because we were tired of cold food, wrong orders, and
               restaurants that were "available" but never actually open. Today we
               connect thousands of hungry people with the kitchens they love —
               fast, reliably, and honestly.
             </p>
-            <ul className="about-perks">
+            <ul className="hm-about-perks">
               <li><CheckCircle size={16} /> Live inventory — no ghost menu items</li>
               <li><CheckCircle size={16} /> 30-minute delivery or your next order is free</li>
               <li><CheckCircle size={16} /> Rider earnings go directly to our team</li>
             </ul>
-            <Link to="/about" className="about-learn-btn">
+            <Link to="/about" className="hm-btn hm-btn--text-lg">
               Learn more about us <ArrowRight size={16} />
             </Link>
           </div>
-        </div>
+        </Reveal>
       </section>
 
       {/* ── LIST YOUR RESTAURANT ── */}
-      <section className="partner-section">
-        <div className="partner-bg">
+      <section className="hm-partner-section">
+        <div className="hm-partner-bg">
           <img
             src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1920&q=80"
             alt="Restaurant kitchen"
           />
-          <div className="partner-overlay" />
+          <div className="hm-partner-overlay" />
         </div>
-        <div className="partner-inner">
-          <div className="partner-text">
-            <span className="section-kicker section-kicker--light">Partner with us</span>
+        <Reveal as="div" className="hm-partner-inner">
+          <div className="hm-partner-text">
+            <span className="hm-eyebrow hm-eyebrow--light">Partner with us</span>
             <h2>List your restaurant.<br />Reach 500,000+ customers.</h2>
+            <hr className="hm-rule hm-rule--light" />
             <p>
               Join Kathmandu's fastest-growing food platform. We handle delivery,
               payments, and customer support — you focus on the food.
             </p>
-            <div className="partner-perks">
-              <div className="partner-perk">
-                <TrendingUp size={20} />
+            <div className="hm-partner-perks">
+              <div className="hm-partner-perk">
+                <TrendingUp size={19} />
                 <div>
                   <strong>Grow your reach</strong>
                   <span>Get discovered by new customers daily</span>
                 </div>
               </div>
-              <div className="partner-perk">
-                <Bike size={20} />
+              <div className="hm-partner-perk">
+                <Bike size={19} />
                 <div>
                   <strong>We deliver</strong>
                   <span>Our riders handle every drop-off</span>
                 </div>
               </div>
-              <div className="partner-perk">
-                <Users size={20} />
+              <div className="hm-partner-perk">
+                <Users size={19} />
                 <div>
                   <strong>Dedicated support</strong>
                   <span>A real person to call, always</span>
                 </div>
               </div>
             </div>
-            <button className="partner-cta" onClick={() => navigate('/register-restaurant')}>
-              <Store size={18} />
+            <button className="hm-btn hm-btn--brass" onClick={() => navigate('/register-restaurant')}>
+              <Store size={17} />
               Register your restaurant
-              <ArrowRight size={16} />
+              <ArrowRight size={15} />
             </button>
           </div>
-        </div>
-      </section>
-
-      {/* DELIVERY PARTNER */}
-      <section className="delivery-partner-section">
-        <div className="delivery-partner-inner">
-          <div className="delivery-partner-copy">
-            <span className="section-kicker">Delivery partnership</span>
-            <h2>Ride with Chulo and manage deliveries your way.</h2>
-            <p>
-              Join as a delivery partner, accept available orders, and update each delivery manually from pickup to drop-off.
-            </p>
-          </div>
-          <div className="delivery-partner-actions">
-            <div className="delivery-partner-points">
-              <span><Bike size={16} /> Manual order acceptance</span>
-              <span><Package size={16} /> Simple delivery dashboard</span>
-              <span><CheckCircle size={16} /> Track completed earnings</span>
-            </div>
-            <button className="partner-cta" onClick={() => navigate('/register-delivery')}>
-              <Bike size={18} />
-              Register as delivery partner
-              <ArrowRight size={16} />
-            </button>
-          </div>
-        </div>
+        </Reveal>
       </section>
 
       {/* ── TESTIMONIALS ── */}
-      <section className="home-section home-section--surface">
-        <div className="section-header">
+      <section className="hm-section hm-section--sunken">
+        <Reveal as="div" className="hm-section-header">
           <div>
-            <span className="section-kicker">Reviews</span>
+            <span className="hm-eyebrow hm-eyebrow--dark">Reviews</span>
             <h2>Kathmandu eats, honestly</h2>
+            <hr className="hm-rule" />
           </div>
-        </div>
-        <div className="testimonials-grid">
-          {[
-            { initials: 'RK', name: 'Rajan K.', area: 'Thamel', stars: 5, text: 'Finally an app where what I see is what\'s actually available. No more ordering something already sold out.' },
-            { initials: 'SP', name: 'Sita P.', area: 'Lazimpat', stars: 5, text: 'Real delivery times, live tracking, and the momos arrived hot. The 30-minute guarantee is real.' },
-            { initials: 'AM', name: 'Anil M.', area: 'Baluwatar', stars: 4, text: 'Live menu categories helped me discover three restaurants I never knew existed in my area.' },
-          ].map((t) => (
-            <div className="testimonial-card" key={t.name}>
-              <div className="t-stars">{'★'.repeat(t.stars)}{'☆'.repeat(5 - t.stars)}</div>
-              <p className="t-text">"{t.text}"</p>
-              <div className="t-author">
-                <div className="t-avatar">{t.initials}</div>
+        </Reveal>
+        <div className="hm-testimonials-grid">
+          {TESTIMONIALS.map((t, i) => (
+            <Reveal as="div" stagger={i * 90} className="hm-card hm-testimonial-card" key={t.name}>
+              <div className="hm-t-stars">
+                {Array.from({ length: 5 }).map((_, si) => (
+                  <Star key={si} size={13} fill={si < t.stars ? 'currentColor' : 'none'} />
+                ))}
+              </div>
+              <p className="hm-t-text">&ldquo;{t.text}&rdquo;</p>
+              <div className="hm-t-author">
+                <div className="hm-t-avatar">{t.initials}</div>
                 <div>
-                  <div className="t-name">{t.name}</div>
-                  <div className="t-area">{t.area}, Kathmandu</div>
+                  <div className="hm-t-name">{t.name}</div>
+                  <div className="hm-t-area">{t.area}, Kathmandu</div>
                 </div>
               </div>
-            </div>
+            </Reveal>
           ))}
         </div>
       </section>
