@@ -3,6 +3,7 @@ import User from '../models/User.js';
 import Restaurant from '../models/Restaurant.js';
 import DeliveryPerson from '../models/DeliveryPerson.js';
 
+const DELIVERY_PERSON_WORKFLOW_ENABLED = false;
 
 // @desc    Register user
 // @route   POST /api/auth/register
@@ -77,6 +78,13 @@ export const registerVendor = async (req, res) => {
 // @access  Public
 export const registerDelivery = async (req, res) => {
   try {
+    if (!DELIVERY_PERSON_WORKFLOW_ENABLED) {
+      return res.status(410).json({
+        success: false,
+        message: 'Delivery person registration is currently disabled'
+      });
+    }
+
     const {
       name, email, phone, password, address,
       vehicle_type, license_plate, avatar

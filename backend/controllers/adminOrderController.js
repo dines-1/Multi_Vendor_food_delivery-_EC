@@ -53,7 +53,7 @@ export const getOrderDetail = async (req, res) => {
 export const overrideStatus = async (req, res) => {
   try {
     const { status, note } = req.body;
-    const validStatuses = ['pending', 'confirmed', 'preparing', 'out_for_delivery', 'delivered', 'cancelled'];
+    const validStatuses = ['pending', 'confirmed', 'preparing', 'ready_for_delivery', 'out_for_delivery', 'delivered', 'cancelled'];
     if (!validStatuses.includes(status)) {
       return res.status(400).json({ success: false, message: 'Invalid status' });
     }

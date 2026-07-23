@@ -2,21 +2,17 @@ import Order from '../models/Order.js';
 import Cart from '../models/Cart.js';
 import MenuItem from '../models/MenuItem.js';
 import Restaurant from '../models/Restaurant.js';
-import DeliveryPerson from '../models/DeliveryPerson.js';
 import { createNotification } from '../utils/notifications.js';
 
 // Valid status transitions
 const VENDOR_STATUS_FLOW = {
   pending: ['confirmed', 'cancelled'],
   confirmed: ['preparing', 'cancelled'],
-  preparing: ['out_for_delivery', 'cancelled'],
-  out_for_delivery: ['cancelled'],
+  preparing: ['ready_for_delivery', 'cancelled'],
+  ready_for_delivery: ['out_for_delivery', 'cancelled'],
+  out_for_delivery: ['delivered', 'cancelled'],
   delivered: [],
   cancelled: []
-};
-
-const DELIVERY_STATUS_FLOW = {
-  out_for_delivery: ['delivered'],
 };
 
 // Auto-cancellation helper for stale pending orders
@@ -172,14 +168,7 @@ export const getMyOrders = async (req, res) => {
     await autoCancelStaleOrders();
     const orders = await Order.find({ customer: req.user.id })
       .sort('-createdAt')
-      .populate('restaurant', 'name logo_url')
-      .populate({
-        path: 'delivery_person_id',
-        populate: {
-          path: 'user',
-          select: 'name phone avatar'
-        }
-      });
+      .populate('restaurant', 'name logo_url');
 
     res.status(200).json({ success: true, data: orders });
   } catch (err) {
@@ -195,14 +184,7 @@ export const getOrderById = async (req, res) => {
     await autoCancelStaleOrders();
     const order = await Order.findById(req.params.id)
       .populate('customer', 'name phone email')
-      .populate('restaurant', 'name logo_url address phone')
-      .populate({
-        path: 'delivery_person_id',
-        populate: {
-          path: 'user',
-          select: 'name phone avatar'
-        }
-      });
+      .populate('restaurant', 'name logo_url address phone');
 
     if (!order) {
       return res.status(404).json({ success: false, message: 'Order not found' });
@@ -222,9 +204,9 @@ export const getOrderById = async (req, res) => {
   }
 };
 
-// @desc    Update order status (vendor / delivery / admin)
+// @desc    Update order status (vendor / admin)
 // @route   PUT /api/orders/:id/status
-// @access  Private (vendor | delivery | admin)
+// @access  Private (vendor | admin)
 export const updateOrderStatus = async (req, res) => {
   try {
     const { status, note } = req.body;
@@ -251,18 +233,10 @@ export const updateOrderStatus = async (req, res) => {
         });
       }
     } else if (req.user.role === 'delivery') {
-      const delivery = await DeliveryPerson.findOne({ user: req.user.id });
-      if (!delivery || order.delivery_person_id?.toString() !== delivery._id.toString()) {
-        return res.status(403).json({ success: false, message: 'Not authorized for this delivery' });
-      }
-
-      const allowed = DELIVERY_STATUS_FLOW[order.status] || [];
-      if (!allowed.includes(status)) {
-        return res.status(400).json({
-          success: false,
-          message: `Delivery personnel cannot move order from "${order.status}" to "${status}"`
-        });
-      }
+      return res.status(403).json({
+        success: false,
+        message: 'Delivery person workflow is currently disabled'
+      });
     }
     // admin can do anything
 
@@ -293,14 +267,7 @@ export const updateOrderStatus = async (req, res) => {
 
     const populated = await Order.findById(order._id)
       .populate('customer', 'name phone email')
-      .populate('restaurant', 'name logo_url')
-      .populate({
-        path: 'delivery_person_id',
-        populate: {
-          path: 'user',
-          select: 'name phone avatar'
-        }
-      });
+      .populate('restaurant', 'name logo_url');
 
     // Real-time update via socket
     if (global.io) {
@@ -342,14 +309,7 @@ export const getVendorOrders = async (req, res) => {
       .sort('-createdAt')
       .skip((page - 1) * limit)
       .limit(Number(limit))
-      .populate('customer', 'name phone email')
-      .populate({
-        path: 'delivery_person_id',
-        populate: {
-          path: 'user',
-          select: 'name phone avatar'
-        }
-      });
+      .populate('customer', 'name phone email');
 
     const total = await Order.countDocuments(filter);
 
@@ -407,8 +367,7 @@ export const acceptOrder = async (req, res) => {
     }
 
     const populated = await Order.findById(order._id)
-      .populate('customer', 'name phone')
-      .populate('delivery_person_id');
+      .populate('customer', 'name phone');
     res.status(200).json({ success: true, data: populated });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
@@ -573,39 +532,15 @@ export const getVendorRevenue = async (req, res) => {
   }
 };
 
-// @desc    Re-request rider (vendor resets 2-min timer)
+// @desc    Re-request rider (inactive while delivery person workflow is disabled)
 // @route   POST /api/orders/:id/re-request
 // @access  Private (vendor)
 export const reRequestRider = async (req, res) => {
   try {
-    const order = await Order.findById(req.params.id);
-    if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
-
-    if (order.status !== 'out_for_delivery' || order.delivery_person_id) {
-      return res.status(400).json({ success: false, message: 'Order must be out for delivery and without a rider' });
-    }
-
-    order.statusHistory.push({
-      status: 'out_for_delivery',
-      changedBy: req.user.id,
-      note: 'Rider re-requested by restaurant',
-      timestamp: new Date()
+    res.status(410).json({
+      success: false,
+      message: 'Delivery person workflow is currently disabled'
     });
-
-    await order.save();
-
-    const populated = await Order.findById(order._id)
-      .populate('customer', 'name phone email')
-      .populate('restaurant', 'name logo_url')
-      .populate({
-        path: 'delivery_person_id',
-        populate: {
-          path: 'user',
-          select: 'name phone avatar'
-        }
-      });
-
-    res.status(200).json({ success: true, data: populated });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
   }

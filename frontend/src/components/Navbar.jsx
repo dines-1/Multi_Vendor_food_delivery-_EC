@@ -7,7 +7,7 @@ import api from '../services/api';
 import NotificationBell from './NotificationBell';
 import './Navbar.css';
 
-const ACTIVE_ORDER_STATUSES = ['pending', 'confirmed', 'preparing', 'out_for_delivery'];
+const ACTIVE_ORDER_STATUSES = ['pending', 'confirmed', 'preparing', 'ready_for_delivery', 'out_for_delivery'];
 
 const Navbar = () => {
   const { user, logout } = useAuth();

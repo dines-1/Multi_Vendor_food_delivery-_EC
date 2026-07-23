@@ -57,12 +57,7 @@ export const updateProfile = async (req, res) => {
 // @access  Private/Delivery
 export const getOrderRequests = async (req, res) => {
   try {
-    const orders = await Order.find({
-      delivery_person_id: null,
-      status: 'out_for_delivery'
-    }).populate('restaurant', 'name address coordinates').sort('-createdAt');
-
-    res.status(200).json({ success: true, data: orders });
+    res.status(200).json({ success: true, data: [] });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -73,33 +68,10 @@ export const getOrderRequests = async (req, res) => {
 // @access  Private/Delivery
 export const acceptOrder = async (req, res) => {
   try {
-    const delivery = await DeliveryPerson.findOne({ user: req.user.id });
-    if (!delivery) {
-      return res.status(404).json({ success: false, message: 'Delivery profile not found' });
-    }
-
-    const order = await Order.findById(req.params.id);
-    if (!order) {
-      return res.status(404).json({ success: false, message: 'Order not found' });
-    }
-
-    if (order.delivery_person_id) {
-      return res.status(400).json({ success: false, message: 'Order already accepted by someone else' });
-    }
-
-    if (order.status !== 'out_for_delivery') {
-      return res.status(400).json({ success: false, message: 'Only ready/out-for-delivery orders can be accepted' });
-    }
-
-    order.delivery_person_id = delivery._id;
-    order.statusHistory.push({
-      status: 'out_for_delivery',
-      changedBy: req.user.id,
-      note: 'Delivery request accepted by rider'
+    res.status(410).json({
+      success: false,
+      message: 'Delivery person workflow is currently disabled'
     });
-    await order.save();
-
-    res.status(200).json({ success: true, data: order });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -110,13 +82,7 @@ export const acceptOrder = async (req, res) => {
 // @access  Private/Delivery
 export const getActiveOrders = async (req, res) => {
   try {
-    const delivery = await DeliveryPerson.findOne({ user: req.user.id });
-    const orders = await Order.find({
-      delivery_person_id: delivery._id,
-      status: 'out_for_delivery'
-    }).populate('restaurant', 'name address coordinates').sort('-createdAt');
-
-    res.status(200).json({ success: true, data: orders });
+    res.status(200).json({ success: true, data: [] });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

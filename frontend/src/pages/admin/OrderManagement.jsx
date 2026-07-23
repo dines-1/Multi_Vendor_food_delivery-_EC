@@ -10,7 +10,7 @@ const formatDate = (d) => {
   return `${String(dt.getDate()).padStart(2, '0')}/${String(dt.getMonth() + 1).padStart(2, '0')}/${dt.getFullYear()}`;
 };
 const statusBadge = (s) => {
-  const map = { pending: 'badge-warning', confirmed: 'badge-info', preparing: 'badge-purple', out_for_delivery: 'badge-info', delivered: 'badge-success', cancelled: 'badge-danger' };
+  const map = { pending: 'badge-warning', confirmed: 'badge-info', preparing: 'badge-purple', ready_for_delivery: 'badge-info', out_for_delivery: 'badge-info', delivered: 'badge-success', cancelled: 'badge-danger' };
   return `badge ${map[s] || 'badge-default'}`;
 };
 
@@ -83,6 +83,7 @@ const OrderManagement = () => {
               <option value="pending">Pending</option>
               <option value="confirmed">Confirmed</option>
               <option value="preparing">Preparing</option>
+              <option value="ready_for_delivery">Ready for Delivery</option>
               <option value="out_for_delivery">Out for Delivery</option>
               <option value="delivered">Delivered</option>
               <option value="cancelled">Cancelled</option>
@@ -169,6 +170,7 @@ const OrderManagement = () => {
                   <option value="pending">Pending</option>
                   <option value="confirmed">Confirmed</option>
                   <option value="preparing">Preparing</option>
+                  <option value="ready_for_delivery">Ready for Delivery</option>
                   <option value="out_for_delivery">Out for Delivery</option>
                   <option value="delivered">Delivered</option>
                   <option value="cancelled">Cancelled</option>

@@ -84,7 +84,7 @@ const Profile = () => {
       const ordersRes = await api.get('/orders/my-orders');
       const orders = ordersRes.data.data || [];
       const totalSpent = orders.reduce((sum, order) => sum + (order.total_amount || order.total || 0), 0);
-      const activeOrders = orders.filter(o => ['pending', 'confirmed', 'preparing', 'out_for_delivery'].includes(o.status)).length;
+      const activeOrders = orders.filter(o => ['pending', 'confirmed', 'preparing', 'ready_for_delivery', 'out_for_delivery'].includes(o.status)).length;
 
       setStats({
         totalOrders: orders.length,

@@ -33,7 +33,7 @@ import { useCart } from '../context/CartContext';
 import { getDocs, normalizeMenuItem, normalizeRestaurant } from '../utils/customerData';
 import './Home.css';
 
-const activeStatuses = ['pending', 'confirmed', 'preparing', 'out_for_delivery'];
+const activeStatuses = ['pending', 'confirmed', 'preparing', 'ready_for_delivery', 'out_for_delivery'];
 
 const CATEGORIES = [
   { name: 'Momos', icon: Soup },

@@ -31,8 +31,8 @@ router.post('/:id/accept', authorize('vendor'), acceptOrder);
 router.post('/:id/reject', authorize('vendor'), rejectOrder);
 router.post('/:id/re-request', authorize('vendor'), reRequestRider);
 
-// Status update (vendor / delivery / admin)
-router.put('/:id/status', authorize('vendor', 'delivery', 'admin'), updateOrderStatus);
+// Status update (restaurant / admin)
+router.put('/:id/status', authorize('vendor', 'admin'), updateOrderStatus);
 
 // Single order detail (customer, vendor, admin)
 router.get('/:id', getOrderById);

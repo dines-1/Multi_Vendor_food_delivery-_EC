@@ -16,23 +16,25 @@ import './MyOrders.css';
 
 /* ── Status config ─────────────────────────────────────── */
 const STATUS_CONFIG = {
-  pending: { label: 'Order Placed', color: '#F59E0B', bg: 'rgba(245,158,11,.12)', icon: Clock, step: 0 },
-  confirmed: { label: 'Confirmed', color: '#3B82F6', bg: 'rgba(59,130,246,.12)', icon: CheckCircle, step: 1 },
+  pending: { label: 'Pending', color: '#F59E0B', bg: 'rgba(245,158,11,.12)', icon: Clock, step: 0 },
+  confirmed: { label: 'Accepted', color: '#3B82F6', bg: 'rgba(59,130,246,.12)', icon: CheckCircle, step: 1 },
   preparing: { label: 'Preparing', color: '#8B5CF6', bg: 'rgba(139,92,246,.12)', icon: ChefHat, step: 2 },
-  out_for_delivery: { label: 'Out for Delivery', color: '#F97316', bg: 'rgba(249,115,22,.12)', icon: Bike, step: 3 },
-  delivered: { label: 'Delivered', color: '#22C55E', bg: 'rgba(34,197,94,.12)', icon: CheckCircle, step: 4 },
+  ready_for_delivery: { label: 'Ready for Delivery', color: '#0EA5E9', bg: 'rgba(14,165,233,.12)', icon: Package, step: 3 },
+  out_for_delivery: { label: 'Out for Delivery', color: '#F97316', bg: 'rgba(249,115,22,.12)', icon: Bike, step: 4 },
+  delivered: { label: 'Delivered', color: '#22C55E', bg: 'rgba(34,197,94,.12)', icon: CheckCircle, step: 5 },
   cancelled: { label: 'Cancelled', color: '#EF4444', bg: 'rgba(239,68,68,.12)', icon: XCircle, step: -1 },
 };
 
 const TIMELINE_STEPS = [
-  { key: 'pending', label: 'Order Placed', icon: Package },
-  { key: 'confirmed', label: 'Confirmed', icon: CheckCircle },
+  { key: 'pending', label: 'Pending', icon: Package },
+  { key: 'confirmed', label: 'Accepted', icon: CheckCircle },
   { key: 'preparing', label: 'Preparing', icon: ChefHat },
-  { key: 'out_for_delivery', label: 'On the Way', icon: Bike },
+  { key: 'ready_for_delivery', label: 'Ready for Delivery', icon: Package },
+  { key: 'out_for_delivery', label: 'Out for Delivery', icon: Bike },
   { key: 'delivered', label: 'Delivered', icon: PartyPopper },
 ];
 
-const ACTIVE_STATUSES = ['pending', 'confirmed', 'preparing', 'out_for_delivery'];
+const ACTIVE_STATUSES = ['pending', 'confirmed', 'preparing', 'ready_for_delivery', 'out_for_delivery'];
 const HISTORY_STATUSES = ['delivered', 'cancelled'];
 
 /* ── Countdown timer ───────────────────────────────────── */
@@ -293,7 +295,7 @@ const OrderDetailsDrawer = ({ order, onClose, onCancel, onReorder, onRate, onRec
 const ActiveCard = ({ order, onOpen, onCancel, cancellingId }) => {
   const cfg = STATUS_CONFIG[order.status] || STATUS_CONFIG.pending;
   const Icon = cfg.icon;
-  const steps = ['pending', 'confirmed', 'preparing', 'out_for_delivery'];
+  const steps = ['pending', 'confirmed', 'preparing', 'ready_for_delivery', 'out_for_delivery'];
   const stepIdx = steps.indexOf(order.status);
   const pct = Math.round((stepIdx / (steps.length - 1)) * 100);
   const cancelling = cancellingId === order._id;
@@ -320,7 +322,7 @@ const ActiveCard = ({ order, onOpen, onCancel, cancellingId }) => {
 
       {/* Steps row */}
       <div className="ac-steps">
-        {TIMELINE_STEPS.slice(0, 4).map((s, i) => {
+        {TIMELINE_STEPS.slice(0, 5).map((s, i) => {
           const sc = STATUS_CONFIG[s.key];
           return (
             <div key={s.key} className={`ac-step ${i <= stepIdx ? 'done' : ''} ${i === stepIdx ? 'cur' : ''}`}>

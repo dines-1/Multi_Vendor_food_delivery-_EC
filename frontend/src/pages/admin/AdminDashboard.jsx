@@ -21,7 +21,7 @@ const formatDate = (d) => {
 const statusBadge = (s) => {
   const map = {
     pending: 'badge-warning', confirmed: 'badge-info', preparing: 'badge-purple',
-    out_for_delivery: 'badge-info', delivered: 'badge-success', cancelled: 'badge-danger',
+    ready_for_delivery: 'badge-info', out_for_delivery: 'badge-info', delivered: 'badge-success', cancelled: 'badge-danger',
   };
   return `badge ${map[s] || 'badge-default'}`;
 };

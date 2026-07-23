@@ -7,7 +7,7 @@ import Order from '../models/Order.js';
 export const getKPIMetrics = async (req, res) => {
   try {
     const totalRevenue = await Order.aggregate([
-      { $match: { status: { $in: ['delivered', 'confirmed', 'preparing'] } } },
+      { $match: { status: { $in: ['delivered', 'confirmed', 'preparing', 'ready_for_delivery', 'out_for_delivery'] } } },
       { $group: { _id: null, total: { $sum: '$total_amount' } } },
     ]);
     const totalOrders = await Order.countDocuments();

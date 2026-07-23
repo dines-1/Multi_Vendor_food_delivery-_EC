@@ -103,118 +103,141 @@ const Explore = () => {
   };
 
   return (
-    <div className="explore-page">
-      <section className="explore-header">
-        <div>
-          <span className="explore-kicker"><Utensils size={15} /> Browse customer menu</span>
-          <h1>Explore restaurants and dishes</h1>
-          <p>Search across real menu documents, populated categories, and active restaurants from the backend.</p>
+    <div className="ex-page">
+      <section className="ex-hero">
+        <div className="ex-hero-copy">
+          <span className="ex-kicker">
+            <Utensils size={14} />
+            Full menu, one ledger
+          </span>
+          <h1>Explore restaurants &amp; dishes</h1>
+          <p>Search every dish on the books, then narrow it down by kitchen or category.</p>
         </div>
-        <div className="explore-search">
-          <Search size={20} />
+
+        <div className="ex-search">
+          <Search size={18} />
           <input
             value={searchQuery}
             onChange={(event) => updateSearch(event.target.value)}
             placeholder="Search food, category, or restaurant"
           />
           {searchQuery && (
-            <button type="button" onClick={() => updateSearch('')} aria-label="Clear search">
-              <X size={18} />
+            <button type="button" className="ex-search-clear" onClick={() => updateSearch('')} aria-label="Clear search">
+              <X size={16} />
             </button>
           )}
         </div>
       </section>
 
-      <div className="explore-layout">
-        <aside className="explore-filters">
-          <div className="filter-title"><Filter size={16} /> Restaurants</div>
+      <div className="ex-layout">
+        <aside className="ex-filters">
+          <div className="ex-filter-title">
+            <Filter size={13} />
+            Restaurants
+          </div>
+
           <button
-            className={`filter-row ${selectedRestaurant === 'All' ? 'active' : ''}`}
+            type="button"
+            className={`ex-filter-row ${selectedRestaurant === 'All' ? 'is-active' : ''}`}
             onClick={() => setSelectedRestaurant('All')}
           >
-            <span className="filter-avatar"><Utensils size={16} /></span>
-            <span>All restaurants</span>
+            <span className="ex-filter-icon">
+              <Utensils size={15} />
+            </span>
+            <span className="ex-filter-name">All restaurants</span>
           </button>
+
           {loading
-            ? Array.from({ length: 5 }).map((_, index) => <div className="filter-skeleton" key={index} />)
+            ? Array.from({ length: 5 }).map((_, index) => <div className="ex-filter-skeleton" key={index} />)
             : restaurants.map((restaurant) => (
                 <button
+                  type="button"
                   key={restaurant.id}
-                  className={`filter-row ${selectedRestaurant === restaurant.id ? 'active' : ''}`}
+                  className={`ex-filter-row ${selectedRestaurant === restaurant.id ? 'is-active' : ''}`}
                   onClick={() => setSelectedRestaurant(restaurant.id)}
                 >
-                  <img src={restaurant.image} alt={restaurant.name} />
-                  <span>{restaurant.name}</span>
-                  <small><Star size={11} fill="currentColor" /> {restaurant.rating.toFixed(1)}</small>
+                  <img className="ex-filter-avatar" src={restaurant.image} alt={restaurant.name} />
+                  <span className="ex-filter-name">{restaurant.name}</span>
+                  <small className="ex-filter-rating">
+                    <Star size={10} fill="currentColor" />
+                    {restaurant.rating.toFixed(1)}
+                  </small>
                 </button>
               ))}
         </aside>
 
-        <main className="explore-results">
-          <div className="category-nav">
+        <main className="ex-results">
+          <nav className="ex-category-nav">
             {loading
-              ? Array.from({ length: 6 }).map((_, index) => <div className="category-skeleton" key={index} />)
+              ? Array.from({ length: 6 }).map((_, index) => <div className="ex-category-skeleton" key={index} />)
               : categories.map((category) => (
                   <button
+                    type="button"
                     key={category}
-                    className={selectedCategory === category ? 'active' : ''}
+                    className={selectedCategory === category ? 'is-active' : ''}
                     onClick={() => setSelectedCategory(category)}
                   >
                     {category}
                   </button>
                 ))}
-          </div>
+          </nav>
 
-          <div className="results-summary">
+          <div className="ex-summary">
             <strong>{filteredItems.length}</strong>
             <span>{filteredItems.length === 1 ? 'dish' : 'dishes'} found</span>
           </div>
 
           {loading ? (
-            <div className="explore-items-grid">
-              {Array.from({ length: 8 }).map((_, index) => <div className="explore-card-skeleton" key={index} />)}
+            <div className="ex-grid">
+              {Array.from({ length: 8 }).map((_, index) => <div className="ex-card-skeleton" key={index} />)}
             </div>
           ) : filteredItems.length === 0 ? (
-            <div className="explore-empty-state">
-              <AlertCircle size={44} />
+            <div className="ex-empty">
+              <AlertCircle size={38} />
               <h2>No matching dishes</h2>
-              <p>Clear filters or try another restaurant, cuisine, or dish name.</p>
-              <button onClick={resetFilters}>Reset filters</button>
+              <p>Clear the filters, or try another restaurant, cuisine, or dish name.</p>
+              <button type="button" onClick={resetFilters}>Reset filters</button>
             </div>
           ) : (
-            <div className="explore-items-grid">
-              {filteredItems.map((item) => (
-                  <article
-                    className="explore-food-card"
-                    key={item.id}
-                    onClick={() => navigate(`/food/${item.id}`)}
-                  >
-                    <div className="explore-image-wrap">
-                      <img src={item.image} alt={item.name} />
-                      <span className={item.isVeg ? 'veg-badge veg' : 'veg-badge nonveg'} />
+            <div className="ex-grid">
+              {filteredItems.map((item, index) => (
+                <article
+                  className="ex-card"
+                  key={item.id}
+                  style={{ '--ex-delay': `${(index % 8) * 45}ms` }}
+                  onClick={() => navigate(`/food/${item.id}`)}
+                >
+                  <div className="ex-card-image">
+                    <img src={item.image} alt={item.name} />
+                    <span className={item.isVeg ? 'ex-veg is-veg' : 'ex-veg is-nonveg'} />
+                  </div>
+                  <div className="ex-card-body">
+                    <div className="ex-card-restaurant">
+                      <Utensils size={12} />
+                      <span>{item.restaurantName}</span>
                     </div>
-                    <div className="explore-card-body">
-                      <div className="restaurant-line">
-                        <Utensils size={13} />
-                        <span>{item.restaurantName}</span>
-                      </div>
-                      <h3>{item.name}</h3>
-                      <p>{item.description}</p>
-                      <div className="item-meta">
-                        <span><Clock size={14} /> {item.preparationTime} min</span>
-                        <span><MapPin size={14} /> {item.categoryName}</span>
-                      </div>
-                      <div className="explore-card-footer">
-                        <div>
-                          <strong>Rs. {item.price}</strong>
-                        </div>
-                        <button onClick={(event) => handleAddToCart(event, item)}>
-                          <ShoppingBag size={16} /> Add
-                        </button>
-                      </div>
+                    <h3>{item.name}</h3>
+                    <p>{item.description}</p>
+                    <div className="ex-card-meta">
+                      <span>
+                        <Clock size={13} />
+                        {item.preparationTime} min
+                      </span>
+                      <span>
+                        <MapPin size={13} />
+                        {item.categoryName}
+                      </span>
                     </div>
-                  </article>
-                ))}
+                    <div className="ex-card-footer">
+                      <strong>Rs. {item.price}</strong>
+                      <button type="button" className="ex-add-btn" onClick={(event) => handleAddToCart(event, item)}>
+                        <ShoppingBag size={15} />
+                        Add
+                      </button>
+                    </div>
+                  </div>
+                </article>
+              ))}
             </div>
           )}
         </main>

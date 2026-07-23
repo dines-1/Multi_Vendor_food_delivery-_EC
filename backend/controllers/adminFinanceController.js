@@ -8,7 +8,7 @@ const DEFAULT_COMMISSION_RATE = 10;
 export const getRevenueReport = async (req, res) => {
   try {
     const gmv = await Order.aggregate([
-      { $match: { status: { $in: ['delivered', 'confirmed', 'preparing'] } } },
+      { $match: { status: { $in: ['delivered', 'confirmed', 'preparing', 'ready_for_delivery', 'out_for_delivery'] } } },
       { $group: { _id: null, total: { $sum: '$total_amount' } } },
     ]);
 

@@ -41,20 +41,22 @@ import './VendorOrders.css';
    the shared vp-badge variants so this page stays in step with the rest
    of the portal's theme. */
 const STATUS_CONFIG = {
-  pending:          { label: 'New Order',       badge: 'vp-badge--pending', icon: Clock },
-  confirmed:        { label: 'Confirmed',        badge: 'vp-badge--info',    icon: CheckCircle },
-  preparing:        { label: 'In Kitchen',       badge: 'vp-badge--brass',   icon: ChefHat },
-  out_for_delivery: { label: 'Out for Delivery', badge: 'vp-badge--wine',    icon: Truck },
-  delivered:        { label: 'Delivered',        badge: 'vp-badge--success', icon: CheckCircle },
-  cancelled:        { label: 'Cancelled',        badge: 'vp-badge--muted',   icon: XCircle },
+  pending:            { label: 'Pending',            badge: 'vp-badge--pending', icon: Clock },
+  confirmed:          { label: 'Accepted',           badge: 'vp-badge--info',    icon: CheckCircle },
+  preparing:          { label: 'Preparing',          badge: 'vp-badge--brass',   icon: ChefHat },
+  ready_for_delivery: { label: 'Ready for Delivery', badge: 'vp-badge--wine',    icon: Package },
+  out_for_delivery:   { label: 'Out for Delivery',   badge: 'vp-badge--wine',    icon: Truck },
+  delivered:          { label: 'Delivered',          badge: 'vp-badge--success', icon: CheckCircle },
+  cancelled:          { label: 'Cancelled',          badge: 'vp-badge--muted',   icon: XCircle },
 };
 
 /* Next allowed status transitions for vendor — no emoji, plain labels */
 const NEXT_STATUSES = {
-  pending:   [{ value: 'confirmed', label: 'Accept Order' }, { value: 'cancelled', label: 'Reject Order' }],
+  pending: [{ value: 'confirmed', label: 'Accept Order' }, { value: 'cancelled', label: 'Reject Order' }],
   confirmed: [{ value: 'preparing', label: 'Start Preparing' }, { value: 'cancelled', label: 'Cancel Order' }],
-  preparing: [{ value: 'out_for_delivery', label: 'Mark Ready / Send for Delivery' }, { value: 'cancelled', label: 'Cancel Order' }],
-  out_for_delivery: [],
+  preparing: [{ value: 'ready_for_delivery', label: 'Mark Ready for Delivery' }, { value: 'cancelled', label: 'Cancel Order' }],
+  ready_for_delivery: [{ value: 'out_for_delivery', label: 'Mark Out for Delivery' }, { value: 'cancelled', label: 'Cancel Order' }],
+  out_for_delivery: [{ value: 'delivered', label: 'Mark Delivered' }],
   delivered: [],
   cancelled: [],
 };
@@ -64,6 +66,7 @@ const FILTER_TABS = [
   { value: 'pending',          label: 'New' },
   { value: 'confirmed',        label: 'Confirmed' },
   { value: 'preparing',        label: 'Preparing' },
+  { value: 'ready_for_delivery', label: 'Ready' },
   { value: 'out_for_delivery', label: 'Out for Delivery' },
   { value: 'delivered',        label: 'Delivered' },
   { value: 'cancelled',        label: 'Cancelled' },
@@ -337,12 +340,6 @@ const VendorOrders = () => {
                       <User size={13} />
                       <span>{order.customer?.name || 'Customer'}</span>
                     </div>
-                    {order.delivery_person_id?.user?.name && (
-                      <div className="vo-info-row vo-rider-row">
-                        <Truck size={12} />
-                        <span>Rider: {order.delivery_person_id.user.name}</span>
-                      </div>
-                    )}
                     <div className="vo-info-row">
                       <ShoppingBag size={13} />
                       <span>{order.items.length} item{order.items.length !== 1 ? 's' : ''}</span>
@@ -407,30 +404,6 @@ const VendorOrders = () => {
                   </div>
                 </div>
               </div>
-
-              {selectedOrder.delivery_person_id && (
-                <div className="vo-detail-section">
-                  <h3 className="vo-section-title"><Truck size={15} /> Delivery partner</h3>
-                  <div className="vo-info-grid">
-                    <div className="vo-info-item">
-                      <label>Rider name</label>
-                      <span>{selectedOrder.delivery_person_id.user?.name || '—'}</span>
-                    </div>
-                    <div className="vo-info-item">
-                      <label><Phone size={12} /> Phone</label>
-                      <span>{selectedOrder.delivery_person_id.user?.phone || '—'}</span>
-                    </div>
-                    <div className="vo-info-item">
-                      <label>Vehicle</label>
-                      <span className="vo-capitalize">{selectedOrder.delivery_person_id.vehicle_type || '—'}</span>
-                    </div>
-                    <div className="vo-info-item">
-                      <label>License plate</label>
-                      <span>{selectedOrder.delivery_person_id.license_plate || '—'}</span>
-                    </div>
-                  </div>
-                </div>
-              )}
 
               <div className="vo-detail-section">
                 <h3 className="vo-section-title"><CreditCard size={15} /> Payment</h3>
