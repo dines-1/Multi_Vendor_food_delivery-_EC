@@ -140,7 +140,7 @@ const AdminRestaurants = () => {
             }}
             style={{ height: 36, fontSize: '0.82rem' }}
           >
-            <option value="">All Statuses</option>
+            <option value="">All Status</option>
             <option value="pending">Pending Approval</option>
             <option value="active">Active</option>
             <option value="suspended">Suspended</option>
@@ -192,10 +192,10 @@ const AdminRestaurants = () => {
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, maxWidth: 160 }}>
                         {(res.cuisines || []).length > 0
                           ? res.cuisines.slice(0, 2).map((c) => (
-                              <span key={c} style={{ background: '#F1F5F9', padding: '2px 6px', borderRadius: 4, fontSize: '0.68rem', color: '#475569' }}>
-                                {c}
-                              </span>
-                            ))
+                            <span key={c} style={{ background: '#F1F5F9', padding: '2px 6px', borderRadius: 4, fontSize: '0.68rem', color: '#475569' }}>
+                              {c}
+                            </span>
+                          ))
                           : <span style={{ fontSize: '0.72rem', color: '#94A3B8' }}>General</span>}
                       </div>
                     </td>
@@ -256,8 +256,7 @@ const AdminRestaurants = () => {
 
                         <button
                           type="button"
-                          className="action-btn"
-                          style={{ background: '#EEF2FF', color: '#4F46E5', border: '1px solid #C7D2FE' }}
+                          className="action-btn btn-commission"
                           onClick={() => {
                             setCommissionRate(res.commissionRate || '');
                             setModal({ type: 'commission', id: res._id });
@@ -269,8 +268,7 @@ const AdminRestaurants = () => {
 
                         <button
                           type="button"
-                          className="action-btn"
-                          style={{ background: '#FEF2F2', color: '#EF4444', border: '1px solid #FECACA' }}
+                          className="action-btn btn-delete"
                           onClick={() => handleDeleteRestaurant(res._id, res.name)}
                           title="Delete Restaurant"
                         >

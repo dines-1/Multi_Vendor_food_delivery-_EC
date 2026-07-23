@@ -551,69 +551,56 @@ body {
 }
 
 /* ── BUTTONS ── */
-.btn {
+.admin-layout button,
+.btn,
+.action-btn,
+.btn-primary,
+.btn-success,
+.btn-danger,
+.btn-warning,
+.btn-outline,
+.btn-approve,
+.btn-suspend,
+.btn-view,
+.btn-commission,
+.btn-delete {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  padding: 7px 14px;
-  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+  border-radius: var(--radius-sm, 6px);
   font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
-  border: none;
-  transition: all 0.15s;
+  border: 1.5px solid #000000 !important;
+  background-color: #FFFFFF !important;
+  color: #000000 !important;
+  transition: all 0.15s ease-in-out;
   text-decoration: none;
   white-space: nowrap;
 }
 
-.btn-primary {
-  background: var(--indigo);
-  color: #fff;
-}
-
-.btn-primary:hover {
-  background: #4F46E5;
-}
-
-.btn-success {
-  background: var(--green);
-  color: #fff;
-}
-
-.btn-success:hover {
-  background: #059669;
-}
-
-.btn-danger {
-  background: var(--red);
-  color: #fff;
-}
-
-.btn-danger:hover {
-  background: #DC2626;
-}
-
-.btn-warning {
-  background: var(--amber);
-  color: #fff;
-}
-
-.btn-warning:hover {
-  background: #D97706;
-}
-
-.btn-outline {
-  background: transparent;
-  color: var(--text-2);
-  border: 1px solid var(--border);
-}
-
-.btn-outline:hover {
-  background: var(--bg);
+.admin-layout button:hover:not(:disabled),
+.btn:hover:not(:disabled),
+.action-btn:hover:not(:disabled),
+.btn-primary:hover:not(:disabled),
+.btn-success:hover:not(:disabled),
+.btn-danger:hover:not(:disabled),
+.btn-warning:hover:not(:disabled),
+.btn-outline:hover:not(:disabled),
+.btn-approve:hover:not(:disabled),
+.btn-suspend:hover:not(:disabled),
+.btn-view:hover:not(:disabled),
+.btn-commission:hover:not(:disabled),
+.btn-delete:hover:not(:disabled) {
+  background-color: #000000 !important;
+  color: #FFFFFF !important;
+  border-color: #000000 !important;
 }
 
 .btn-sm {
-  padding: 5px 10px;
+  padding: 4px 8px;
   font-size: 0.7rem;
 }
 
@@ -621,47 +608,6 @@ body {
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
-}
-
-/* action-btn aliases */
-.action-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 5px 10px;
-  border-radius: var(--radius-sm);
-  font-size: 0.7rem;
-  font-weight: 600;
-  cursor: pointer;
-  border: none;
-  transition: all 0.15s;
-}
-
-.btn-approve {
-  background: var(--green-light);
-  color: #065F46;
-}
-
-.btn-approve:hover {
-  background: #A7F3D0;
-}
-
-.btn-suspend {
-  background: var(--red-light);
-  color: #991B1B;
-}
-
-.btn-suspend:hover {
-  background: #FECACA;
-}
-
-.btn-view {
-  background: var(--indigo-light);
-  color: var(--indigo);
-}
-
-.btn-view:hover {
-  background: #E0E7FF;
 }
 
 /* ── FORM ELEMENTS ── */
