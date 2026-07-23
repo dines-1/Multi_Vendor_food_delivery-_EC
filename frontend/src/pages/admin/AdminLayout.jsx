@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
-  LayoutDashboard, Users, Package, ShoppingCart,
+  LayoutDashboard, Utensils, Users, Package, ShoppingCart,
   DollarSign, Settings, LogOut, ChevronRight
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -10,6 +10,7 @@ import './Admin.css';
 const navItems = [
   { section: 'Overview' },
   { to: '/admin', icon: LayoutDashboard, label: 'Dashboard', end: true },
+  { to: '/admin/restaurants', icon: Utensils, label: 'Restaurant' },
   { to: '/admin/users', icon: Users, label: 'Users' },
   { to: '/admin/products', icon: Package, label: 'Products' },
   { to: '/admin/orders', icon: ShoppingCart, label: 'Orders' },

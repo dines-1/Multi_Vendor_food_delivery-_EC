@@ -9,6 +9,13 @@ const adminService = {
   getRecentOrders: () => api.get('/admin/dashboard/recent-orders').then(r => r.data),
   getPendingVendors: () => api.get('/admin/dashboard/pending-vendors').then(r => r.data),
 
+  // ==================== RESTAURANTS ====================
+  getRestaurants: (params = {}) => api.get('/admin/restaurants', { params }).then(r => r.data),
+  getRestaurantDetail: (id) => api.get(`/admin/restaurants/${id}`).then(r => r.data),
+  updateRestaurantStatus: (id, status, suspendReason) => api.put(`/admin/restaurants/${id}/status`, { status, suspendReason }).then(r => r.data),
+  updateRestaurantCommission: (id, commissionRate) => api.put(`/admin/restaurants/${id}/commission`, { commissionRate }).then(r => r.data),
+  deleteRestaurant: (id) => api.delete(`/admin/restaurants/${id}`).then(r => r.data),
+
   // ==================== VENDORS ====================
   getVendors: (params = {}) => api.get('/admin/vendors', { params }).then(r => r.data),
   getVendorDetail: (id) => api.get(`/admin/vendors/${id}`).then(r => r.data),

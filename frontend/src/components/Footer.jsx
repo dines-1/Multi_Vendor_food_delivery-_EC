@@ -27,9 +27,8 @@ const Footer = () => {
           <ul>
             <li><Link to="/about">About Us</Link></li>
             <li><Link to="/explore">Browse Menu</Link></li>
-            <li><Link to="/explore">Featured Restaurants</Link></li>
-            <li><a href="#">Join as Vendor</a></li>
-            <li><a href="#">Become a Rider</a></li>
+            <li><Link to="/vendors">Vendor Partners</Link></li>
+            <li><Link to="/register-restaurant">Join as Vendor</Link></li>
           </ul>
         </div>
 

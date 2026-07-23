@@ -12,9 +12,10 @@ import RestaurantDetail from './pages/RestaurantDetail';
 import FoodDetail from './pages/FoodDetail';
 import AdminLayout from './pages/admin/AdminLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminRestaurants from './pages/admin/AdminRestaurants';
 import VendorManagement from './pages/admin/VendorManagement';
 import UserManagement from './pages/admin/UserManagement';
-import AdminDelivery from './pages/admin/AdminDelivery'
+import AdminDelivery from './pages/admin/AdminDelivery';
 import ProductModeration from './pages/admin/ProductModeration';
 import OrderManagement from './pages/admin/OrderManagement';
 import FinanceManager from './pages/admin/FinanceManager';
@@ -22,6 +23,7 @@ import PlatformSettings from './pages/admin/PlatformSettings';
 import MyOrders from './pages/MyOrders';
 import TrackOrder from './pages/TrackOrder';
 import Explore from './pages/Explore';
+import Vendors from './pages/Vendors';
 import Contact from './pages/Contact';
 import AboutUs from './pages/AboutUs';
 import AdminRoute from './components/AdminRoute';
@@ -41,7 +43,7 @@ import { CartProvider } from './context/CartContext';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import PaymentResult from './pages/PaymentResult';
-import Registerrestaurants from './pages/Registerrestaurant'
+import Registerrestaurants from './pages/Registerrestaurant';
 import RegisterDelivery from './pages/RegisterDelivery';
 
 function App() {
@@ -65,6 +67,7 @@ function App() {
               {/* Public Routes with Navbar and Footer */}
               <Route path="/" element={<><Navbar /><main className="main-content"><HomeRedirect /></main><Footer /></>} />
               <Route path="/explore" element={<><Navbar /><main className="main-content"><Explore /></main><Footer /></>} />
+              <Route path="/vendors" element={<><Navbar /><main className="main-content"><Vendors /></main><Footer /></>} />
               <Route path="/about" element={<><Navbar /><main className="main-content"><AboutUs /></main><Footer /></>} />
               <Route path="/contact" element={<><Navbar /><main className="main-content"><Contact /></main><Footer /></>} />
               <Route path="/login" element={<><Navbar /><main className="main-content"><Login /></main><Footer /></>} />
@@ -94,6 +97,7 @@ function App() {
                 }
               >
                 <Route index element={<AdminDashboard />} />
+                <Route path="restaurants" element={<AdminRestaurants />} />
                 <Route path="vendors" element={<VendorManagement />} />
                 <Route path="users" element={<UserManagement />} />
                 <Route path="delivery" element={<AdminDelivery />} />
